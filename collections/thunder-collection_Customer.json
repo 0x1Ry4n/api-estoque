@@ -1,0 +1,189 @@
+{
+    "info": {
+        "_postman_id": "721e71f9-084e-40dd-b0ee-29daabdbbf9e",
+        "name": "Customer",
+        "description": "Coleção de endpoints para gerenciar clientes",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Create Customer",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"fullname\": \"João Ga1y\",\"email\": \"joao23.gay@example.com\",\"phone\": \"1198721433221\",\"cpf\": \"143.456.742-09\",\"cep\": \"012342-567\",\"notes\": \"Cliente gay\",\"preferredPaymentMethod\": \"ANY\",\"communicationPreference\": \"ANY\",\"defaultCustomer\": false}"
+                },
+                "url": {
+                    "raw": "http://127.0.0.1:8000/customer",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "customer"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Update Customer By Id",
+            "request": {
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTgyNDI1fQ.L4QoWDyjpZhknIH7e1b2r0YpMu1yDNXuXZQlrfvNzcg",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"fullname\": \"João da Silva\",\"email\": \"joao.silva@example.com\",\"phone\": \"11987654321\",\"cpf\": \"123.456.789-09\",\"cep\": \"01234-567\"}"
+                },
+                "url": {
+                    "raw": "http://127.0.0.1:8000/customer/fa8600f8-4008-4486-9e1d-5217528ee07f",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "customer",
+                        "fa8600f8-4008-4486-9e1d-5217528ee07f"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Update Customer Status By Id",
+            "request": {
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTg1NTMwfQ.Y5rPSBg4yVkfamKj8be2Co0EQGmsYw1dg-oFJix15ok",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"status\": \"ACTIVE\"}"
+                },
+                "url": {
+                    "raw": "http://127.0.0.1:8000/customer/fa8600f8-4008-4486-9e1d-5217528ee07f/status",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "customer",
+                        "fa8600f8-4008-4486-9e1d-5217528ee07f",
+                        "status"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Delete Customer By Id",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTg1NTMwfQ.Y5rPSBg4yVkfamKj8be2Co0EQGmsYw1dg-oFJix15ok",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "http://127.0.0.1:8000/customer/9de01ad4-81b2-4fe6-af0a-194c391a1f96",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "customer",
+                        "9de01ad4-81b2-4fe6-af0a-194c391a1f96"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "List Customer By Id",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTgyNDI1fQ.L4QoWDyjpZhknIH7e1b2r0YpMu1yDNXuXZQlrfvNzcg",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "http://127.0.0.1:8000/customer/fa8600f8-4008-4486-9e1d-5217528ee07f",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "customer",
+                        "fa8600f8-4008-4486-9e1d-5217528ee07f"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "List All Customers",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "http://127.0.0.1:8000/customer",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "customer"
+                    ]
+                }
+            }
+        }
+    ]
+}

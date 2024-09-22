@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    container_name: "estoquedb"
+    environment:
+      - 'POSTGRES_DB=${DATABASE_NAME}'
+      - 'POSTGRES_PASSWORD=${DATABASE_PASSWORD}'
+      - 'POSTGRES_USER=${DATABASE_USER}'
+    networks:
+      - api_network
+    ports:
+      - '${DATABASE_PORT}:${DATABASE_PORT}'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  deepface-api:
+      build:
+        context: ./deepface-api
+      container_name: "deepface_api"
+      environment:
+        - PYTHONUNBUFFERED=1
+      networks:
+        - api_network
+      ports:
+        - "5000:5000" 
+
+volumes:
+  postgres_data:
+
+networks:
+  api_network:
+      driver: bridge
+
