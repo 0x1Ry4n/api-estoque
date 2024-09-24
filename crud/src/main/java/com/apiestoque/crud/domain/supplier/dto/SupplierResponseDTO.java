@@ -1,6 +1,8 @@
-package com.apiestoque.crud.domain.supplier;
+package com.apiestoque.crud.domain.supplier.dto;
 
 import java.util.Date;
+
+import com.apiestoque.crud.domain.supplier.Supplier;
 
 public record SupplierResponseDTO(
     String id,

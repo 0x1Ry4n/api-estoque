@@ -8,14 +8,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.Date;
 import java.math.BigDecimal;
-
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity(name = "products")
 @Table(name = "products")
@@ -48,12 +51,17 @@ public class Product {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @ManyToOne
-    @JoinColumn(name = "supplier_id") 
-    private Supplier supplier;
+    // change: um produto é fornecido por vários fornecedores 
+    @ManyToMany
+    @JoinTable(
+        name = "product_supplier",
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "supplier_id")
+    ) 
+    private Set<Supplier> suppliers = new HashSet<>();
     
-    @Column(nullable = false)
-    private Boolean purchasedSeparately = false;
+    @CreatedBy
+    private String createdBy;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -62,6 +70,9 @@ public class Product {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @LastModifiedBy
+    private String lastModifiedBy;
 
     @PrePersist
     public void onPrePersist() {
@@ -76,8 +87,7 @@ public class Product {
         Integer stockQuantity, 
         LocalDate expirationDate,
         Category category,
-        Supplier supplier,
-        Boolean purchasedSeparately 
+        Set<Supplier> suppliers
     ) {
         this.name = name;
         this.description = description;
@@ -86,7 +96,6 @@ public class Product {
         this.stockQuantity = stockQuantity;
         this.expirationDate = expirationDate;
         this.category = category;
-        this.supplier = supplier;
-        this.purchasedSeparately = purchasedSeparately;
+        this.suppliers = suppliers;
     }
 }

@@ -1,7 +1,9 @@
-package com.apiestoque.crud.domain.customer;
+package com.apiestoque.crud.domain.customer.dto;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+
+import com.apiestoque.crud.domain.customer.Customer;
 
 public record CustomerResponseDTO(
         String id,
@@ -11,8 +13,8 @@ public record CustomerResponseDTO(
         String cpf,
         String cep,
         String notes,
-        String preferredPaymentMethod,
-        String communicationPreference,
+        CustomerPreferredPaymentMethod preferredPaymentMethod,
+        CustomerCommunicationPreference communicationPreference,
         boolean isDefaultCustomer,
         LocalDateTime lastOrderDate,
         CustomerStatus customerStatus,

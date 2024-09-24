@@ -6,6 +6,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.apiestoque.crud.domain.user.dto.UserRole;
+import com.apiestoque.crud.domain.user.dto.UserStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -48,6 +51,10 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private UserRole role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private UserStatus status;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private Date createdAt;
@@ -56,10 +63,12 @@ public class User implements UserDetails {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    public User(String username, String email, String password, UserRole role) {
+
+    public User(String username, String email, String password, UserStatus status, UserRole role) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.status = status;
         this.role = role;
     }
 

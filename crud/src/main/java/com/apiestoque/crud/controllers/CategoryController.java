@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.apiestoque.crud.domain.product.ProductResponseDTO;
 import com.apiestoque.crud.domain.product.category.Category;
-import com.apiestoque.crud.domain.product.category.CategoryRequestDTO;
-import com.apiestoque.crud.domain.product.category.CategoryResponseDTO;
-import com.apiestoque.crud.domain.product.category.CategoryUpdateDTO;
+import com.apiestoque.crud.domain.product.category.dto.CategoryRequestDTO;
+import com.apiestoque.crud.domain.product.category.dto.CategoryResponseDTO;
+import com.apiestoque.crud.domain.product.category.dto.CategoryUpdateDTO;
+import com.apiestoque.crud.domain.product.dto.ProductResponseDTO;
 import com.apiestoque.crud.repositories.CategoryRepository;
 
 import java.util.List;
@@ -30,36 +30,36 @@ public class CategoryController {
     private CategoryRepository categoryRepository;
 
     @PostMapping
-public ResponseEntity<CategoryResponseDTO> createCategory(@RequestBody @Validated CategoryRequestDTO data) {
-    if (categoryRepository.existsByName(data.name())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria com esse nome já existe.");
+    public ResponseEntity<CategoryResponseDTO> createCategory(@RequestBody @Validated CategoryRequestDTO data) {
+        if (categoryRepository.existsByName(data.name())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria com esse nome já existe.");
+        }
+
+        Category newCategory = new Category();
+        newCategory.setName(data.name());
+
+        Category savedCategory = this.categoryRepository.save(newCategory);
+        CategoryResponseDTO responseDTO = new CategoryResponseDTO(savedCategory);
+
+        return ResponseEntity.status(201).body(responseDTO);
     }
 
-    Category newCategory = new Category();
-    newCategory.setName(data.name());
-
-    Category savedCategory = this.categoryRepository.save(newCategory);
-    CategoryResponseDTO responseDTO = new CategoryResponseDTO(savedCategory);
-
-    return ResponseEntity.status(201).body(responseDTO);
-}
-
-@PatchMapping("/{id}")
-public ResponseEntity<CategoryResponseDTO> updateCategory(@PathVariable String id,
+    @PatchMapping("/{id}")
+    public ResponseEntity<CategoryResponseDTO> updateCategory(@PathVariable String id,
         @RequestBody @Validated CategoryUpdateDTO data) {
-    Category category = categoryRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
 
-    if (data.name() != null && !data.name().equals(category.getName()) && 
-        categoryRepository.existsByName(data.name())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria com esse nome já existe.");
+        if (data.name() != null && !data.name().equals(category.getName()) &&
+                categoryRepository.existsByName(data.name())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria com esse nome já existe.");
+        }
+
+        category.setName(data.name());
+        Category updatedCategory = categoryRepository.save(category);
+
+        return ResponseEntity.ok(new CategoryResponseDTO(updatedCategory));
     }
-
-    category.setName(data.name());
-    Category updatedCategory = categoryRepository.save(category);
-
-    return ResponseEntity.ok(new CategoryResponseDTO(updatedCategory));
-}
 
     @GetMapping
     public ResponseEntity<List<CategoryResponseDTO>> getAllCategories() {

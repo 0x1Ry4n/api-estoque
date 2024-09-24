@@ -31,14 +31,22 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST,  "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST,  "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST,  "/products").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST,  "/category").hasRole("ADMIN")
+                        // Permitir acesso público para login
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        
+                        // Permitir registro apenas para a conta mestra (admin)
+                        .requestMatchers(HttpMethod.POST, "/auth/register/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/auth/register/user").hasRole("ADMIN")
+
+                        // Permitir operações relacionadas a produtos, categorias, fornecedores e clientes apenas para admin
+                        .requestMatchers(HttpMethod.POST, "/products").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/category").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/category").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST,  "/supplier").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/supplier").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/supplier/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/customer/*/status").hasRole("ADMIN")
+
+                        // Requerer autenticação para todas as outras requisições
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

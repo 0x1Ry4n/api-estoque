@@ -1,4 +1,4 @@
-package com.apiestoque.crud.domain.customer;
+package com.apiestoque.crud.domain.customer.dto;
 
 public record CustomerRequestDTO(
         String fullname,
@@ -7,7 +7,7 @@ public record CustomerRequestDTO(
         String cpf,
         String cep,
         String notes,
-        String preferredPaymentMethod,
-        String communicationPreference,
+        CustomerPreferredPaymentMethod preferredPaymentMethod,
+        CustomerCommunicationPreference communicationPreference,
         boolean isDefaultCustomer) {
 }

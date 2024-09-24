@@ -1,4 +1,4 @@
-package com.apiestoque.crud.domain.supplier;
+package com.apiestoque.crud.domain.supplier.dto;
 
 public record SupplierRequestDTO(
     String name,

@@ -7,11 +7,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+
 
 @Entity(name = "suppliers")
 @Table(name = "suppliers")
@@ -31,11 +35,18 @@ public class Supplier {
     private String email;
 
     @Column(nullable = false)
+
     private String phone;
+
+    @CreatedBy
+    private String createdBy;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt;
+
+    @LastModifiedBy
+    private String lastModifiedBy;
 
     @LastModifiedDate
     @Column(name = "updated_at")
@@ -46,9 +57,9 @@ public class Supplier {
         this.createdAt = new Date(); 
     }
 
-    @OneToMany(mappedBy = "supplier") 
-    private List<Product> products;
-    
+    @OneToMany(mappedBy = "suppliers")
+    private Set<Product> products = new HashSet<>();
+
     public Supplier(String name, String email, String phone) {
         this.name = name;
         this.email = email;

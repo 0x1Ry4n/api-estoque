@@ -1,9 +1,8 @@
-package com.apiestoque.crud.domain.customer;
+package com.apiestoque.crud.domain.customer.dto;
 
 public enum CustomerStatus {
     ACTIVE("Ativo"),
     INACTIVE("Inativo"),
-    BANNED("Banido"),
     PENDING("Pendente");
 
     private final String description;

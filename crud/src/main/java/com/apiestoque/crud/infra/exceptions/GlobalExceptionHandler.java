@@ -1,10 +1,13 @@
-package com.apiestoque.crud.infra;
+package com.apiestoque.crud.infra.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.NoHandlerFoundException;
+
+import com.apiestoque.crud.infra.response.ApiResponse;
+
 import org.springframework.web.server.ResponseStatusException;
 
 @ControllerAdvice

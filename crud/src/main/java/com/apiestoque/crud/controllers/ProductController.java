@@ -14,16 +14,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.apiestoque.crud.domain.product.Product;
-import com.apiestoque.crud.domain.product.ProductRequestDTO;
-import com.apiestoque.crud.domain.product.ProductResponseDTO;
-import com.apiestoque.crud.domain.product.ProductUpdateDTO;
 import com.apiestoque.crud.domain.product.category.Category;
+import com.apiestoque.crud.domain.product.dto.ProductRequestDTO;
+import com.apiestoque.crud.domain.product.dto.ProductResponseDTO;
+import com.apiestoque.crud.domain.product.dto.ProductUpdateDTO;
 import com.apiestoque.crud.domain.supplier.Supplier;
 import com.apiestoque.crud.repositories.CategoryRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
 
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,11 +45,15 @@ public class ProductController {
         Category category = categoryRepository.findById(data.categoryId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
 
-        Supplier supplier = null; 
-
-        if (data.supplierId() != null) {
-            supplier = supplierRepository.findById(data.supplierId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado."));
+        Set<Supplier> suppliers = new HashSet<>();
+        
+        if (data.suppliersId() != null) {
+            for (String supplierId : data.suppliersId()) {
+                Supplier supplier = supplierRepository.findById(supplierId)
+                        .orElseThrow(
+                                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado."));
+                suppliers.add(supplier);
+            }
         }
 
         Product newProduct = new Product(
@@ -58,9 +64,7 @@ public class ProductController {
                 data.stockQuantity(),
                 data.expirationDate(),
                 category,
-                supplier,
-                supplier == null 
-        );
+                suppliers);
 
         Product savedProduct = this.productRepository.save(newProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ProductResponseDTO(savedProduct));

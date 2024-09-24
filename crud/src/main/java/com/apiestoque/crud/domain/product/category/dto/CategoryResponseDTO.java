@@ -1,6 +1,8 @@
-package com.apiestoque.crud.domain.product.category;
+package com.apiestoque.crud.domain.product.category.dto;
 
 import java.util.Date;
+
+import com.apiestoque.crud.domain.product.category.Category;
 
 
 public record CategoryResponseDTO(

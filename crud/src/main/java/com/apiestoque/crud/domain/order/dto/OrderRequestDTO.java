@@ -1,4 +1,4 @@
-package com.apiestoque.crud.domain.order;
+package com.apiestoque.crud.domain.order.dto;
 
 import java.math.BigDecimal;
 

@@ -1,4 +1,4 @@
-package com.apiestoque.crud.infra;
+package com.apiestoque.crud.infra.response;
 
 public class ApiResponse {
     private String message;

@@ -2,8 +2,8 @@ package com.apiestoque.crud.controllers;
 
 import com.apiestoque.crud.domain.customer.Customer;
 import com.apiestoque.crud.domain.order.Order;
-import com.apiestoque.crud.domain.order.OrderRequestDTO;
-import com.apiestoque.crud.domain.order.OrderResponseDTO;
+import com.apiestoque.crud.domain.order.dto.OrderRequestDTO;
+import com.apiestoque.crud.domain.order.dto.OrderResponseDTO;
 import com.apiestoque.crud.domain.product.Product;
 import com.apiestoque.crud.repositories.CustomerRepository;
 import com.apiestoque.crud.repositories.OrderRepository;

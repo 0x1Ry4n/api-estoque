@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.apiestoque.crud.domain.customer.Customer;
-import com.apiestoque.crud.domain.customer.CustomerRequestDTO;
-import com.apiestoque.crud.domain.customer.CustomerResponseDTO;
-import com.apiestoque.crud.domain.customer.CustomerStatus;
-import com.apiestoque.crud.domain.customer.CustomerUpdateStatusRequestDTO;
+import com.apiestoque.crud.domain.customer.dto.CustomerRequestDTO;
+import com.apiestoque.crud.domain.customer.dto.CustomerResponseDTO;
+import com.apiestoque.crud.domain.customer.dto.CustomerStatus;
+import com.apiestoque.crud.domain.customer.dto.CustomerUpdateStatusRequestDTO;
 import com.apiestoque.crud.repositories.CustomerRepository;
 
 import java.util.List;

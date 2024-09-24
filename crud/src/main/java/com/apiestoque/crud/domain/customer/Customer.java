@@ -3,8 +3,14 @@ package com.apiestoque.crud.domain.customer;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import com.apiestoque.crud.domain.customer.dto.CustomerCommunicationPreference;
+import com.apiestoque.crud.domain.customer.dto.CustomerPreferredPaymentMethod;
+import com.apiestoque.crud.domain.customer.dto.CustomerStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,8 +47,14 @@ public class Customer {
     
     private String cep;
     private String notes;
-    private String preferredPaymentMethod;
-    private String communicationPreference;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "preferred_payment_ethod")
+    private CustomerPreferredPaymentMethod preferredPaymentMethod;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "communication_preference")
+    private CustomerCommunicationPreference communicationPreference;
     private LocalDateTime lastOrderDate;
 
     @Column(name = "is_default_customer", nullable = false)
@@ -72,8 +84,8 @@ public class Customer {
             String cpf,
             String cep,
             String notes,
-            String preferredPaymentMethod,
-            String communicationPreference,
+            CustomerPreferredPaymentMethod preferredPaymentMethod,
+            CustomerCommunicationPreference communicationPreference,
             LocalDateTime lastOrderDate,
             boolean defaultCustomer,
             CustomerStatus status) {

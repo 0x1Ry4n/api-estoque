@@ -1,4 +1,4 @@
-package com.apiestoque.crud.domain.product;
+package com.apiestoque.crud.domain.product.dto;
 
 import java.time.LocalDate;
 import java.math.BigDecimal;

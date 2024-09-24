@@ -1,4 +1,4 @@
-package com.apiestoque.crud.domain.user;
+package com.apiestoque.crud.domain.user.dto;
 
 public enum UserRole {
     ADMIN("admin"),

@@ -7,10 +7,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.apiestoque.crud.domain.product.ProductResponseDTO;
+import com.apiestoque.crud.domain.product.dto.ProductResponseDTO;
 import com.apiestoque.crud.domain.supplier.Supplier;
-import com.apiestoque.crud.domain.supplier.SupplierRequestDTO;
-import com.apiestoque.crud.domain.supplier.SupplierResponseDTO;
+import com.apiestoque.crud.domain.supplier.dto.SupplierRequestDTO;
+import com.apiestoque.crud.domain.supplier.dto.SupplierResponseDTO;
 import com.apiestoque.crud.repositories.SupplierRepository;
 
 import java.util.List;

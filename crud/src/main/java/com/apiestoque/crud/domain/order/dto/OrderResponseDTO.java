@@ -1,8 +1,10 @@
-package com.apiestoque.crud.domain.order;
+package com.apiestoque.crud.domain.order.dto;
 
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
 import java.util.Date;
+
+import com.apiestoque.crud.domain.order.Order;
 
 public record OrderResponseDTO(
     String id,
