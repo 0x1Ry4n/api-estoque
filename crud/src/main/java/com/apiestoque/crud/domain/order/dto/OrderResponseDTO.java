@@ -12,7 +12,7 @@ public record OrderResponseDTO(
     String productId,
     Integer quantity,
     BigDecimal totalPrice,
-    String paymentMethod,
+    OrderPaymentMethod paymentMethod,
     OrderStatus status,
     LocalDateTime orderDate,
     Date createdAt

@@ -1,67 +1,92 @@
 {
-    "clientName": "Thunder Client",
-    "collectionName": "Order",
-    "collectionId": "a45d90d0-64e4-402c-8df1-65aaa3405b91",
-    "dateExported": "2024-09-24T03:05:06.476Z",
-    "version": "1.2",
-    "folders": [],
-    "requests": [
+    "info": {
+        "name": "Order",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
         {
-            "_id": "147ded6a-02f2-4034-869a-59c5a9e90086",
-            "colId": "a45d90d0-64e4-402c-8df1-65aaa3405b91",
-            "containerId": "",
             "name": "Create Order",
-            "url": "http://127.0.0.1:8000/orders",
-            "method": "POST",
-            "sortNum": 10000,
-            "created": "2024-09-22T04:34:05.172Z",
-            "modified": "2024-09-22T20:02:41.801Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"customerId\": \"540173dc-ad1e-4359-94a8-247fd7f8a020\",\n    \"productId\": \"3ff98712-6026-4eed-b00c-035911da158e\",\n    \"quantity\": 10,\n    \"totalPrice\": 100.00,\n    \"paymentMethod\": \"CREDIT_CARD\",\n    \"status\": \"DELIVERED\"\n}"
+                },
+                "url": {
+                    "raw": "http://127.0.0.1:8000/orders",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "orders"
+                    ]
                 }
-            ],
-            "body": {
-                "type": "json",
-                "raw": "{\n    \"customerId\": \"540173dc-ad1e-4359-94a8-247fd7f8a020\",\n    \"productId\": \"3ff98712-6026-4eed-b00c-035911da158e\",  \n    \"quantity\": 10,                 \n    \"totalPrice\": 100.00,          \n    \"paymentMethod\": \"CREDIT_CARD\", \n    \"status\": \"DELIVERED\"             \n}\n",
-                "form": []
             }
         },
         {
-            "_id": "1d1707c7-6012-41ce-a08c-6e811ba27d22",
-            "colId": "a45d90d0-64e4-402c-8df1-65aaa3405b91",
-            "containerId": "",
             "name": "List All Orders",
-            "url": "http://127.0.0.1:8000/orders",
-            "method": "GET",
-            "sortNum": 20000,
-            "created": "2024-09-22T04:40:56.364Z",
-            "modified": "2024-09-22T20:02:52.852Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
+                    }
+                ],
+                "url": {
+                    "raw": "http://127.0.0.1:8000/orders",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "orders"
+                    ]
                 }
-            ]
+            }
         },
         {
-            "_id": "f1f3735a-328a-4da5-add2-3f01a3dbea6e",
-            "colId": "a45d90d0-64e4-402c-8df1-65aaa3405b91",
-            "containerId": "",
             "name": "List Orders By Customer",
-            "url": "http://127.0.0.1:8000/orders/customer/540173dc-ad1e-4359-94a8-247fd7f8a020",
-            "method": "GET",
-            "sortNum": 30000,
-            "created": "2024-09-22T04:43:21.333Z",
-            "modified": "2024-09-22T20:03:05.443Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
+                    }
+                ],
+                "url": {
+                    "raw": "http://127.0.0.1:8000/orders/customer/540173dc-ad1e-4359-94a8-247fd7f8a020",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "orders",
+                        "customer",
+                        "540173dc-ad1e-4359-94a8-247fd7f8a020"
+                    ]
                 }
-            ]
+            }
         }
-    ],
-    "ref": "VB4bnwf-iQJ9oct2DTlMNSfSxVXKKXoELIZLcRCNvN642XSaQUVKPo5o8AheRi0BSaBgqHdscAuNWk4dN6ndxA"
+    ]
 }

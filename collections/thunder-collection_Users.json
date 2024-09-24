@@ -1,101 +1,160 @@
 {
-    "clientName": "Thunder Client",
-    "collectionName": "Users",
-    "collectionId": "ddd0640f-ad6c-4615-bff5-ba25e7f40776",
-    "dateExported": "2024-09-24T03:04:45.547Z",
-    "version": "1.2",
-    "folders": [],
-    "requests": [
+    "info": {
+        "_postman_id": "ddd0640f-ad6c-4615-bff5-ba25e7f40776",
+        "name": "Users",
+        "description": "",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
         {
-            "_id": "9e239246-4529-403c-8518-b4411cc884cc",
-            "colId": "ddd0640f-ad6c-4615-bff5-ba25e7f40776",
-            "containerId": "",
             "name": "Create User",
-            "url": "http://127.0.0.1:8000/auth/register/user",
-            "method": "POST",
-            "sortNum": 5000,
-            "created": "2024-09-07T22:28:40.065Z",
-            "modified": "2024-09-24T02:47:43.694Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"username\": \"ryan12346\",\"email\": \"ryan24@gmail.com\",\"password\": \"teste1234\",\"role\": \"USER\"}"
+                },
+                "url": {
+                    "raw": "http://127.0.0.1:8000/auth/register/user",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "auth",
+                        "register",
+                        "user"
+                    ]
                 }
-            ],
-            "body": {
-                "type": "json",
-                "raw": "{\n    \"username\": \"ryan12346\",\n    \"email\": \"ryan24@gmail.com\",\n    \"password\": \"teste1234\",\n    \"role\": \"USER\"\n}",
-                "form": []
-            }
+            },
+            "response": []
         },
         {
-            "_id": "925ebec5-379b-48c2-ba3c-21378b222dc9",
-            "colId": "ddd0640f-ad6c-4615-bff5-ba25e7f40776",
-            "containerId": "",
             "name": "Generate User Token",
-            "url": "http://127.0.0.1:8000/auth/login",
-            "method": "POST",
-            "sortNum": 10000,
-            "created": "2024-09-07T22:26:54.427Z",
-            "modified": "2024-09-24T02:46:27.437Z",
-            "headers": [],
-            "body": {
-                "type": "json",
-                "raw": "{\n      \"email\": \"admin@example.com\",\n    \"password\": \"root\"\n}",
-                "form": []
-            }
+            "request": {
+                "method": "POST",
+                "url": {
+                    "raw": "http://127.0.0.1:8000/auth/login",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "auth",
+                        "login"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"email\": \"admin@example.com\",\"password\": \"root\"}"
+                }
+            },
+            "response": []
         },
         {
-            "_id": "6b78a26b-80d2-4a03-beb1-d6aa08b176cb",
-            "colId": "ddd0640f-ad6c-4615-bff5-ba25e7f40776",
-            "containerId": "",
             "name": "Verify User Token",
-            "url": "http://127.0.0.1:8000/auth/me",
-            "method": "POST",
-            "sortNum": 50000,
-            "created": "2024-09-07T22:52:13.178Z",
-            "modified": "2024-09-22T05:47:20.309Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTkwMzk4fQ.9U3NRBU_DYG4iBcCNHbUYWVHU7utGZXcsYpU8a1DgOA"
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTkwMzk4fQ.9U3NRBU_DYG4iBcCNHbUYWVHU7utGZXcsYpU8a1DgOA",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "http://127.0.0.1:8000/auth/me",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "auth",
+                        "me"
+                    ]
                 }
-            ]
+            },
+            "response": []
         },
         {
-            "_id": "06ba5f34-f453-4f12-9962-51c48e6510c5",
-            "colId": "ddd0640f-ad6c-4615-bff5-ba25e7f40776",
-            "containerId": "",
             "name": "Refresh User Token",
-            "url": "http://127.0.0.1:8000/api/v1/auth/jwt/refresh",
-            "method": "POST",
-            "sortNum": 60000,
-            "created": "2024-09-07T22:53:15.226Z",
-            "modified": "2024-09-07T22:53:34.462Z",
-            "headers": [],
-            "body": {
-                "type": "json",
-                "raw": "{\n  \"refresh\": \"token\"\n}",
-                "form": []
-            }
+            "request": {
+                "method": "POST",
+                "url": {
+                    "raw": "http://127.0.0.1:8000/api/v1/auth/jwt/refresh",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "jwt",
+                        "refresh"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"refresh\": \"token\"}"
+                }
+            },
+            "response": []
         },
         {
-            "_id": "0df2dabd-225b-4aa1-ab2b-cc9b1e4b525d",
-            "colId": "ddd0640f-ad6c-4615-bff5-ba25e7f40776",
-            "containerId": "",
             "name": "Retrieve Actual User",
-            "url": "http://127.0.0.1:8000/api/v1/auth/users/me/",
-            "method": "GET",
-            "sortNum": 70000,
-            "created": "2024-09-08T04:02:01.142Z",
-            "modified": "2024-09-08T04:03:13.610Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI1ODM1NzQxLCJpYXQiOjE3MjU3NDkzNDEsImp0aSI6IjFkOTg5NGI5MGNkMTRkZWRhNDA2NGNiY2EwNmRlYzU1IiwidXNlcl9pZCI6Mn0.Ljd-Ujvud4mkBd_vHHa_62KtYt8135ukkWc-Pvd2DhE"
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI1ODM1NzQxLCJpYXQiOjE3MjU3NDkzNDEsImp0aSI6IjFkOTg5NGI5MGNkMTRkZWRhNDA2NGNiY2EwNmRlYzU1IiwidXNlcl9pZCI6Mn0.Ljd-Ujvud4mkBd_vHHa_62KtYt8135ukkWc-Pvd2DhE",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "http://127.0.0.1:8000/api/v1/auth/users/me/",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "users",
+                        "me"
+                    ]
                 }
-            ]
+            },
+            "response": []
         }
-    ],
-    "ref": "qINB0eWAuD9LrDltPD22E2w9PL_wRXQuIcWNHKYeBN_Lf4b9rqzwMQTvQpNwKFlkXcQyswixqlJ1OOsnYVHBHg"
+    ]
 }

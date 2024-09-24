@@ -2,6 +2,7 @@ package com.apiestoque.crud.controllers;
 
 import com.apiestoque.crud.domain.customer.Customer;
 import com.apiestoque.crud.domain.order.Order;
+import com.apiestoque.crud.domain.order.dto.OrderDetailsResponseDTO;
 import com.apiestoque.crud.domain.order.dto.OrderRequestDTO;
 import com.apiestoque.crud.domain.order.dto.OrderResponseDTO;
 import com.apiestoque.crud.domain.product.Product;
@@ -18,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("orders")
@@ -40,18 +42,26 @@ public class OrderController {
         Product product = productRepository.findById(data.productId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
 
-        if (product.getStockQuantity() < data.quantity() || data.quantity() <= 0) {
+
+        if (data.quantity() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade solicitada menor ou igual a 0.");
+        }
+
+        if (data.quantity() > product.getStockQuantity()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade indisponível no estoque.");
         }
 
+
         product.setStockQuantity(product.getStockQuantity() - data.quantity());
         productRepository.save(product);
+
+        BigDecimal totalPrice = BigDecimal.valueOf(data.quantity()).multiply(product.getPrice());
 
         Order newOrder = new Order(
                 customer,
                 product,
                 data.quantity(),
-                data.totalPrice(),
+                totalPrice,
                 data.paymentMethod(),
                 data.status());
 
@@ -74,6 +84,14 @@ public class OrderController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
 
         return ResponseEntity.ok(new OrderResponseDTO(order));
+    }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<OrderDetailsResponseDTO> getOrderDetails(@PathVariable String id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
+
+        return ResponseEntity.ok(new OrderDetailsResponseDTO(order));
     }
 
     @GetMapping("/customer/{customerId}")

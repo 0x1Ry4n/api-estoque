@@ -1,9 +1,9 @@
 package com.apiestoque.crud.domain.customer.dto;
 
 public enum CustomerCommunicationPreference {
-    EMAIL("EMAIL"),
-    PHONE("PHONE"),
-    ANY("A");
+    EMAIL("Email"),
+    PHONE("Phone number"),
+    ANY("Any");
 
     private String description;
 

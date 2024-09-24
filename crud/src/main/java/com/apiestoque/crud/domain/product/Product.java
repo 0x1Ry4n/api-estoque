@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.math.BigDecimal;
 import java.util.Set;
-import java.util.HashSet;
 
 @Entity(name = "products")
 @Table(name = "products")
@@ -51,15 +50,15 @@ public class Product {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    // change: um produto é fornecido por vários fornecedores 
+    // change: um produto é fornecido por vários fornecedores
     @ManyToMany
     @JoinTable(
-        name = "product_supplier",
-        joinColumns = @JoinColumn(name = "product_id"),
+        name = "product_supplier",  
+        joinColumns = @JoinColumn(name = "product_id"),   
         inverseJoinColumns = @JoinColumn(name = "supplier_id")
-    ) 
-    private Set<Supplier> suppliers = new HashSet<>();
-    
+    )
+    private Set<Supplier> suppliers;
+
     @CreatedBy
     private String createdBy;
 
@@ -76,19 +75,18 @@ public class Product {
 
     @PrePersist
     public void onPrePersist() {
-        this.createdAt = new Date(); 
+        this.createdAt = new Date();
     }
 
     public Product(
-        String name, 
-        String description, 
-        BigDecimal price, 
-        BigDecimal discount, 
-        Integer stockQuantity, 
-        LocalDate expirationDate,
-        Category category,
-        Set<Supplier> suppliers
-    ) {
+            String name,
+            String description,
+            BigDecimal price,
+            BigDecimal discount,
+            Integer stockQuantity,
+            LocalDate expirationDate,
+            Category category,
+            Set<Supplier> suppliers) {
         this.name = name;
         this.description = description;
         this.price = price;

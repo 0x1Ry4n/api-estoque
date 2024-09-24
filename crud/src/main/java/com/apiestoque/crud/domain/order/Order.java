@@ -1,6 +1,7 @@
 package com.apiestoque.crud.domain.order;
 
 import com.apiestoque.crud.domain.customer.Customer;
+import com.apiestoque.crud.domain.order.dto.OrderPaymentMethod;
 import com.apiestoque.crud.domain.order.dto.OrderStatus;
 import com.apiestoque.crud.domain.product.Product;
 
@@ -44,8 +45,9 @@ public class Order {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
-    @Column(nullable = false)
-    private String paymentMethod;
+    @Column(name = "payment_method", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OrderPaymentMethod paymentMethod;
 
     @Column(nullable = false)
     private LocalDateTime orderDate;
@@ -74,7 +76,7 @@ public class Order {
         this.createdAt = new Date();
     }
 
-    public Order(Customer customer, Product product, Integer quantity, BigDecimal totalPrice, String paymentMethod, OrderStatus status) {
+    public Order(Customer customer, Product product, Integer quantity, BigDecimal totalPrice, OrderPaymentMethod paymentMethod, OrderStatus status) {
         this.customer = customer;
         this.product = product;
         this.quantity = quantity;

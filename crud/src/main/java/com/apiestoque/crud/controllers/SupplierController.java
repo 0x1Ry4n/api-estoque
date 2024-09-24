@@ -7,14 +7,17 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.apiestoque.crud.domain.product.Product;
 import com.apiestoque.crud.domain.product.dto.ProductResponseDTO;
 import com.apiestoque.crud.domain.supplier.Supplier;
 import com.apiestoque.crud.domain.supplier.dto.SupplierRequestDTO;
 import com.apiestoque.crud.domain.supplier.dto.SupplierResponseDTO;
+import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("supplier")
@@ -22,6 +25,9 @@ public class SupplierController {
 
     @Autowired
     private SupplierRepository supplierRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @PostMapping
     public ResponseEntity<SupplierResponseDTO> createSupplier(@RequestBody @Validated SupplierRequestDTO data) {
@@ -83,15 +89,20 @@ public class SupplierController {
         return ResponseEntity.ok(new SupplierResponseDTO(supplier));
     }
 
-    @GetMapping("/{id}/products")
-    public ResponseEntity<List<ProductResponseDTO>> getProductsBySupplier(@PathVariable String id) {
-        Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado."));
+    @GetMapping("/{supplierId}/products")
+    public ResponseEntity<List<ProductResponseDTO>> getProductsBySupplierId(@PathVariable String supplierId) {
+        Optional<Supplier> supplier = supplierRepository.findById(supplierId);
 
-        List<ProductResponseDTO> productList = supplier.getProducts().stream()
+        if (supplier.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado.");
+        }
+
+        List<Product> products = productRepository.findBySuppliersId(supplierId);
+        List<ProductResponseDTO> productList = products.stream()
                 .map(ProductResponseDTO::new)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(productList);
+        return ResponseEntity.ok(productList.isEmpty() ? List.of() : productList);
     }
+   
 }

@@ -1,123 +1,101 @@
 {
-    "clientName": "Thunder Client",
-    "collectionName": "Products",
-    "collectionId": "acb6381c-e88f-4e9f-b6ad-85c4a90219b7",
-    "dateExported": "2024-09-24T03:05:01.320Z",
-    "version": "1.2",
-    "folders": [],
-    "requests": [
+    "info": {
+        "_postman_id": "acb6381c-e88f-4e9f-b6ad-85c4a90219b7",
+        "name": "Products",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
         {
-            "_id": "db6d40b5-1595-42c3-bbbc-56a737741ca3",
-            "colId": "acb6381c-e88f-4e9f-b6ad-85c4a90219b7",
-            "containerId": "",
             "name": "Create Product",
-            "url": "http://127.0.0.1:8000/products",
-            "method": "POST",
-            "sortNum": 5000,
-            "created": "2024-09-07T22:25:11.394Z",
-            "modified": "2024-09-24T03:04:13.596Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
+            "request": {
+                "url": "http://127.0.0.1:8000/products",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"SKANK\",\n  \"description\": \"Droga alucinogena\", \n  \"price\": 40,\n  \"discount\": 0, \n  \"stockQuantity\": 20,\n  \"expirationDate\": \"2024-09-21\",  \n  \"categoryId\": \"867ac7a8-68f8-48cb-aced-1f9e90fc49a5\",\n  \"suppliersId\": [\"cd312a13-96f7-406b-b669-cf965b9b33fa\"]  \n}"
                 }
-            ],
-            "body": {
-                "type": "json",
-                "raw": "{\n  \"name\": \"SKANK\",\n  \"description\": \"Droga alucinogena\", \n  \"price\": 40,\n  \"discount\": 0, \n  \"stockQuantity\": 20,\n  \"expirationDate\": \"2024-09-21\",  \n  \"categoryId\": \"867ac7a8-68f8-48cb-aced-1f9e90fc49a5\",\n  \"suppliersId\": [\"cd312a13-96f7-406b-b669-cf965b9b33fa\"]  \n}\n",
-                "form": []
-            }
+            },
+            "response": []
         },
         {
-            "_id": "5b987013-80df-43eb-8782-78df4b90c3c8",
-            "colId": "acb6381c-e88f-4e9f-b6ad-85c4a90219b7",
-            "containerId": "",
             "name": "Update Product by ID",
-            "url": "http://127.0.0.1:8000/products/03db2b29-e810-4a5d-88e0-994987d70c53",
-            "method": "PATCH",
-            "sortNum": 7500,
-            "created": "2024-09-07T22:25:21.692Z",
-            "modified": "2024-09-22T20:10:42.372Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW5AZ21haWwuY29tIiwiZXhwIjoxNzI3MDQyOTU4fQ.dyIieOrhOQlU37G9Ich2uG5ZOYsRCmYGlPHZClc7eCo"
+            "request": {
+                "url": "http://127.0.0.1:8000/products/03db2b29-e810-4a5d-88e0-994987d70c53",
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW5AZ21haWwuY29tIiwiZXhwIjoxNzI3MDQyOTU4fQ.dyIieOrhOQlU37G9Ich2uG5ZOYsRCmYGlPHZClc7eCo"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"price\": 20,\n  \"stockQuantity\": 20\n}"
                 }
-            ],
-            "body": {
-                "type": "json",
-                "raw": "{\n  \"price\": 20,\n  \"stockQuantity\": 20\n}",
-                "form": []
-            }
+            },
+            "response": []
         },
         {
-            "_id": "9989e580-ba03-485a-ba8d-e45def85ec24",
-            "colId": "acb6381c-e88f-4e9f-b6ad-85c4a90219b7",
-            "containerId": "",
             "name": "Delete Product by ID",
-            "url": "http://127.0.0.1:8000/products/9de01ad4-81b2-4fe6-af0a-194c391a1f96",
-            "method": "DELETE",
-            "sortNum": 8125,
-            "created": "2024-09-07T22:25:56.505Z",
-            "modified": "2024-09-22T04:45:58.691Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTg1NTMwfQ.Y5rPSBg4yVkfamKj8be2Co0EQGmsYw1dg-oFJix15ok"
-                }
-            ]
+            "request": {
+                "url": "http://127.0.0.1:8000/products/9de01ad4-81b2-4fe6-af0a-194c391a1f96",
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTg1NTMwfQ.Y5rPSBg4yVkfamKj8be2Co0EQGmsYw1dg-oFJix15ok"
+                    }
+                ]
+            },
+            "response": []
         },
         {
-            "_id": "402be160-bc1e-442e-971c-b4485a1926b9",
-            "colId": "acb6381c-e88f-4e9f-b6ad-85c4a90219b7",
-            "containerId": "",
             "name": "List Product by ID",
-            "url": "http://127.0.0.1:8000/products/546fb9ec-288f-47bb-bffe-0dc5ef6fc0c0",
-            "method": "GET",
-            "sortNum": 8750,
-            "created": "2024-09-07T22:25:03.631Z",
-            "modified": "2024-09-22T03:46:00.903Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTgzMjIyfQ.GoRBbLYLCbDgd-yvabeTPZAc38rDobmluMG2qrMNtGg"
-                }
-            ]
+            "request": {
+                "url": "http://127.0.0.1:8000/products/546fb9ec-288f-47bb-bffe-0dc5ef6fc0c0",
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTgzMjIyfQ.GoRBbLYLCbDgd-yvabeTPZAc38rDobmluMG2qrMNtGg"
+                    }
+                ]
+            },
+            "response": []
         },
         {
-            "_id": "5425dc19-3390-4651-a56e-4cbe6b5a4024",
-            "colId": "acb6381c-e88f-4e9f-b6ad-85c4a90219b7",
-            "containerId": "",
             "name": "List Product By Name",
-            "url": "http://127.0.0.1:8000/products/name/Teste",
-            "method": "GET",
-            "sortNum": 9375,
-            "created": "2024-09-21T22:59:44.615Z",
-            "modified": "2024-09-22T03:45:47.400Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTgzMjIyfQ.GoRBbLYLCbDgd-yvabeTPZAc38rDobmluMG2qrMNtGg"
-                }
-            ]
+            "request": {
+                "url": "http://127.0.0.1:8000/products/name/Teste",
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTgzMjIyfQ.GoRBbLYLCbDgd-yvabeTPZAc38rDobmluMG2qrMNtGg"
+                    }
+                ]
+            },
+            "response": []
         },
         {
-            "_id": "0465a028-589e-48e9-a6e2-71f9d9718d99",
-            "colId": "acb6381c-e88f-4e9f-b6ad-85c4a90219b7",
-            "containerId": "",
             "name": "List All Products",
-            "url": "http://127.0.0.1:8000/products",
-            "method": "GET",
-            "sortNum": 10000,
-            "created": "2024-09-07T22:24:46.771Z",
-            "modified": "2024-09-24T02:49:03.233Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
-                }
-            ]
+            "request": {
+                "url": "http://127.0.0.1:8000/products",
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
+                    }
+                ]
+            },
+            "response": []
         }
-    ],
-    "ref": "R99dtsy47Q3YhFC4zYFtpTi5Mmqm15HZPXgaXRNcWSc99ApDmDjOWNegDZtWWYsy_NqvwVNp7OPVojDjMxRMRQ"
+    ]
 }

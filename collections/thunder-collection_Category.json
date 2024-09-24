@@ -1,123 +1,110 @@
 {
-    "clientName": "Thunder Client",
-    "collectionName": "Category",
-    "collectionId": "047c478f-e4af-4e67-9aef-1b089bc98a0d",
-    "dateExported": "2024-09-24T03:04:57.550Z",
-    "version": "1.2",
-    "folders": [],
-    "requests": [
-        {
-            "_id": "cbe0c3ac-c977-4dea-b093-577305bb5415",
-            "colId": "047c478f-e4af-4e67-9aef-1b089bc98a0d",
-            "containerId": "",
-            "name": "Create Category",
-            "url": "http://127.0.0.1:8000/category",
-            "method": "POST",
-            "sortNum": 10000,
-            "created": "2024-09-21T23:05:49.099Z",
-            "modified": "2024-09-24T02:48:03.356Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
-                }
-            ],
-            "body": {
-                "type": "json",
-                "raw": "{\n  \"name\": \"Teste24\"\n}",
-                "form": []
+    "info": {
+      "_postman_id": "c5f90a4d-0d3c-4ec5-91ed-4bfffc4e04f6",
+      "name": "Category API",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Create Category",
+        "request": {
+          "url": "http://127.0.0.1:8000/category",
+          "method": "POST",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
             }
-        },
-        {
-            "_id": "26209858-abfb-4eb7-a4f0-086bd0cede94",
-            "colId": "047c478f-e4af-4e67-9aef-1b089bc98a0d",
-            "containerId": "",
-            "name": "Update Category By Id",
-            "url": "http://127.0.0.1:8000/category/902fcbc6-86e4-456d-98b9-82b528681c43",
-            "method": "PATCH",
-            "sortNum": 20000,
-            "created": "2024-09-21T23:06:32.680Z",
-            "modified": "2024-09-22T20:10:24.953Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW5AZ21haWwuY29tIiwiZXhwIjoxNzI3MDQyOTU4fQ.dyIieOrhOQlU37G9Ich2uG5ZOYsRCmYGlPHZClc7eCo"
-                }
-            ],
-            "body": {
-                "type": "json",
-                "raw": "{\n  \"name\": \"Teste2\"\n}",
-                "form": []
-            }
-        },
-        {
-            "_id": "0a1f035c-33e7-4c7c-9a03-2dbff6b05b26",
-            "colId": "047c478f-e4af-4e67-9aef-1b089bc98a0d",
-            "containerId": "",
-            "name": "Delete Category By Id",
-            "url": "http://127.0.0.1:8000/category/9de01ad4-81b2-4fe6-af0a-194c391a1f96",
-            "method": "DELETE",
-            "sortNum": 30000,
-            "created": "2024-09-21T23:06:39.131Z",
-            "modified": "2024-09-22T04:46:16.383Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTY1NDQ2fQ.JZ8Ke33e2HD0fc1iS3PkJGZdqfLumq12HeeuIO3RhV4"
-                }
-            ]
-        },
-        {
-            "_id": "93007b84-7885-491b-b52d-c4aedc60666f",
-            "colId": "047c478f-e4af-4e67-9aef-1b089bc98a0d",
-            "containerId": "",
-            "name": "List Category By Id",
-            "url": "http://127.0.0.1:8000/category/ab9534bb-ec7a-4bc3-9b19-5101abd8d0a4",
-            "method": "GET",
-            "sortNum": 40000,
-            "created": "2024-09-21T23:06:51.326Z",
-            "modified": "2024-09-22T19:54:04.348Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
-                }
-            ]
-        },
-        {
-            "_id": "b0f50ddb-b2e0-4288-8f8d-6182fb083c2a",
-            "colId": "047c478f-e4af-4e67-9aef-1b089bc98a0d",
-            "containerId": "",
-            "name": "List Products By Category",
-            "url": "http://127.0.0.1:8000/category/12d95054-50fb-4269-8b7c-cbb3d9e106d3/products",
-            "method": "GET",
-            "sortNum": 45000,
-            "created": "2024-09-22T03:32:19.167Z",
-            "modified": "2024-09-24T02:48:08.268Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
-                }
-            ]
-        },
-        {
-            "_id": "c86ff33a-e6e7-4762-afcb-e915244ae151",
-            "colId": "047c478f-e4af-4e67-9aef-1b089bc98a0d",
-            "containerId": "",
-            "name": "List All Categories",
-            "url": "http://127.0.0.1:8000/category",
-            "method": "GET",
-            "sortNum": 50000,
-            "created": "2024-09-21T23:06:58.967Z",
-            "modified": "2024-09-24T02:48:13.648Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
-                }
-            ]
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\"name\": \"Teste24\"}"
+          },
+          "response": []
         }
-    ],
-    "ref": "GPoAXU7y7z6zHlFebSJwuNtez75GFQN6mUQpk-sH25U_jrGm4mJvx_zkL-5fDOY7DXs1gFk8YeKaqqpA9lTIHA"
-}
+      },
+      {
+        "name": "Update Category By Id",
+        "request": {
+          "url": "http://127.0.0.1:8000/category/902fcbc6-86e4-456d-98b9-82b528681c43",
+          "method": "PATCH",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW5AZ21haWwuY29tIiwiZXhwIjoxNzI3MDQyOTU4fQ.dyIieOrhOQlU37G9Ich2uG5ZOYsRCmYGlPHZClc7eCo"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\"name\": \"Teste2\"}"
+          },
+          "response": []
+        }
+      },
+      {
+        "name": "Delete Category By Id",
+        "request": {
+          "url": "http://127.0.0.1:8000/category/9de01ad4-81b2-4fe6-af0a-194c391a1f96",
+          "method": "DELETE",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTY1NDQ2fQ.JZ8Ke33e2HD0fc1iS3PkJGZdqfLumq12HeeuIO3RhV4"
+            }
+          ],
+          "response": []
+        }
+      },
+      {
+        "name": "List Category By Id",
+        "request": {
+          "url": "http://127.0.0.1:8000/category/ab9534bb-ec7a-4bc3-9b19-5101abd8d0a4",
+          "method": "GET",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
+            }
+          ],
+          "response": []
+        }
+      },
+      {
+        "name": "List Products By Category",
+        "request": {
+          "url": "http://127.0.0.1:8000/category/12d95054-50fb-4269-8b7c-cbb3d9e106d3/products",
+          "method": "GET",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
+            }
+          ],
+          "response": []
+        }
+      },
+      {
+        "name": "List All Categories",
+        "request": {
+          "url": "http://127.0.0.1:8000/category",
+          "method": "GET",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
+            }
+          ],
+          "response": []
+        }
+      }
+    ]
+  }
+  

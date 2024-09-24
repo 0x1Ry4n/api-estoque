@@ -1,6 +1,8 @@
 package com.apiestoque.crud.domain.supplier;
 
 import com.apiestoque.crud.domain.product.Product;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -14,8 +16,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
 import java.util.Set;
-import java.util.HashSet;
-
 
 @Entity(name = "suppliers")
 @Table(name = "suppliers")
@@ -35,7 +35,6 @@ public class Supplier {
     private String email;
 
     @Column(nullable = false)
-
     private String phone;
 
     @CreatedBy
@@ -54,11 +53,12 @@ public class Supplier {
 
     @PrePersist
     public void onPrePersist() {
-        this.createdAt = new Date(); 
+        this.createdAt = new Date();
     }
 
-    @OneToMany(mappedBy = "suppliers")
-    private Set<Product> products = new HashSet<>();
+    @JsonIgnore 
+    @ManyToMany(mappedBy = "suppliers")
+    private Set<Product> products;
 
     public Supplier(String name, String email, String phone) {
         this.name = name;
