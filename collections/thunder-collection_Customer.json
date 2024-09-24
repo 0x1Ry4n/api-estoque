@@ -1,0 +1,128 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "Customer",
+    "collectionId": "721e71f9-084e-40dd-b0ee-29daabdbbf9e",
+    "dateExported": "2024-09-24T03:05:04.068Z",
+    "version": "1.2",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "d8e35b18-b5e7-42d1-9d33-64ea6503cdb5",
+            "colId": "721e71f9-084e-40dd-b0ee-29daabdbbf9e",
+            "containerId": "",
+            "name": "Create Customer",
+            "url": "http://127.0.0.1:8000/customer",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2024-09-22T01:16:26.058Z",
+            "modified": "2024-09-24T02:49:46.710Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"fullname\": \"João Ga1y\",\n  \"email\": \"joao23.gay@example.com\",\n  \"phone\": \"1198721433221\",\n  \"cpf\": \"143.456.742-09\",\n  \"cep\": \"012342-567\",\n  \"notes\": \"Cliente gay\",\n  \"preferredPaymentMethod\": \"ANY\",\n  \"communicationPreference\": \"ANY\",\n  \"defaultCustomer\": false\n}\n",
+                "form": []
+            }
+        },
+        {
+            "_id": "aaf2c19e-dd6b-4d8d-8515-423aee5f4c86",
+            "colId": "721e71f9-084e-40dd-b0ee-29daabdbbf9e",
+            "containerId": "",
+            "name": "Update Customer By Id",
+            "url": "http://127.0.0.1:8000/customer/fa8600f8-4008-4486-9e1d-5217528ee07f",
+            "method": "PATCH",
+            "sortNum": 15000,
+            "created": "2024-09-22T01:25:32.813Z",
+            "modified": "2024-09-22T03:47:34.313Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTgyNDI1fQ.L4QoWDyjpZhknIH7e1b2r0YpMu1yDNXuXZQlrfvNzcg"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"fullname\": \"João da Silva\",\n  \"email\": \"joao.silva@example.com\",\n  \"phone\": \"11987654321\",\n  \"cpf\": \"123.456.789-09\",\n  \"cep\": \"01234-567\"\n}\n",
+                "form": []
+            }
+        },
+        {
+            "_id": "f08c7c92-9f19-4707-8cc7-79f0d25bce43",
+            "colId": "721e71f9-084e-40dd-b0ee-29daabdbbf9e",
+            "containerId": "",
+            "name": "Update Customer Status By Id",
+            "url": "http://127.0.0.1:8000/customer/fa8600f8-4008-4486-9e1d-5217528ee07f/status",
+            "method": "PATCH",
+            "sortNum": 16250,
+            "created": "2024-09-22T03:58:49.301Z",
+            "modified": "2024-09-22T04:12:29.021Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTg1NTMwfQ.Y5rPSBg4yVkfamKj8be2Co0EQGmsYw1dg-oFJix15ok"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "ffd62ef5-3597-48c9-b365-4e6621785e60",
+            "colId": "721e71f9-084e-40dd-b0ee-29daabdbbf9e",
+            "containerId": "",
+            "name": "Delete Customer By Id",
+            "url": "http://127.0.0.1:8000/customer/9de01ad4-81b2-4fe6-af0a-194c391a1f96",
+            "method": "DELETE",
+            "sortNum": 16875,
+            "created": "2024-09-22T04:45:20.846Z",
+            "modified": "2024-09-22T04:45:52.947Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTg1NTMwfQ.Y5rPSBg4yVkfamKj8be2Co0EQGmsYw1dg-oFJix15ok"
+                }
+            ]
+        },
+        {
+            "_id": "6b541cc0-3feb-4069-a685-7f869962b1e3",
+            "colId": "721e71f9-084e-40dd-b0ee-29daabdbbf9e",
+            "containerId": "",
+            "name": "List Customer By Id",
+            "url": "http://127.0.0.1:8000/customer/fa8600f8-4008-4486-9e1d-5217528ee07f",
+            "method": "GET",
+            "sortNum": 17500,
+            "created": "2024-09-22T03:46:41.042Z",
+            "modified": "2024-09-22T03:47:09.236Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTgyNDI1fQ.L4QoWDyjpZhknIH7e1b2r0YpMu1yDNXuXZQlrfvNzcg"
+                }
+            ]
+        },
+        {
+            "_id": "1d13e75b-06c1-4499-b695-01995518e51e",
+            "colId": "721e71f9-084e-40dd-b0ee-29daabdbbf9e",
+            "containerId": "",
+            "name": "List All Customers",
+            "url": "http://127.0.0.1:8000/customer",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2024-09-22T01:21:16.227Z",
+            "modified": "2024-09-24T02:50:04.945Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
+                }
+            ]
+        }
+    ],
+    "ref": "35n12sDGLpFW15oUzcs_Tr4ypgbeMofyVgXVgER0kHus1DF410KEWyFdAkr9xrWRwsc2nzdRdiwVE4UXuFRTRw"
+}

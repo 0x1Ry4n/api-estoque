@@ -1,0 +1,106 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "Supplier",
+    "collectionId": "ff13e31c-8b9b-472c-873e-5f30a7c03491",
+    "dateExported": "2024-09-24T03:04:54.312Z",
+    "version": "1.2",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "cd8d8629-d02c-414f-bc73-a7f051e54186",
+            "colId": "ff13e31c-8b9b-472c-873e-5f30a7c03491",
+            "containerId": "",
+            "name": "Create Supplier",
+            "url": "http://127.0.0.1:8000/supplier",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2024-09-22T03:09:54.344Z",
+            "modified": "2024-09-24T02:55:56.992Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"name\": \"Fornecedor Exemplo\",\n    \"email\": \"fornecedor2234@example.com\",\n    \"phone\": \"+55 11 91234-562178\"\n}\n",
+                "form": []
+            }
+        },
+        {
+            "_id": "c79aed27-9f08-4032-b59a-a9b75db6699e",
+            "colId": "ff13e31c-8b9b-472c-873e-5f30a7c03491",
+            "containerId": "",
+            "name": "Update Supplier By Id ",
+            "url": "http://127.0.0.1:8000/supplier/ecc11073-07d1-465e-9f53-e39297fa70be",
+            "method": "PATCH",
+            "sortNum": 15000,
+            "created": "2024-09-22T03:39:13.322Z",
+            "modified": "2024-09-22T20:10:07.653Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW5AZ21haWwuY29tIiwiZXhwIjoxNzI3MDQyOTU4fQ.dyIieOrhOQlU37G9Ich2uG5ZOYsRCmYGlPHZClc7eCo"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"name\": \"Teste\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "c581cd4f-b3c1-4269-b1de-a3453d2314b7",
+            "colId": "ff13e31c-8b9b-472c-873e-5f30a7c03491",
+            "containerId": "",
+            "name": "List Supplier By Id",
+            "url": "http://127.0.0.1:8000/supplier/ecc11073-07d1-465e-9f53-e39297fa70be",
+            "method": "GET",
+            "sortNum": 17500,
+            "created": "2024-09-22T03:41:30.851Z",
+            "modified": "2024-09-22T19:52:29.307Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
+                }
+            ]
+        },
+        {
+            "_id": "48b84ecb-ae79-4663-909f-9966b81a440b",
+            "colId": "ff13e31c-8b9b-472c-873e-5f30a7c03491",
+            "containerId": "",
+            "name": "List Products By Supplier",
+            "url": "http://127.0.0.1:8000/supplier/ecc11073-07d1-465e-9f53-e39297fa70be/products",
+            "method": "GET",
+            "sortNum": 18750,
+            "created": "2024-09-22T03:35:57.704Z",
+            "modified": "2024-09-22T19:53:16.510Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
+                }
+            ]
+        },
+        {
+            "_id": "9d54e45a-ea82-494b-80ef-e6180f4a143a",
+            "colId": "ff13e31c-8b9b-472c-873e-5f30a7c03491",
+            "containerId": "",
+            "name": "List All Suppliers",
+            "url": "http://127.0.0.1:8000/supplier",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2024-09-22T03:22:35.948Z",
+            "modified": "2024-09-24T02:47:56.467Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o"
+                }
+            ]
+        }
+    ],
+    "ref": "UvNVOPWl3vGqp87pzJ3YSbV4gpf7GF6gzKO0DyR-lDhSYh6LeXge65jGgr_IC9i0o9A6AphCBIl8nIMH_YrheA"
+}
