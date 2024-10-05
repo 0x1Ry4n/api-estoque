@@ -1,9 +1,9 @@
 package com.apiestoque.crud.domain.order;
 
 import com.apiestoque.crud.domain.customer.Customer;
+import com.apiestoque.crud.domain.inventory.Inventory;
 import com.apiestoque.crud.domain.order.dto.OrderPaymentMethod;
 import com.apiestoque.crud.domain.order.dto.OrderStatus;
-import com.apiestoque.crud.domain.product.Product;
 
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -26,7 +26,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class Order {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -34,10 +33,10 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
-
+    
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "inventory_id", nullable = false)
+    private Inventory inventory;
 
     @Column(nullable = false)
     private Integer quantity;
@@ -56,7 +55,7 @@ public class Order {
     @Column(name = "order_status")
     private OrderStatus status;
 
-     @CreatedBy
+    @CreatedBy
     private String createdBy;
 
     @CreatedDate
@@ -76,9 +75,9 @@ public class Order {
         this.createdAt = new Date();
     }
 
-    public Order(Customer customer, Product product, Integer quantity, BigDecimal totalPrice, OrderPaymentMethod paymentMethod, OrderStatus status) {
+    public Order(Customer customer, Inventory inventory, Integer quantity, BigDecimal totalPrice, OrderPaymentMethod paymentMethod, OrderStatus status) {
         this.customer = customer;
-        this.product = product;
+        this.inventory = inventory;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
         this.paymentMethod = paymentMethod;

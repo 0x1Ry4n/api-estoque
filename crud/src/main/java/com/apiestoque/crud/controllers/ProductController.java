@@ -1,41 +1,44 @@
 package com.apiestoque.crud.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.apiestoque.crud.domain.product.Product;
 import com.apiestoque.crud.domain.product.category.Category;
+import com.apiestoque.crud.domain.product.dto.ProductDetailedResponseDTO;
 import com.apiestoque.crud.domain.product.dto.ProductRequestDTO;
 import com.apiestoque.crud.domain.product.dto.ProductResponseDTO;
 import com.apiestoque.crud.domain.product.dto.ProductUpdateDTO;
-import com.apiestoque.crud.domain.supplier.Supplier;
+import com.apiestoque.crud.domain.inventory.Inventory;
+import com.apiestoque.crud.domain.inventory.dto.InventoryRequestDTO;
+import com.apiestoque.crud.domain.inventory.dto.InventoryResponseDTO;
 import com.apiestoque.crud.repositories.CategoryRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
+import com.apiestoque.crud.repositories.InventoryRepository;
+import com.apiestoque.crud.domain.supplier.Supplier;
 
 import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.stream.Collectors;
+import java.util.Set;
 
 @RestController
-@RequestMapping("products")
+@RequestMapping("/api/products")
 public class ProductController {
     @Autowired
     private ProductRepository productRepository;
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private InventoryRepository inventoryRepository;
 
     @Autowired
     private SupplierRepository supplierRepository;
@@ -45,26 +48,19 @@ public class ProductController {
         Category category = categoryRepository.findById(data.categoryId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
 
-        Set<Supplier> suppliers = new HashSet<>();
-        
-        if (data.suppliersId() != null) {
-            for (String supplierId : data.suppliersId()) {
-                Supplier supplier = supplierRepository.findById(supplierId)
-                        .orElseThrow(
-                                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado."));
-                suppliers.add(supplier);
-            }
-        }
+        Set<Supplier> suppliers = data.suppliersId().stream()
+                .map(supplierId -> supplierRepository.findById(supplierId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Fornecedor não encontrado com ID: " + supplierId)))
+                .collect(Collectors.toSet());
 
         Product newProduct = new Product(
                 data.name(),
                 data.description(),
-                data.price(),
-                data.discount(),
-                data.stockQuantity(),
-                data.expirationDate(),
+                data.unitPrice(),
                 category,
-                suppliers);
+                suppliers,
+                data.expirationDate());
 
         Product savedProduct = this.productRepository.save(newProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ProductResponseDTO(savedProduct));
@@ -84,26 +80,8 @@ public class ProductController {
             product.setDescription(data.description());
         }
 
-        if (data.price() != null) {
-            product.setPrice(data.price());
-        }
-
-        if (data.discount() != null) {
-            product.setDiscount(data.discount());
-        }
-
-        if (data.stockQuantity() != null) {
-            product.setStockQuantity(data.stockQuantity());
-        }
-
         if (data.expirationDate() != null) {
             product.setExpirationDate(data.expirationDate());
-        }
-
-        if (data.categoryId() != null) {
-            Category category = categoryRepository.findById(data.categoryId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
-            product.setCategory(category);
         }
 
         Product updatedProduct = productRepository.save(product);
@@ -111,19 +89,17 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
-        List<ProductResponseDTO> productList = productRepository.findAll().stream()
-                .map(ProductResponseDTO::new)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(productList);
+    public ResponseEntity<Page<ProductResponseDTO>> getAllProducts(Pageable pageable) {
+        Page<ProductResponseDTO> productPage = productRepository.findAll(pageable)
+                .map(ProductResponseDTO::new);
+        return ResponseEntity.ok(productPage);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable String id) {
+    public ResponseEntity<ProductDetailedResponseDTO> getProductById(@PathVariable String id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
-
-        return ResponseEntity.ok(new ProductResponseDTO(product));
+        return ResponseEntity.ok(new ProductDetailedResponseDTO(product));
     }
 
     @GetMapping("/name/{name}")
@@ -132,9 +108,89 @@ public class ProductController {
         List<ProductResponseDTO> productList = products.stream()
                 .map(ProductResponseDTO::new)
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(productList.isEmpty() ? List.of() : productList);
     }
 
-  
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ProductDetailedResponseDTO> deleteProductById(@PathVariable String id) {
+        productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+
+        this.productRepository.deleteById(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{productId}/inventory")
+    public ResponseEntity<InventoryResponseDTO> createInventory(@PathVariable String productId,
+            @RequestBody @Validated InventoryRequestDTO data) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+
+        if (data.quantity() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade do inventário deve ser maior que 0!");
+        }
+
+        Inventory inventory = new Inventory(
+                product,
+                data.quantity(),
+                data.discount(),
+                data.location());
+
+        Inventory savedInventory = inventoryRepository.save(inventory);
+
+        product.setStockQuantity(product.getStockQuantity() + data.quantity());
+        product.setOriginalStockQuantity(product.getOriginalStockQuantity() + data.quantity());
+        productRepository.save(product);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new InventoryResponseDTO(savedInventory));
+    }
+
+    @PatchMapping("/{productId}/inventory/{inventoryId}")
+    public ResponseEntity<InventoryResponseDTO> updateInventory(@PathVariable String productId,
+            @PathVariable String inventoryId, @RequestBody @Validated InventoryRequestDTO data) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+
+        Inventory inventory = inventoryRepository.findById(inventoryId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
+
+        if (!inventory.getProduct().getId().equals(productId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O inventário não pertence a este produto.");
+        }
+
+        if (data.quantity() != null) {
+            inventory.setQuantity(data.quantity());
+            inventory.setOriginalQuantity(data.quantity());
+            product.setStockQuantity(data.quantity());
+            product.setOriginalStockQuantity(data.quantity());
+        }
+
+        if (data.discount() != null) {
+            inventory.setDiscount(data.discount());
+        }
+
+        Inventory updatedInventory = inventoryRepository.save(inventory);
+        return ResponseEntity.ok(new InventoryResponseDTO(updatedInventory));
+    }
+
+    @DeleteMapping("/{productId}/inventory/{inventoryId}")
+    public ResponseEntity<Void> deleteInventory(@PathVariable String productId, @PathVariable String inventoryId) {
+        Inventory inventory = inventoryRepository.findById(inventoryId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
+        
+        if (!inventory.getProduct().getId().equals(productId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O inventário não pertence a este produto.");
+        }
+
+        Product product = inventory.getProduct();
+        
+        product.setStockQuantity(product.getStockQuantity() - inventory.getQuantity());
+        product.setOriginalStockQuantity(product.getOriginalStockQuantity() - inventory.getQuantity());
+        productRepository.save(product);
+
+        inventoryRepository.delete(inventory);
+
+        return ResponseEntity.noContent().build();
+    }
 }

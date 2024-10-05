@@ -1,8 +1,9 @@
 package com.apiestoque.crud.domain.order.dto;
 
 import com.apiestoque.crud.domain.customer.dto.CustomerResponseDTO;
+import com.apiestoque.crud.domain.inventory.Inventory;
+import com.apiestoque.crud.domain.inventory.dto.InventoryResponseDTO;
 import com.apiestoque.crud.domain.order.Order;
-import com.apiestoque.crud.domain.product.dto.ProductDetailedResponseDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,23 +11,24 @@ import java.time.LocalDateTime;
 public record OrderDetailsResponseDTO(
     String orderId,
     Integer quantity,
-    BigDecimal totalPrice,
     OrderPaymentMethod paymentMethod,
     OrderStatus orderStatus,
-    LocalDateTime orderDate,
-    ProductDetailedResponseDTO product,
-    CustomerResponseDTO customer
+    BigDecimal totalPrice,
+    CustomerResponseDTO customer,
+    InventoryResponseDTO inventory,
+    LocalDateTime orderDate
 ) {
-    public OrderDetailsResponseDTO(Order order) {
+    public OrderDetailsResponseDTO(Order order, Inventory inventory) {
         this(
             order.getId(),
             order.getQuantity(),
-            order.getTotalPrice(),
             order.getPaymentMethod(),
             order.getStatus(),
-            order.getOrderDate(),
-            new ProductDetailedResponseDTO(order.getProduct()),
-            new CustomerResponseDTO(order.getCustomer())
+            order.getTotalPrice(),
+            new CustomerResponseDTO(order.getCustomer()),
+            new InventoryResponseDTO(inventory),
+            order.getOrderDate()
         );
     }
 }
+            

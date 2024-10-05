@@ -14,7 +14,6 @@ public class AuditorAwareImpl implements AuditorAware<String> {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated()) {
-            // Retorna o nome do usuário autenticado
             return Optional.of(authentication.getName());
         }
 

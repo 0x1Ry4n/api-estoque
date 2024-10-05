@@ -1,38 +1,43 @@
 package com.apiestoque.crud.domain.product.dto;
 
+import com.apiestoque.crud.domain.inventory.dto.InventoryResponseDTO;
 import com.apiestoque.crud.domain.product.Product;
 import com.apiestoque.crud.domain.product.category.dto.CategoryResponseDTO;
 import com.apiestoque.crud.domain.supplier.dto.SupplierResponseDTO;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
 
 public record ProductDetailedResponseDTO(
     String id,
     String name,
     String description,
-    BigDecimal price,
-    BigDecimal discount,
+    Integer originalStockQuantity,
     Integer stockQuantity,
+    BigDecimal unitPrice,
     LocalDate expirationDate,
     CategoryResponseDTO category,
-    List<SupplierResponseDTO> suppliers
+    Set<InventoryResponseDTO> inventory, 
+    Set<SupplierResponseDTO> suppliers 
 ) {
     public ProductDetailedResponseDTO(Product product) {
         this(
             product.getId(),
             product.getName(),
             product.getDescription(),
-            product.getPrice(),
-            product.getDiscount(),
+            product.getOriginalStockQuantity(),
             product.getStockQuantity(),
+            product.getUnitPrice(),
             product.getExpirationDate(),
             product.getCategory() != null ? new CategoryResponseDTO(product.getCategory()) : null,
-            product.getSuppliers().stream()
-                .map(SupplierResponseDTO::new)
-                .collect(Collectors.toList())
+            product.getInventories() != null ? product.getInventories().stream()
+                .map(InventoryResponseDTO::new) 
+                .collect(Collectors.toSet()) : Set.of(),
+            product.getSuppliers() != null ? product.getSuppliers().stream()
+                .map(SupplierResponseDTO::new) 
+                .collect(Collectors.toSet()) : Set.of() 
         );
     }
 }

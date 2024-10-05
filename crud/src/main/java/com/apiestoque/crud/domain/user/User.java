@@ -62,16 +62,7 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     @LastModifiedDate
     private LocalDateTime updatedAt;
-
-
-    public User(String username, String email, String password, UserStatus status, UserRole role) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.status = status;
-        this.role = role;
-    }
-
+  
     @PrePersist
     public void onPrePersist() {
         this.createdAt = new Date(); 
@@ -108,5 +99,13 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public User(String username, String email, String password, UserStatus status, UserRole role) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.status = status;
+        this.role = role;
     }
 }

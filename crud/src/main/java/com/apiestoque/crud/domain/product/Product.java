@@ -1,5 +1,6 @@
 package com.apiestoque.crud.domain.product;
 
+import com.apiestoque.crud.domain.inventory.Inventory;
 import com.apiestoque.crud.domain.product.category.Category;
 import com.apiestoque.crud.domain.supplier.Supplier;
 import jakarta.persistence.*;
@@ -30,34 +31,33 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(nullable = false)
     private String name;
 
     @Column(columnDefinition = "text")
     private String description;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
+    @Column(name = "original_stock_quantity", nullable = false)
+    private Integer originalStockQuantity;
 
-    @Column(precision = 5, scale = 2)
-    private BigDecimal discount;
+    @Column(name = "stock_quantity")
+    private Integer stockQuantity = 0;
 
-    @Column(nullable = false)
-    private Integer stockQuantity;
-
-    private LocalDate expirationDate;
+    @Column(name = "unit_price", nullable = false)
+    private BigDecimal unitPrice; 
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    // change: um produto é fornecido por vários fornecedores
     @ManyToMany
-    @JoinTable(
-        name = "product_supplier",  
-        joinColumns = @JoinColumn(name = "product_id"),   
-        inverseJoinColumns = @JoinColumn(name = "supplier_id")
-    )
+    @JoinTable(name = "product_supplier", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "supplier_id"))
     private Set<Supplier> suppliers;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private Set<Inventory> inventories;
+
+    private LocalDate expirationDate;
 
     @CreatedBy
     private String createdBy;
@@ -76,24 +76,16 @@ public class Product {
     @PrePersist
     public void onPrePersist() {
         this.createdAt = new Date();
+        this.originalStockQuantity = stockQuantity;
     }
 
-    public Product(
-            String name,
-            String description,
-            BigDecimal price,
-            BigDecimal discount,
-            Integer stockQuantity,
-            LocalDate expirationDate,
-            Category category,
-            Set<Supplier> suppliers) {
+    public Product(String name, String description, BigDecimal unitPrice, Category category,
+                   Set<Supplier> suppliers, LocalDate expirationDate) {
         this.name = name;
         this.description = description;
-        this.price = price;
-        this.discount = discount;
-        this.stockQuantity = stockQuantity;
-        this.expirationDate = expirationDate;
+        this.unitPrice = unitPrice; 
         this.category = category;
         this.suppliers = suppliers;
+        this.expirationDate = expirationDate;
     }
 }

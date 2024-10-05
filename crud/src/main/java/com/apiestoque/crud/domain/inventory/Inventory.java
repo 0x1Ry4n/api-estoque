@@ -1,45 +1,49 @@
-package com.apiestoque.crud.domain.supplier;
+package com.apiestoque.crud.domain.inventory;
 
 import com.apiestoque.crud.domain.product.Product;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
-import java.util.Set;
+import java.time.LocalDateTime;
 
-@Entity(name = "suppliers")
-@Table(name = "suppliers")
+@Entity(name = "inventory")
+@Table(name = "inventory")
 @Getter
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class Supplier {
+public class Inventory {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false, unique = true)
-    private String email;
+    @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
     @Column(nullable = false)
-    private String phone;
+    private Integer originalQuantity;
 
-    @JsonIgnore 
-    @ManyToMany(mappedBy = "suppliers")
-    private Set<Product> products;
+    @Column(nullable = false)
+    private Integer quantity;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal discount;
+
+    private String location;  
+
+    @CreatedBy
+    private String createdBy;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -47,10 +51,7 @@ public class Supplier {
 
     @LastModifiedDate
     @Column(name = "updated_at")
-    private Date updatedAt;
-
-    @CreatedBy
-    private String createdBy;
+    private LocalDateTime updatedAt;
 
     @LastModifiedBy
     private String lastModifiedBy;
@@ -58,11 +59,13 @@ public class Supplier {
     @PrePersist
     public void onPrePersist() {
         this.createdAt = new Date();
+        this.originalQuantity = this.quantity;
     }
 
-    public Supplier(String name, String email, String phone) {
-        this.name = name;
-        this.email = email;
-        this.phone = phone;
+    public Inventory(Product product, Integer quantity, BigDecimal discount, String location) {
+        this.product = product;
+        this.quantity = quantity;
+        this.discount = discount;
+        this.location = location;
     }
 }

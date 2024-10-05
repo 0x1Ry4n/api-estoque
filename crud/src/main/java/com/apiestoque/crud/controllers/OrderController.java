@@ -1,6 +1,8 @@
 package com.apiestoque.crud.controllers;
 
 import com.apiestoque.crud.domain.customer.Customer;
+import com.apiestoque.crud.domain.inventory.Inventory;
+import com.apiestoque.crud.repositories.InventoryRepository;
 import com.apiestoque.crud.domain.order.Order;
 import com.apiestoque.crud.domain.order.dto.OrderDetailsResponseDTO;
 import com.apiestoque.crud.domain.order.dto.OrderRequestDTO;
@@ -9,20 +11,24 @@ import com.apiestoque.crud.domain.product.Product;
 import com.apiestoque.crud.repositories.CustomerRepository;
 import com.apiestoque.crud.repositories.OrderRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("orders")
+@RequestMapping("/api/orders")
 public class OrderController {
 
     @Autowired
@@ -34,7 +40,11 @@ public class OrderController {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private InventoryRepository inventoryRepository;
+
     @PostMapping
+    @Transactional
     public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody @Validated OrderRequestDTO data) {
         Customer customer = customerRepository.findById(data.customerId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado."));
@@ -42,24 +52,28 @@ public class OrderController {
         Product product = productRepository.findById(data.productId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
 
+        Inventory inventory = inventoryRepository.findById(data.inventoryId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
 
         if (data.quantity() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade solicitada menor ou igual a 0.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantidade deve ser maior que zero.");
         }
 
-        if (data.quantity() > product.getStockQuantity()) {
+        if (data.quantity() > inventory.getQuantity()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade indisponível no estoque.");
         }
 
+        inventory.setQuantity(inventory.getQuantity() - data.quantity());
+        inventoryRepository.save(inventory);
 
         product.setStockQuantity(product.getStockQuantity() - data.quantity());
         productRepository.save(product);
 
-        BigDecimal totalPrice = BigDecimal.valueOf(data.quantity()).multiply(product.getPrice());
+        BigDecimal totalPrice = inventory.getProduct().getUnitPrice().multiply(BigDecimal.valueOf(data.quantity()));
 
         Order newOrder = new Order(
                 customer,
-                product,
+                inventory,
                 data.quantity(),
                 totalPrice,
                 data.paymentMethod(),
@@ -71,11 +85,10 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderResponseDTO>> getAllOrders() {
-        List<OrderResponseDTO> orderList = orderRepository.findAll().stream()
-                .map(OrderResponseDTO::new)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(orderList);
+    public ResponseEntity<Page<OrderResponseDTO>> getAllOrders(Pageable pageable) {
+        Page<OrderResponseDTO> orderPage = orderRepository.findAll(pageable)
+                .map(OrderResponseDTO::new);
+        return ResponseEntity.ok(orderPage);
     }
 
     @GetMapping("/{id}")
@@ -86,12 +99,16 @@ public class OrderController {
         return ResponseEntity.ok(new OrderResponseDTO(order));
     }
 
-    @GetMapping("/{id}/details")
-    public ResponseEntity<OrderDetailsResponseDTO> getOrderDetails(@PathVariable String id) {
-        Order order = orderRepository.findById(id)
+    @GetMapping("/{orderID}/details")
+    public ResponseEntity<OrderDetailsResponseDTO> getOrderDetails(@PathVariable String orderID) {
+        Order order = orderRepository.findById(orderID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
 
-        return ResponseEntity.ok(new OrderDetailsResponseDTO(order));
+        Inventory inventory = inventoryRepository.findById(order.getInventory().getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Inventário não encontrado para este pedido."));
+
+        return ResponseEntity.ok(new OrderDetailsResponseDTO(order, inventory));
     }
 
     @GetMapping("/customer/{customerId}")
@@ -107,5 +124,26 @@ public class OrderController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(orderList);
+    }
+
+    @DeleteMapping("/{orderId}")
+    @Transactional 
+    public ResponseEntity<Void> deleteOrder(@PathVariable String orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado!"));
+
+        Inventory inventory = order.getInventory();
+        int quantityOrdered = order.getQuantity();
+
+        inventory.setQuantity(inventory.getQuantity() + quantityOrdered);
+        inventoryRepository.save(inventory);
+
+        Product product = inventory.getProduct();
+        product.setStockQuantity(product.getStockQuantity() + quantityOrdered);
+        productRepository.save(product);
+
+        orderRepository.delete(order);
+
+        return ResponseEntity.noContent().build(); 
     }
 }

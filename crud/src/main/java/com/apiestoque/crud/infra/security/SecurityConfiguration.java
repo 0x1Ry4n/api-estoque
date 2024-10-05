@@ -25,28 +25,30 @@ public class SecurityConfiguration {
     @Autowired
     SecurityFilter securityFilter;
 
+    @Autowired
+    CorsConfigurationImpl corsConfigurationImpl;
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationImpl.corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        // Permitir acesso público para login
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api-docs").permitAll()
                         
-                        // Permitir registro apenas para a conta mestra (admin)
-                        .requestMatchers(HttpMethod.POST, "/auth/register/admin").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/auth/register/user").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register/user").hasRole("ADMIN")
 
-                        // Permitir operações relacionadas a produtos, categorias, fornecedores e clientes apenas para admin
-                        .requestMatchers(HttpMethod.POST, "/products").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/category").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/category").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/supplier").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/supplier/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/customer/*/status").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/products").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/category").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/category").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/supplier").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/supplier/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/customer/*/status").hasRole("ADMIN")
 
-                        // Requerer autenticação para todas as outras requisições
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

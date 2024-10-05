@@ -10,10 +10,11 @@ public record OrderResponseDTO(
     String id,
     String customerId,
     String productId,
+    String inventoryId,
+    OrderStatus status,
+    OrderPaymentMethod paymentMethod,
     Integer quantity,
     BigDecimal totalPrice,
-    OrderPaymentMethod paymentMethod,
-    OrderStatus status,
     LocalDateTime orderDate,
     Date createdAt
 ) {
@@ -21,11 +22,12 @@ public record OrderResponseDTO(
         this(
             order.getId(), 
             order.getCustomer().getId(), 
-            order.getProduct().getId(), 
+            order.getInventory().getProduct().getId(),
+            order.getInventory().getId(), 
+            order.getStatus(), 
+            order.getPaymentMethod(), 
             order.getQuantity(), 
             order.getTotalPrice(), 
-            order.getPaymentMethod(), 
-            order.getStatus(), 
             order.getOrderDate(), 
             order.getCreatedAt()
         );

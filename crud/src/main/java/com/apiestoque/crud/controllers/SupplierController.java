@@ -1,6 +1,8 @@
 package com.apiestoque.crud.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -16,11 +18,11 @@ import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("supplier")
+@RequestMapping("/api/supplier")
 public class SupplierController {
 
     @Autowired
@@ -75,11 +77,11 @@ public class SupplierController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SupplierResponseDTO>> getAllSuppliers() {
-        List<SupplierResponseDTO> supplierList = supplierRepository.findAll().stream()
-                .map(SupplierResponseDTO::new)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(supplierList);
+    public ResponseEntity<Page<SupplierResponseDTO>> getAllSuppliers(Pageable pageable) {
+        var supplierPage = supplierRepository.findAll(pageable)
+                .map(SupplierResponseDTO::new);
+
+        return ResponseEntity.ok(supplierPage);
     }
 
     @GetMapping("/{id}")
@@ -104,5 +106,4 @@ public class SupplierController {
 
         return ResponseEntity.ok(productList.isEmpty() ? List.of() : productList);
     }
-   
 }

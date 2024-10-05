@@ -1,11 +1,10 @@
 package com.apiestoque.crud.domain.product.dto;
 
-import java.math.BigDecimal;
-
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
 
 import com.apiestoque.crud.domain.product.Product;
 
@@ -13,11 +12,12 @@ public record ProductResponseDTO(
     String id,
     String name,
     String description,
-    BigDecimal price,
-    BigDecimal discount,
+    Integer originalStockQuantity,
     Integer stockQuantity,
+    BigDecimal unitPrice,
     LocalDate expirationDate,
     String categoryId,
+    List<String> inventoryIds,
     List<String> supplierIds,  
     Date createdAt
 ) {
@@ -26,14 +26,19 @@ public record ProductResponseDTO(
             product.getId(),
             product.getName(),
             product.getDescription(),
-            product.getPrice(),
-            product.getDiscount(),
+            product.getOriginalStockQuantity(),
             product.getStockQuantity(),
+            product.getUnitPrice(),
             product.getExpirationDate(),
             product.getCategory() != null ? product.getCategory().getId() : null,
-            product.getSuppliers().stream()  
-                .map(supplier -> supplier.getId())
-                .collect(Collectors.toList()),
+            product.getInventories() != null ? 
+                product.getInventories().stream()
+                    .map(inventory -> inventory.getId())
+                    .collect(Collectors.toList()) : null,  
+            product.getSuppliers() != null ? 
+                product.getSuppliers().stream()
+                    .map(supplier -> supplier.getId())
+                    .collect(Collectors.toList()) : null,  
             product.getCreatedAt()
         );
     }

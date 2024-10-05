@@ -20,11 +20,13 @@ import com.apiestoque.crud.domain.product.category.dto.CategoryUpdateDTO;
 import com.apiestoque.crud.domain.product.dto.ProductResponseDTO;
 import com.apiestoque.crud.repositories.CategoryRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("category")
+@RequestMapping("/api/category")
 public class CategoryController {
     @Autowired
     private CategoryRepository categoryRepository;
@@ -62,12 +64,10 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponseDTO>> getAllCategories() {
-        List<CategoryResponseDTO> categoryList = categoryRepository.findAll().stream()
-                .map(CategoryResponseDTO::new)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(categoryList);
+    public ResponseEntity<Page<CategoryResponseDTO>> getAllCategories(Pageable pageable) {
+        Page<CategoryResponseDTO> categoryPage = categoryRepository.findAll(pageable)
+                .map(CategoryResponseDTO::new);
+        return ResponseEntity.ok(categoryPage);
     }
 
     @GetMapping("/{id}")
@@ -90,7 +90,7 @@ public class CategoryController {
     @GetMapping("/{id}/products")
     public ResponseEntity<List<ProductResponseDTO>> getProductsBySupplier(@PathVariable String id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
 
         List<ProductResponseDTO> productList = category.getProducts().stream()
                 .map(ProductResponseDTO::new)

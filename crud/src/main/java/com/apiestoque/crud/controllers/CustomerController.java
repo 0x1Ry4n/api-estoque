@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.apiestoque.crud.domain.customer.Customer;
 import com.apiestoque.crud.domain.customer.dto.CustomerRequestDTO;
@@ -20,12 +22,12 @@ import com.apiestoque.crud.domain.customer.dto.CustomerStatus;
 import com.apiestoque.crud.domain.customer.dto.CustomerUpdateStatusRequestDTO;
 import com.apiestoque.crud.repositories.CustomerRepository;
 
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 @RestController
-@RequestMapping("customer")
+@RequestMapping("/api/customer")
 public class CustomerController {
     @Autowired
     private CustomerRepository customerRepository;
@@ -62,7 +64,6 @@ public class CustomerController {
         Customer savedCustomer = this.customerRepository.save(newCustomer);
         return ResponseEntity.status(201).body(new CustomerResponseDTO(savedCustomer));
     }
-    
 
     @PatchMapping("/{id}")
     public ResponseEntity<CustomerResponseDTO> updateCustomer(@PathVariable String id,
@@ -143,11 +144,10 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CustomerResponseDTO>> getAllCustomers() {
-        List<CustomerResponseDTO> customerList = customerRepository.findAll().stream()
-                .map(CustomerResponseDTO::new)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(customerList);
+    public ResponseEntity<Page<CustomerResponseDTO>> getAllCustomers(Pageable pageable) {
+        Page<CustomerResponseDTO> customerPage = customerRepository.findAll(pageable)
+                .map(CustomerResponseDTO::new);
+        return ResponseEntity.ok(customerPage);
     }
 
     @GetMapping("/{id}")

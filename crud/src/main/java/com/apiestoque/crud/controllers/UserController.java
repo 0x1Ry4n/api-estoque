@@ -21,7 +21,7 @@ import com.apiestoque.crud.infra.security.TokenService;
 import com.apiestoque.crud.repositories.UserRepository;
 
 @RestController
-@RequestMapping("auth")
+@RequestMapping("/api/auth")
 public class UserController {
     @Autowired
     private AuthenticationManager authenticationManager;
