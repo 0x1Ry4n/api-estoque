@@ -21,9 +21,7 @@ public class DefaultAdminUserInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Verifica se a conta mestra já existe
         if (userRepository.findByUsername("admin") == null) {
-            // Cria a conta mestra
             User masterUser = new User("admin", "admin@example.com", 
                 passwordEncoder.encode("root"),
                 UserStatus.ACTIVE,

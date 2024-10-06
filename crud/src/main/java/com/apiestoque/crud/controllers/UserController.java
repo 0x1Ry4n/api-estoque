@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.apiestoque.crud.domain.user.User;
 import com.apiestoque.crud.domain.user.dto.AuthenticationDTO;
 import com.apiestoque.crud.domain.user.dto.LoginResponseDTO;
+import com.apiestoque.crud.domain.user.dto.RefreshTokenRequestDTO;
 import com.apiestoque.crud.domain.user.dto.RegisterUserDTO;
 import com.apiestoque.crud.domain.user.dto.UserRole;
 import com.apiestoque.crud.infra.response.ApiResponse;
@@ -95,5 +96,25 @@ public class UserController {
         this.userRepository.save(newUser);
 
         return ResponseEntity.ok().body(new ApiResponse("User registered successfully."));
+    }
+
+    @SuppressWarnings("rawtypes")
+    @PostMapping("/refresh-token")
+    public ResponseEntity refreshToken(@RequestBody @Validated RefreshTokenRequestDTO request) {
+        String refreshToken = request.refreshToken();
+        
+        if (tokenService.validateToken(refreshToken).equals("")) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Invalid refresh token."));
+        }
+
+        String username = tokenService.getUsernameFromToken(refreshToken);
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(new ApiResponse("User not found."));
+        }
+
+        String newToken = tokenService.generateToken(user);
+
+        return ResponseEntity.ok(new LoginResponseDTO(newToken));
     }
 }

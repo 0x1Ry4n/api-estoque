@@ -80,6 +80,10 @@ public class ProductController {
             product.setDescription(data.description());
         }
 
+        if (data.price() != null) {
+            product.setUnitPrice(data.price());
+        }
+
         if (data.expirationDate() != null) {
             product.setExpirationDate(data.expirationDate());
         }
@@ -144,6 +148,21 @@ public class ProductController {
         productRepository.save(product);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new InventoryResponseDTO(savedInventory));
+    }
+
+    @GetMapping("/inventory")
+    public ResponseEntity<Page<InventoryResponseDTO>> getAllInventories(Pageable pageable) {
+        Page<InventoryResponseDTO> productPage = inventoryRepository.findAll(pageable)
+                .map(InventoryResponseDTO::new);
+        return ResponseEntity.ok(productPage);
+    }
+
+    @GetMapping("{id}/inventory")
+    public ResponseEntity<InventoryResponseDTO> getInventoryById(@PathVariable String id) {
+        Inventory inventory = inventoryRepository.findByProductId(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
+
+        return ResponseEntity.ok(new InventoryResponseDTO(inventory));
     }
 
     @PatchMapping("/{productId}/inventory/{inventoryId}")

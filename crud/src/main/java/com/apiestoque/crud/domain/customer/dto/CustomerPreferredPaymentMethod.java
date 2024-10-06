@@ -2,6 +2,7 @@ package com.apiestoque.crud.domain.customer.dto;
 
 public enum CustomerPreferredPaymentMethod {
     CREDIT_CARD("Credit card"),
+    DEBIT_CARD("Debit card"),
     MONEY("Money"),
     ANY("Any");
 

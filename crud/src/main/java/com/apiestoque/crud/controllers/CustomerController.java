@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,15 +37,15 @@ public class CustomerController {
     public ResponseEntity<CustomerResponseDTO> createCustomer(@RequestBody @Validated CustomerRequestDTO data) {
         boolean isDefaultCustomer = data.isDefaultCustomer();
     
-        if (customerRepository.existsByEmail(data.email())) {
+        if (data.email() != null && customerRepository.existsByEmail(data.email())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "E-mail já existe.");
         }
     
-        if (customerRepository.existsByPhone(data.phone())) {
+        if (data.phone() != null && customerRepository.existsByPhone(data.phone())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Telefone já existe.");
         }
     
-        if (data.cpf() != null && customerRepository.existsByCpf(data.cpf())) {
+        if (data.cpf() != null && data.cpf() != null && customerRepository.existsByCpf(data.cpf())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CPF já existe.");
         }
     
@@ -192,5 +193,15 @@ public class CustomerController {
         }
 
         return ResponseEntity.ok(new CustomerResponseDTO(customer.get()));
+    }
+
+    @DeleteMapping("/{id}")
+     public ResponseEntity<CustomerResponseDTO> deleteProductById(@PathVariable String id) {
+        customerRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+
+        this.customerRepository.deleteById(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

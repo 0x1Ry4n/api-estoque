@@ -9,11 +9,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.apiestoque.crud.domain.customer.dto.CustomerResponseDTO;
 import com.apiestoque.crud.domain.product.Product;
 import com.apiestoque.crud.domain.product.dto.ProductResponseDTO;
 import com.apiestoque.crud.domain.supplier.Supplier;
 import com.apiestoque.crud.domain.supplier.dto.SupplierRequestDTO;
 import com.apiestoque.crud.domain.supplier.dto.SupplierResponseDTO;
+import com.apiestoque.crud.domain.supplier.dto.SupplierUpdateRequestDTO;
 import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
 
@@ -48,7 +50,7 @@ public class SupplierController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<SupplierResponseDTO> updateSupplier(@PathVariable String id,
-            @RequestBody @Validated SupplierRequestDTO data) {
+            @RequestBody @Validated SupplierUpdateRequestDTO data) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado."));
 
@@ -105,5 +107,15 @@ public class SupplierController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(productList.isEmpty() ? List.of() : productList);
+    }
+
+    @DeleteMapping("/{id}")
+     public ResponseEntity<CustomerResponseDTO> deleteProductById(@PathVariable String id) {
+        supplierRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado."));
+
+        this.supplierRepository.deleteById(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
