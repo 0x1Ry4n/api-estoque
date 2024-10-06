@@ -99,6 +99,25 @@ public class OrderController {
         return ResponseEntity.ok(new OrderResponseDTO(order));
     }
 
+    @GetMapping("/details")
+    public ResponseEntity<Page<OrderDetailsResponseDTO>> getAllOrderDetails(Pageable pageable) {
+        Page<Order> ordersPage = orderRepository.findAll(pageable);
+    
+        if (ordersPage.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum pedido encontrado.");
+        }
+    
+        Page<OrderDetailsResponseDTO> orderDetailsPage = ordersPage.map(order -> {
+            Inventory inventory = inventoryRepository.findById(order.getInventory().getId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Inventário não encontrado para o pedido com ID: " + order.getId()));
+            return new OrderDetailsResponseDTO(order, inventory);
+        });
+    
+        return ResponseEntity.ok(orderDetailsPage);
+    }
+    
+
     @GetMapping("/{orderID}/details")
     public ResponseEntity<OrderDetailsResponseDTO> getOrderDetails(@PathVariable String orderID) {
         Order order = orderRepository.findById(orderID)

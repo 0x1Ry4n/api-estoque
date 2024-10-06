@@ -7,6 +7,7 @@ import com.apiestoque.crud.domain.inventory.Inventory;
 public record InventoryResponseDTO(
     String id,
     String productId,
+    String productName,
     Integer originalQuantity,
     Integer quantity,
     BigDecimal unitPrice,
@@ -17,6 +18,7 @@ public record InventoryResponseDTO(
         this(
             inventory.getId(),
             inventory.getProduct().getId(), 
+            inventory.getProduct().getName(),
             inventory.getOriginalQuantity(),
             inventory.getQuantity(),
             inventory.getProduct().getUnitPrice(),

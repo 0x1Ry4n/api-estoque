@@ -4,7 +4,8 @@ public enum OrderPaymentMethod {
     CREDIT_CARD("Credit card"),
     DEBIT_CARD("Debit card"),
     PIX("Pix"),
-    MONEY("Money");
+    MONEY("Money"),
+    ANY("Any");
 
     private final String description;
 
