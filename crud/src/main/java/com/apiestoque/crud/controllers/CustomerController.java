@@ -1,6 +1,8 @@
 package com.apiestoque.crud.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -24,9 +26,11 @@ import com.apiestoque.crud.domain.customer.dto.CustomerUpdateStatusRequestDTO;
 import com.apiestoque.crud.repositories.CustomerRepository;
 
 
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerController {
@@ -196,7 +200,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-     public ResponseEntity<CustomerResponseDTO> deleteProductById(@PathVariable String id) {
+    public ResponseEntity<CustomerResponseDTO> deleteProductById(@PathVariable String id) {
         customerRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
 

@@ -15,6 +15,8 @@ import com.apiestoque.crud.repositories.ProductRepository;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -118,6 +120,7 @@ public class OrderController {
     }
     
 
+    
     @GetMapping("/{orderID}/details")
     public ResponseEntity<OrderDetailsResponseDTO> getOrderDetails(@PathVariable String orderID) {
         Order order = orderRepository.findById(orderID)
@@ -146,8 +149,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/{orderId}")
-    @Transactional 
-    public ResponseEntity<Void> deleteOrder(@PathVariable String orderId) {
+    public ResponseEntity<OrderResponseDTO> deleteOrder(@PathVariable String orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado!"));
 
