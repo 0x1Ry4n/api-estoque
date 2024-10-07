@@ -158,11 +158,18 @@ public class ProductController {
     }
 
     @GetMapping("{id}/inventory")
-    public ResponseEntity<InventoryResponseDTO> getInventoryById(@PathVariable String id) {
-        Inventory inventory = inventoryRepository.findByProductId(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
-
-        return ResponseEntity.ok(new InventoryResponseDTO(inventory));
+    public ResponseEntity<List<InventoryResponseDTO>> getInventoryById(@PathVariable String id) {
+        List<Inventory> inventories = inventoryRepository.findAllByProductId(id);
+        
+        if (inventories.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventários não encontrados.");
+        }
+    
+        List<InventoryResponseDTO> inventoryResponseDTOs = inventories.stream()
+                .map(InventoryResponseDTO::new) 
+                .collect(Collectors.toList());
+    
+        return ResponseEntity.ok(inventoryResponseDTOs);
     }
 
     @PatchMapping("/{productId}/inventory/{inventoryId}")
