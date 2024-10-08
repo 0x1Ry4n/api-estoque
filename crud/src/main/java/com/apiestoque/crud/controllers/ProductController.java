@@ -2,8 +2,6 @@ package com.apiestoque.crud.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +18,12 @@ import com.apiestoque.crud.domain.product.dto.ProductUpdateDTO;
 import com.apiestoque.crud.domain.inventory.Inventory;
 import com.apiestoque.crud.domain.inventory.dto.InventoryRequestDTO;
 import com.apiestoque.crud.domain.inventory.dto.InventoryResponseDTO;
+import com.apiestoque.crud.domain.order.Order;
 import com.apiestoque.crud.repositories.CategoryRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
 import com.apiestoque.crud.repositories.InventoryRepository;
+import com.apiestoque.crud.repositories.OrderRepository;
 import com.apiestoque.crud.domain.supplier.Supplier;
 
 import java.util.List;
@@ -38,6 +38,9 @@ public class ProductController {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Autowired
     private InventoryRepository inventoryRepository;
@@ -177,27 +180,36 @@ public class ProductController {
     @PatchMapping("/{productId}/inventory/{inventoryId}")
     public ResponseEntity<InventoryResponseDTO> updateInventory(@PathVariable String productId,
             @PathVariable String inventoryId, @RequestBody @Validated InventoryRequestDTO data) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
-
         Inventory inventory = inventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
-
+    
         if (!inventory.getProduct().getId().equals(productId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O inventário não pertence a este produto.");
         }
+    
+        int previousOriginalQuantity = inventory.getOriginalQuantity();
 
         if (data.quantity() != null) {
-            inventory.setQuantity(data.quantity());
-            inventory.setOriginalQuantity(data.quantity());
-            product.setStockQuantity(data.quantity());
-            product.setOriginalStockQuantity(data.quantity());
-        }
+            inventory.setOriginalQuantity(previousOriginalQuantity + data.quantity());
+    
+            List<Order> orders = orderRepository.findByInventory_Product(inventory.getProduct());
+            int ordersQuantity = orders.stream().mapToInt(Order::getQuantity).sum();
 
+            int newQuantity = (previousOriginalQuantity - ordersQuantity) + data.quantity();
+            inventory.setQuantity(newQuantity);
+    
+            Product product = inventory.getProduct();
+            
+            product.setStockQuantity(product.getStockQuantity() + data.quantity());
+            product.setOriginalStockQuantity(product.getOriginalStockQuantity() + data.quantity());
+    
+            productRepository.save(product);
+        }
+    
         if (data.discount() != null) {
             inventory.setDiscount(data.discount());
         }
-
+    
         Inventory updatedInventory = inventoryRepository.save(inventory);
         return ResponseEntity.ok(new InventoryResponseDTO(updatedInventory));
     }
@@ -206,13 +218,17 @@ public class ProductController {
     public ResponseEntity<Void> deleteInventory(@PathVariable String productId, @PathVariable String inventoryId) {
         Inventory inventory = inventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
-        
+
         if (!inventory.getProduct().getId().equals(productId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O inventário não pertence a este produto.");
         }
 
         Product product = inventory.getProduct();
         
+        if (product.getStockQuantity() < inventory.getQuantity()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é possível deletar o inventário. A quantidade do inventário excede o estoque do produto.");
+        }
+
         product.setStockQuantity(product.getStockQuantity() - inventory.getQuantity());
         product.setOriginalStockQuantity(product.getOriginalStockQuantity() - inventory.getQuantity());
         productRepository.save(product);

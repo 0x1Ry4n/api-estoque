@@ -1,8 +1,6 @@
 package com.apiestoque.crud.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,7 +19,6 @@ import com.apiestoque.crud.domain.product.category.dto.CategoryRequestDTO;
 import com.apiestoque.crud.domain.product.category.dto.CategoryResponseDTO;
 import com.apiestoque.crud.domain.product.category.dto.CategoryUpdateDTO;
 import com.apiestoque.crud.domain.product.dto.ProductDetailedResponseDTO;
-import com.apiestoque.crud.domain.product.dto.ProductResponseDTO;
 import com.apiestoque.crud.repositories.CategoryRepository;
 
 import org.springframework.data.domain.Page;
@@ -89,18 +86,6 @@ public class CategoryController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(categoryList.isEmpty() ? List.of() : categoryList);
-    }
-
-    @GetMapping("/{id}/products")
-    public ResponseEntity<List<ProductResponseDTO>> getProductsBySupplier(@PathVariable String id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
-
-        List<ProductResponseDTO> productList = category.getProducts().stream()
-                .map(ProductResponseDTO::new)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(productList);
     }
 
     @DeleteMapping("/{id}")

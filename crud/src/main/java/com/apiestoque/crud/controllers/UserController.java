@@ -73,7 +73,7 @@ public class UserController {
 
     @PostMapping("/register/user")
     public ResponseEntity<ApiResponse> registerUser(@RequestBody @Validated RegisterUserDTO data) {
-        User masterUser = userRepository.findByUsername("admin"); // Nome da conta mestra
+        User masterUser = userRepository.findByUsername("admin"); 
         if (masterUser == null) {
             return ResponseEntity.badRequest().body(new ApiResponse("Master user does not exist."));
         }

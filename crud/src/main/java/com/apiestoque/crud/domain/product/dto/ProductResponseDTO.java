@@ -17,6 +17,7 @@ public record ProductResponseDTO(
     BigDecimal unitPrice,
     LocalDate expirationDate,
     String categoryId,
+    String categoryName,
     List<String> inventoryIds,
     List<String> supplierIds,  
     Date createdAt
@@ -31,6 +32,7 @@ public record ProductResponseDTO(
             product.getUnitPrice(),
             product.getExpirationDate(),
             product.getCategory() != null ? product.getCategory().getId() : null,
+            product.getCategory() != null ? product.getCategory().getName() : null,
             product.getInventories() != null ? 
                 product.getInventories().stream()
                     .map(inventory -> inventory.getId())
