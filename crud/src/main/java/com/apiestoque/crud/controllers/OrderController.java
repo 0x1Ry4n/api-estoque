@@ -159,10 +159,18 @@ public class OrderController {
         inventoryRepository.save(inventory);
 
         Product product = inventory.getProduct();
-        product.setStockQuantity(product.getStockQuantity() + quantityOrdered);
+
+        List<Inventory> allInventories = inventoryRepository.findByProduct(product);
+
+        int totalStockQuantity = allInventories.stream().mapToInt(Inventory::getQuantity).sum();
+        int totalOriginalStockQuantity = allInventories.stream().mapToInt(Inventory::getOriginalQuantity).sum();
+
+        product.setStockQuantity(totalStockQuantity);
+        product.setOriginalStockQuantity(totalOriginalStockQuantity);
         productRepository.save(product);
 
         orderRepository.delete(order);
-        return ResponseEntity.noContent().build(); 
+
+        return ResponseEntity.noContent().build();
     }
 }

@@ -22,6 +22,9 @@ import com.apiestoque.crud.domain.order.Order;
 import com.apiestoque.crud.repositories.CategoryRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
+
+import jakarta.transaction.Transactional;
+
 import com.apiestoque.crud.repositories.InventoryRepository;
 import com.apiestoque.crud.repositories.OrderRepository;
 import com.apiestoque.crud.domain.supplier.Supplier;
@@ -178,44 +181,10 @@ public class ProductController {
     }
 
     @PatchMapping("/{productId}/inventory/{inventoryId}")
+    @Transactional
     public ResponseEntity<InventoryResponseDTO> updateInventory(@PathVariable String productId,
             @PathVariable String inventoryId, @RequestBody @Validated InventoryRequestDTO data) {
-        Inventory inventory = inventoryRepository.findById(inventoryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
-    
-        if (!inventory.getProduct().getId().equals(productId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O inventário não pertence a este produto.");
-        }
-    
-        int previousOriginalQuantity = inventory.getOriginalQuantity();
-
-        if (data.quantity() != null) {
-            inventory.setOriginalQuantity(previousOriginalQuantity + data.quantity());
-    
-            List<Order> orders = orderRepository.findByInventory_Product(inventory.getProduct());
-            int ordersQuantity = orders.stream().mapToInt(Order::getQuantity).sum();
-
-            int newQuantity = (previousOriginalQuantity - ordersQuantity) + data.quantity();
-            inventory.setQuantity(newQuantity);
-    
-            Product product = inventory.getProduct();
-            
-            product.setStockQuantity(product.getStockQuantity() + data.quantity());
-            product.setOriginalStockQuantity(product.getOriginalStockQuantity() + data.quantity());
-    
-            productRepository.save(product);
-        }
-    
-        if (data.discount() != null) {
-            inventory.setDiscount(data.discount());
-        }
-    
-        Inventory updatedInventory = inventoryRepository.save(inventory);
-        return ResponseEntity.ok(new InventoryResponseDTO(updatedInventory));
-    }
-
-    @DeleteMapping("/{productId}/inventory/{inventoryId}")
-    public ResponseEntity<Void> deleteInventory(@PathVariable String productId, @PathVariable String inventoryId) {
+        
         Inventory inventory = inventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
 
@@ -224,7 +193,49 @@ public class ProductController {
         }
 
         Product product = inventory.getProduct();
+        int previousOriginalQuantity = inventory.getOriginalQuantity();
         
+        if (data.quantity() != null) {
+            int newOriginalQuantity = previousOriginalQuantity + data.quantity();
+            inventory.setOriginalQuantity(newOriginalQuantity);
+
+            List<Order> orders = orderRepository.findByInventory_Product(product);
+            int ordersQuantity = orders.stream().mapToInt(Order::getQuantity).sum();
+
+            int newQuantity = (previousOriginalQuantity - ordersQuantity) + data.quantity();
+            if (newQuantity < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantidade resultante não pode ser negativa.");
+            }
+
+            inventory.setQuantity(newQuantity);
+
+            product.setStockQuantity(product.getStockQuantity() + data.quantity());
+            product.setOriginalStockQuantity(product.getOriginalStockQuantity() + data.quantity());
+            productRepository.save(product);
+        }
+
+        if (data.discount() != null) {
+            inventory.setDiscount(data.discount());
+        }
+
+        Inventory updatedInventory = inventoryRepository.save(inventory);
+
+        return ResponseEntity.ok(new InventoryResponseDTO(updatedInventory));
+    }
+
+    @DeleteMapping("/{productId}/inventory/{inventoryId}")
+    @Transactional
+    public ResponseEntity<Void> deleteInventory(@PathVariable String productId, @PathVariable String inventoryId) {
+        
+        Inventory inventory = inventoryRepository.findById(inventoryId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
+
+        if (!inventory.getProduct().getId().equals(productId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O inventário não pertence a este produto.");
+        }
+
+        Product product = inventory.getProduct();
+
         if (product.getStockQuantity() < inventory.getQuantity()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é possível deletar o inventário. A quantidade do inventário excede o estoque do produto.");
         }
