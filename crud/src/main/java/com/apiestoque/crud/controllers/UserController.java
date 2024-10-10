@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,9 @@ import com.apiestoque.crud.domain.user.dto.UserRole;
 import com.apiestoque.crud.infra.response.ApiResponse;
 import com.apiestoque.crud.infra.security.TokenService;
 import com.apiestoque.crud.repositories.UserRepository;
+import org.springframework.security.core.Authentication;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -77,7 +81,7 @@ public class UserController {
         if (masterUser == null) {
             return ResponseEntity.badRequest().body(new ApiResponse("Master user does not exist."));
         }
-
+        
         if (data.role() == null || !data.role().equals(UserRole.USER)) {
             return ResponseEntity.badRequest().body(new ApiResponse("A role of user is required for this endpoint."));
         }
@@ -116,5 +120,17 @@ public class UserController {
         String newToken = tokenService.generateToken(user);
 
         return ResponseEntity.ok(new LoginResponseDTO(newToken));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getLoggedUser(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> listUsers() {
+        List<User> users = userRepository.findAll();
+        return ResponseEntity.ok(users);
     }
 }
