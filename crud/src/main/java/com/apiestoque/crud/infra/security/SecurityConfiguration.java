@@ -36,17 +36,18 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationImpl.corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh-token").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api-docs").permitAll()
+                        .requestMatchers(HttpMethod.POST,  "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST,  "/api/auth/refresh-token").permitAll()
+                        .requestMatchers(HttpMethod.GET,   "/api-docs").permitAll()
                         
-                        .requestMatchers(HttpMethod.POST, "/api/auth/register/admin").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/auth/register/user").hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.POST, "/api/products").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/category").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,  "/api/auth/register/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,  "/api/auth/register/user").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,  "/api/auth/users").hasRole("ADMIN")
+                        
+                        .requestMatchers(HttpMethod.POST,  "/api/products").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,  "/api/category").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/category").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/supplier").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,  "/api/supplier").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/supplier/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/customer/*/status").hasRole("ADMIN")
 
