@@ -11,6 +11,9 @@ public record ProductRequestDTO(
 
     @NotBlank(message = "Description is required")
     String description,
+    
+    @NotBlank(message = "Product code is required")
+    String productCode,
 
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")

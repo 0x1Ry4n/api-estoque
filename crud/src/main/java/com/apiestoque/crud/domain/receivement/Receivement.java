@@ -40,6 +40,8 @@ public class Receivement {
     @Column(name="inventory_code", nullable = false)
     private String inventoryCode;
 
+    private String description;
+
     @Column(nullable = false)
     private Integer quantity;
 
@@ -72,10 +74,11 @@ public class Receivement {
         this.createdAt = new Date();
     }
 
-    public Receivement(Product product, Supplier supplier, String inventoryCode, Integer quantity, BigDecimal totalPrice, LocalDate receivingDate, ReceivementStatus status) {
+    public Receivement(Product product, Supplier supplier, String inventoryCode, String description, Integer quantity, BigDecimal totalPrice, LocalDate receivingDate, ReceivementStatus status) {
         this.product = product;
         this.supplier = supplier;
         this.inventoryCode = inventoryCode;
+        this.description = description;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
         this.receivingDate = receivingDate;

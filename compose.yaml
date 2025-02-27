@@ -9,7 +9,7 @@ services:
     networks:
       - api_network
     ports:
-      - '${DATABASE_PORT}:${DATABASE_PORT}'
+      - '5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
   deepface-api:

@@ -62,6 +62,7 @@ public class ReceivementController implements CrudController<String, Receivement
             product,
             supplier,
             inventory.getInventoryCode(),
+            data.description(),
             data.quantity(),
             totalPrice,
             data.receivingDate(),
@@ -116,12 +117,15 @@ public class ReceivementController implements CrudController<String, Receivement
             receivement.setStatus(data.status());
         }
 
+        if (data.description() != null) {
+            receivement.setDescription(data.description());
+        }
+
         if (quantityDifference != 0) {
             Inventory inventory = inventoryRepository.findByProductId(data.productId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi encontrado nenhum inventário para o produto!"));
 
             Product product = inventory.getProduct();
-
 
             inventory.setQuantity(inventory.getQuantity() + quantityDifference);
             inventory.setReceivementQuantity(inventory.getReceivementQuantity() + quantityDifference);
@@ -139,9 +143,27 @@ public class ReceivementController implements CrudController<String, Receivement
 
     @Override
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<ReceivementResponseDTO> delete(@PathVariable String id) {
-        receivementRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recebimento não encontrado."));
+        Receivement receivement = receivementRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recebimento não encontrado."));
+
+        Inventory inventory = inventoryRepository.findByInventoryCode(receivement.getInventoryCode())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
+
+        Product product = productRepository.findById(receivement.getProduct().getId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+
+        inventory.getReceivements().remove(receivement);
+
+        inventory.setQuantity(inventory.getQuantity() - receivement.getQuantity());
+        inventory.setReceivementQuantity(inventory.getReceivementQuantity() - receivement.getQuantity());
+
+        product.setStockQuantity(product.getStockQuantity() - receivement.getQuantity());
+
+        this.inventoryRepository.save(inventory);
+
+        this.productRepository.save(product);
 
         this.receivementRepository.deleteById(id);
 

@@ -192,5 +192,5 @@ public class UserController {
     public ResponseEntity<List<User>> listUsers() {
         List<User> users = userRepository.findAll();
         return ResponseEntity.ok(users);
-    }
+    } 
 }

@@ -34,6 +34,9 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private String productCode;
+
     @Column(columnDefinition = "text")
     private String description;
 
@@ -75,9 +78,10 @@ public class Product {
         this.createdAt = new Date();
     }
 
-    public Product(String name, String description, BigDecimal unitPrice, Category category,
+    public Product(String name, String description, String productCode, BigDecimal unitPrice, Category category,
                    Set<Supplier> suppliers, LocalDate expirationDate) {
         this.name = name;
+        this.productCode = productCode;
         this.description = description;
         this.unitPrice = unitPrice; 
         this.category = category;

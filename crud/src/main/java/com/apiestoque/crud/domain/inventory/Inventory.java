@@ -36,7 +36,7 @@ public class Inventory {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @ManyToMany(cascade = CascadeType.REMOVE)
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
         name = "inventory_receivements",
         joinColumns = @JoinColumn(name = "inventory_id"),
@@ -44,7 +44,7 @@ public class Inventory {
     )
     private List<Receivement> receivements = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.REMOVE)
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
         name = "inventory_exits",
         joinColumns = @JoinColumn(name = "inventory_id"),

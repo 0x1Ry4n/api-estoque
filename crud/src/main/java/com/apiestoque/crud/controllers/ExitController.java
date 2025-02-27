@@ -128,9 +128,27 @@ public class ExitController implements CrudController<String, ExitRequestDTO, Ex
 
     @Override
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<ExitResponseDTO> delete(@PathVariable String id) {
-        exitRepository.findById(id)
+        Exit exit = exitRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Saída de produto não encontrada."));
+
+        Inventory inventory = inventoryRepository.findByInventoryCode(exit.getInventoryCode())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
+
+        Product product = productRepository.findById(exit.getProduct().getId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+
+        inventory.getExits().remove(exit);
+
+        inventory.setQuantity(inventory.getQuantity() + exit.getQuantity());
+        inventory.setExitQuantity(inventory.getExitQuantity() - exit.getQuantity());
+
+        product.setStockQuantity(product.getStockQuantity() + exit.getQuantity());
+
+        this.inventoryRepository.save(inventory);
+
+        this.productRepository.save(product);
 
         this.exitRepository.deleteById(id);
 

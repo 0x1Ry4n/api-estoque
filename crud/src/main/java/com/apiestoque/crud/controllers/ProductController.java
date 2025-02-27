@@ -24,6 +24,9 @@ import com.apiestoque.crud.repositories.ExitRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.ReceivementRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
+
+import jakarta.transaction.Transactional;
+
 import com.apiestoque.crud.repositories.InventoryRepository;
 import com.apiestoque.crud.domain.supplier.Supplier;
 
@@ -67,6 +70,7 @@ public class ProductController implements CrudController<String, ProductRequestD
         Product newProduct = new Product(
                 data.name(),
                 data.description(),
+                data.productCode(),
                 data.unitPrice(),
                 category,
                 suppliers,
@@ -76,13 +80,16 @@ public class ProductController implements CrudController<String, ProductRequestD
         return ResponseEntity.status(HttpStatus.CREATED).body(new ProductResponseDTO(savedProduct));
     }
 
-
     @Override
     @PatchMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> update(@PathVariable String id,
             @RequestBody @Validated ProductUpdateDTO data) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+
+        if (data.productCode() != null) {
+            product.setProductCode(data.productCode());
+        }
 
         if (data.name() != null) {
             product.setName(data.name());
@@ -99,7 +106,7 @@ public class ProductController implements CrudController<String, ProductRequestD
         if (data.expirationDate() != null) {
             product.setExpirationDate(data.expirationDate());
         }
-
+        
         Product updatedProduct = productRepository.save(product);
         return ResponseEntity.ok(new ProductResponseDTO(updatedProduct));
     }
@@ -148,6 +155,7 @@ public class ProductController implements CrudController<String, ProductRequestD
     // ---- Inventory controller ---- 
 
     @PostMapping("/{productId}/inventory")
+    @Transactional
     public ResponseEntity<InventoryResponseDTO> createInventory(@PathVariable String productId,
             @RequestBody @Validated InventoryRequestDTO data) {
         Product product = productRepository.findById(productId)
@@ -188,6 +196,7 @@ public class ProductController implements CrudController<String, ProductRequestD
     }
 
     @DeleteMapping("/{productId}/inventory/{inventoryId}")
+    @Transactional
     public ResponseEntity<Void> deleteInventory(@PathVariable String productId, @PathVariable String inventoryId) {
         productRepository.findById(productId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi possível encontrar o produto selecionado!"));

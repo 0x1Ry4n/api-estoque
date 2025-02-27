@@ -12,6 +12,8 @@ public record ReceivementRequestDTO(
     @NotNull(message = "Supplier ID is required") 
     String supplierId,
 
+    String description,
+
     @NotNull(message = "Inventory code is required")
     String inventoryId,
     
