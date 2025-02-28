@@ -26,7 +26,7 @@ O Diagrama Lógico detalha a organização e estrutura de dados do sistema, alé
 
 - **Localização do arquivo:** `imagens/diagrama_logico.png`
 
-![Diagrama Lógico](imagens/diagrama_logico.jng)
+![Diagrama Lógico](imagens/diagrama_logico.jpg)
 
 ---
 
