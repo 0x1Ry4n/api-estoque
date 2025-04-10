@@ -3,6 +3,7 @@ package com.apiestoque.crud.infra.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -26,8 +27,10 @@ public class SecurityConfiguration {
     SecurityFilter securityFilter;
 
     @Autowired
-    CorsConfigurationImpl corsConfigurationImpl;
+    private RedisTemplate<String, String> redisTemplate;
 
+    @Autowired
+    CorsConfigurationImpl corsConfigurationImpl;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -39,20 +42,27 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST,  "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST,  "/api/auth/refresh-token").permitAll()
                         .requestMatchers(HttpMethod.GET,   "/api-docs").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/verify-face").permitAll()
                         
                         .requestMatchers(HttpMethod.POST,  "/api/auth/register/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST,  "/api/auth/register/user").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,  "/api/auth/users").hasRole("ADMIN")
                         
                         .requestMatchers(HttpMethod.POST,  "/api/products").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/products/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,  "/api/products/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,  "/api/products/*/inventory").permitAll()
+
+
                         .requestMatchers(HttpMethod.POST,  "/api/category").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/category").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/category/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,  "/api/category/*").hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.POST,  "/api/supplier").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/supplier/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/supplier/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,  "/api/supplier/*").hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.PATCH, "/api/customer/*/status").hasRole("ADMIN")
-
-
-
                         
                         .anyRequest().authenticated()
                 )

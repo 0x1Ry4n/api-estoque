@@ -10,23 +10,40 @@ services:
       - api_network
     ports:
       - '5433:5432'
-    volumes:
+    volumes:  
       - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: redis_estoque
+    networks:
+      - api_network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --save 60 1 --loglevel warning
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
   deepface-api:
-      build:
-        context: ./deepface-api
-      container_name: "deepface_api"
-      environment:
-        - PYTHONUNBUFFERED=1
-      networks:
-        - api_network
-      ports:
-        - "5000:5000" 
+    build:
+      context: ./deepface-api
+    container_name: "deepface_api"
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - api_network
+    ports:
+      - "5000:5000" 
 
 volumes:
   postgres_data:
+  redis_data:  
 
 networks:
   api_network:
-      driver: bridge
-
+    driver: bridge

@@ -36,6 +36,18 @@
 			<version>3.0.2</version> 
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+			<version>3.3.4</version> <!-- Use a mesma versão do seu Spring Boot -->
+		</dependency>
+
+		<!-- Lettuce (cliente Redis) -->
+		<dependency>
+			<groupId>io.lettuce</groupId>
+			<artifactId>lettuce-core</artifactId>
+			<version>6.3.2.RELEASE</version> <!-- Ou versão compatível -->
+		</dependency>
+		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
 			<version>1.6.2</version>

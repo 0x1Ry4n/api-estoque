@@ -1,6 +1,7 @@
 package com.apiestoque.crud.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +19,7 @@ import com.apiestoque.crud.domain.user.dto.AuthenticationDTO;
 import com.apiestoque.crud.domain.user.dto.LoginResponseDTO;
 import com.apiestoque.crud.domain.user.dto.RefreshTokenRequestDTO;
 import com.apiestoque.crud.domain.user.dto.RegisterUserDTO;
+import com.apiestoque.crud.domain.user.dto.UserResponseDTO;
 import com.apiestoque.crud.domain.user.dto.UserRole;
 import com.apiestoque.crud.infra.response.ApiResponse;
 import com.apiestoque.crud.infra.security.TokenService;
@@ -33,6 +35,8 @@ import java.net.http.HttpResponse;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -44,6 +48,9 @@ public class UserController {
     private UserRepository userRepository;
 
     @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+    
+    @Autowired
     private TokenService tokenService;
 
     @SuppressWarnings("rawtypes")
@@ -51,9 +58,22 @@ public class UserController {
     public ResponseEntity login(@RequestBody @Validated AuthenticationDTO data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         var auth = this.authenticationManager.authenticate(usernamePassword);
+        
+        User user = (User) auth.getPrincipal();
+        
+        if (user.getRole() == UserRole.USER) {
+            String key = "face_validation:" + user.getEmail();
+            String validation = redisTemplate.opsForValue().get(key);
+            
+            if (validation == null || !validation.equals("valid")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiResponse("Verificação facial necessária"));
+            }
+            
+            redisTemplate.delete(key);
+        }
 
         var token = tokenService.generateToken((User) auth.getPrincipal());
-
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
@@ -61,13 +81,28 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> verifyFace(@RequestBody Map<String, String> payload) {
         try {
             String capturedImage = payload.get("image");
-            String username = payload.get("username");
+            String email = payload.get("email");
 
-            User user = userRepository.findByUsername(username);
-            if (user == null || user.getFaceImage() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of("error", "Usuário não encontrado ou imagem não registrada"));
+            if (capturedImage == null || capturedImage.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Imagem capturada está vazia ou ausente"));
             }
+
+            if (email == null || email.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "E-mail ausente"));
+            }
+
+            User user = userRepository.findUserByEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Usuário não encontrado. Insira um e-mail válido"));
+            } else if (user.getFaceImage() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)    
+                .body(Map.of("error", "Usuário não possuí imagem facial registrada no banco"));
+            }
+
+            System.out.println("🔍 Verificando imagem para o usuário: " + email);
 
             byte[] savedFaceImage = user.getFaceImage();
             String base64SavedImage = Base64.getEncoder().encodeToString(savedFaceImage);
@@ -89,12 +124,17 @@ public class UserController {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> result = mapper.readValue(response.body(), Map.class);
 
+            if (Boolean.TRUE.equals(result.get("verified"))) {
+                String key = "face_validation:" + email;
+                redisTemplate.opsForValue().set(key, "valid", 5, TimeUnit.MINUTES);
+            }
+
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Erro no reconhecimento facial"));
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -183,14 +223,38 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getLoggedUser(Authentication authentication) {
+    public ResponseEntity<UserResponseDTO> getLoggedUser(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(user);
+
+        UserResponseDTO dto = new UserResponseDTO(
+            user.getId(),
+            user.getUsernameOriginal(), 
+            Optional.empty(),
+            user.getEmail(),
+            user.getRole().toString(),
+            user.getStatus().toString(),
+            user.getCreatedAt(),
+            user.getUpdatedAt()
+        );
+
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> listUsers() {
+    public ResponseEntity<List<UserResponseDTO>> listUsers() {
         List<User> users = userRepository.findAll();
-        return ResponseEntity.ok(users);
-    } 
+
+        List<UserResponseDTO> dtos = users.stream().map(user -> new UserResponseDTO(
+            user.getId(),
+            user.getUsernameOriginal(), 
+            Optional.ofNullable(user.getPassword()),
+            user.getEmail(),
+            user.getRole().toString(),
+            user.getStatus().toString(),
+            user.getCreatedAt(),
+            user.getUpdatedAt()
+        )).toList();
+
+        return ResponseEntity.ok(dtos);
+    }
 }
