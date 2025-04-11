@@ -1,4 +1,4 @@
-package com.apiestoque.crud.infra.security;
+package com.apiestoque.crud.services;
 
 import com.apiestoque.crud.domain.user.User;
 import com.auth0.jwt.JWT;
@@ -7,7 +7,6 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;

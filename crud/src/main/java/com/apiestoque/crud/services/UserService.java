@@ -7,16 +7,14 @@ import com.apiestoque.crud.domain.user.dto.RegisterUserDTO;
 import com.apiestoque.crud.domain.user.dto.UserResponseDTO;
 import com.apiestoque.crud.repositories.UserRepository;
 import com.apiestoque.crud.infra.response.ApiResponse;
-import com.apiestoque.crud.infra.security.TokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.apiestoque.crud.domain.user.dto.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -27,11 +25,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import com.apiestoque.crud.domain.user.dto.UserRole;
-
 @Service
 public class UserService {
-
     @Autowired
     private AuthenticationManager authenticationManager;
 

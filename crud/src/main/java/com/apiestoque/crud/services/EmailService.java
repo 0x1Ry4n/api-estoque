@@ -1,10 +1,8 @@
 package com.apiestoque.crud.services;
 
+import org.springframework.stereotype.Service;
 import javax.mail.*;
 import javax.mail.internet.*;
-
-import org.springframework.stereotype.Service;
-
 import java.util.Properties;
 
 @Service

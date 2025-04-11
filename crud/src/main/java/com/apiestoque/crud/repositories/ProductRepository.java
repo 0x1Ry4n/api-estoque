@@ -1,7 +1,6 @@
 package com.apiestoque.crud.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.apiestoque.crud.domain.product.Product;
 import java.util.List;
 

@@ -7,9 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.apiestoque.crud.infra.response.ApiResponse;
-
 import org.springframework.web.server.ResponseStatusException;
 
 @ControllerAdvice
