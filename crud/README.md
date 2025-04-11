@@ -33,7 +33,9 @@ A autenticação é feita utilizando **JWT (JSON Web Token)** e **refresh tokens
 - **Spring Boot**: Framework Java para desenvolvimento de aplicações web.
 - **Spring Security**: Implementação de segurança, controle de autenticação e autorização.
 - **JWT**: JSON Web Token para autenticação baseada em tokens.
+- **Redis**: Banco de dados in-memory utilizado para caching.
 - **PostgreSQL**: Banco de dados relacional utilizado para persistência de dados.
+- **Deepface Python**: Biblioteca utilizada para criação do microserviço de reconhecimento facial.
 - **Docker**: Para criação de contêineres e facilitar a execução e deploy do projeto.
 
 ## Requisitos

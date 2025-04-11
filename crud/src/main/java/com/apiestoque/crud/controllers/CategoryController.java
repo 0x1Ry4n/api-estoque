@@ -12,16 +12,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.apiestoque.crud.controllers.base.CrudController;
 import com.apiestoque.crud.domain.product.category.dto.CategoryRequestDTO;
 import com.apiestoque.crud.domain.product.category.dto.CategoryResponseDTO;
 import com.apiestoque.crud.domain.product.category.dto.CategoryUpdateDTO;
 import com.apiestoque.crud.domain.product.dto.ProductDetailedResponseDTO;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 
 import com.apiestoque.crud.services.CategoryService;

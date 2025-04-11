@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.apiestoque.crud.domain.user.dto.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -50,7 +51,7 @@ public class UserService {
             String validation = redisTemplate.opsForValue().get(key);
 
             if (validation == null || !validation.equals("valid")) {
-                throw new RuntimeException("Verificação facial necessária");
+                throw new RuntimeException("Verificação facial necessária.");
             }
 
             redisTemplate.delete(key);
@@ -98,43 +99,43 @@ public class UserService {
 
     public ApiResponse registerAdmin(RegisterUserDTO data) {
         if (userRepository.findByUsername("admin") == null) {
-            return new ApiResponse("Master user does not exist.");
+            return new ApiResponse(HttpStatus.NOT_FOUND, "Usuário Master não existente.", false);
         }
 
         if (data.role() == null || !data.role().equals(UserRole.ADMIN)) {
-            return new ApiResponse("A role of admin is required for this endpoint.");
+            return new ApiResponse(HttpStatus.FORBIDDEN, "A regra de usuário admin é necessária para acessar este recurso.", false);
         }
 
         if (this.userRepository.findByUsername(data.username()) != null) {
-            return new ApiResponse("Username já existe.");
+            return new ApiResponse(HttpStatus.BAD_REQUEST, "O username já está cadastrado na plataforma.", false);
         }
 
         if (this.userRepository.findByEmail(data.email()) != null) {
-            return new ApiResponse("Email já existe.");
+            return new ApiResponse(HttpStatus.BAD_REQUEST, "O e-mail já está cadastrado na plataforma.", false);
         }
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
         User newUser = new User(data.username(), data.email(), encryptedPassword, data.status(), data.role(), null);
         this.userRepository.save(newUser);
 
-        return new ApiResponse("Admin user registered successfully.");
+        return new ApiResponse(HttpStatus.CREATED, "Admin registrado com sucesso.");
     }
 
     public ApiResponse registerUser(RegisterUserDTO data) {
         if (userRepository.findByUsername("admin") == null) {
-            return new ApiResponse("Master user does not exist.");
+            return new ApiResponse(HttpStatus.BAD_REQUEST, "Usuário Master não existente.", false);
         }
 
         if (data.role() == null || !data.role().equals(UserRole.USER)) {
-            return new ApiResponse("A role of user is required for this endpoint.");
+            return new ApiResponse(HttpStatus.BAD_REQUEST, "A regra de usuário comum é necessária para acessar este recurso.", false);
         }
 
         if (this.userRepository.findByUsername(data.username()) != null) {
-            return new ApiResponse("Username já existe.");
+            return new ApiResponse(HttpStatus.BAD_REQUEST, "O username já está cadastrado na plataforma.", false);
         }
 
         if (this.userRepository.findByEmail(data.email()) != null) {
-            return new ApiResponse("Email já existe.");
+            return new ApiResponse(HttpStatus.BAD_REQUEST, "O e-mail já está cadastrado na plataforma.", false);
         }
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
@@ -151,18 +152,18 @@ public class UserService {
 
         this.userRepository.save(newUser);
 
-        return new ApiResponse("User registered successfully.");
+        return new ApiResponse(HttpStatus.CREATED, "User registrado com sucesso.");
     }
 
     public String refreshToken(String refreshToken) {
         if (tokenService.validateToken(refreshToken).equals("")) {
-            throw new RuntimeException("Invalid refresh token.");
+            throw new RuntimeException("Refresh token inválido.");
         }
 
         String username = tokenService.getUsernameFromToken(refreshToken);
         User user = userRepository.findByUsername(username);
         if (user == null) {
-            throw new RuntimeException("User not found.");
+            throw new RuntimeException("Usuário não encontrado.");
         }
 
         return tokenService.generateToken(user);

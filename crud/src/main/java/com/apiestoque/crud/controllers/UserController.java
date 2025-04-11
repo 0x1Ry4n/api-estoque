@@ -47,13 +47,13 @@ public class UserController {
     @PostMapping("/register/admin")
     public ResponseEntity<ApiResponse> registerAdmin(@RequestBody RegisterUserDTO data) {
         ApiResponse response = userService.registerAdmin(data);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PostMapping("/register/user")
     public ResponseEntity<ApiResponse> registerUser(@RequestBody RegisterUserDTO data) {
         ApiResponse response = userService.registerUser(data);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PostMapping("/refresh-token")

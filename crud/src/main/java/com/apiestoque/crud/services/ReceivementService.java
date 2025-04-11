@@ -88,10 +88,14 @@ public class ReceivementService {
         Receivement receivement = receivementRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recebimento não encontrado."));
 
+        Product product = productRepository.findById(data.productId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+
         int quantityDifference = 0;
         if (data.quantity() > 0) {
             quantityDifference = data.quantity() - receivement.getQuantity();
             receivement.setQuantity(data.quantity());
+            receivement.setTotalPrice(product.getUnitPrice().multiply(BigDecimal.valueOf(data.quantity())));
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade deve ser maior que zero.");
         }
@@ -103,8 +107,6 @@ public class ReceivementService {
         if (quantityDifference != 0) {
             Inventory inventory = inventoryRepository.findByProductId(data.productId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));
-
-            Product product = inventory.getProduct();
 
             inventory.setQuantity(inventory.getQuantity() + quantityDifference);
             inventory.setReceivementQuantity(inventory.getReceivementQuantity() + quantityDifference);

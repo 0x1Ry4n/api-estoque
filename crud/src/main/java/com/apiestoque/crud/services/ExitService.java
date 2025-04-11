@@ -8,6 +8,9 @@ import com.apiestoque.crud.domain.product.Product;
 import com.apiestoque.crud.repositories.ExitRepository;
 import com.apiestoque.crud.repositories.InventoryRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
+
+import java.math.BigDecimal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +57,7 @@ public class ExitService {
 
         inventory.setQuantity(inventory.getQuantity() - data.quantity());
         inventory.setExitQuantity(inventory.getExitQuantity() + data.quantity());
+
         inventoryRepository.save(inventory);
 
         product.setStockQuantity(product.getStockQuantity() - data.quantity());

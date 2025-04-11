@@ -4,7 +4,6 @@ import com.apiestoque.crud.controllers.base.CrudController;
 import com.apiestoque.crud.domain.exit.dto.ExitRequestDTO;
 import com.apiestoque.crud.domain.exit.dto.ExitResponseDTO;
 import com.apiestoque.crud.services.ExitService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
