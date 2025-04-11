@@ -18,6 +18,7 @@ import com.apiestoque.crud.domain.user.User;
 @RestController
 @RequestMapping("/api/auth")
 public class UserController {
+
     @Autowired
     private UserService userService;
 
@@ -27,7 +28,8 @@ public class UserController {
             LoginResponseDTO response = userService.authenticateUser(data);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponseDTO(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                 .body(new LoginResponseDTO("Falha na autenticação: " + e.getMessage()));
         }
     }
 
@@ -37,20 +39,21 @@ public class UserController {
             Map<String, Object> result = userService.verifyFace(payload.get("image"), payload.get("email"));
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(Map.of("error", "Erro ao verificar a face: " + e.getMessage()));
         }
     }
 
     @PostMapping("/register/admin")
     public ResponseEntity<ApiResponse> registerAdmin(@RequestBody RegisterUserDTO data) {
         ApiResponse response = userService.registerAdmin(data);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/register/user")
     public ResponseEntity<ApiResponse> registerUser(@RequestBody RegisterUserDTO data) {
         ApiResponse response = userService.registerUser(data);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/refresh-token")
@@ -59,7 +62,8 @@ public class UserController {
             String newToken = userService.refreshToken(refreshToken);
             return ResponseEntity.ok(new LoginResponseDTO(newToken));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponseDTO(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(new LoginResponseDTO("Falha ao renovar o token: " + e.getMessage()));
         }
     }
 

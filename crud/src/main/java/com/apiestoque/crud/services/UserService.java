@@ -68,9 +68,9 @@ public class UserService {
     public Map<String, Object> verifyFace(String capturedImage, String email) throws Exception {
         User user = userRepository.findUserByEmail(email);
         if (user == null) {
-            throw new RuntimeException("Usuário não encontrado. Insira um e-mail válido");
+            throw new RuntimeException("Usuário não encontrado. Insira um e-mail válido.");
         } else if (user.getFaceImage() == null) {
-            throw new RuntimeException("Usuário não possuí imagem facial registrada no banco");
+            throw new RuntimeException("Usuário não possui imagem facial registrada no banco.");
         }
 
         byte[] savedFaceImage = user.getFaceImage();
