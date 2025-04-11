@@ -12,104 +12,60 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.apiestoque.crud.controllers.base.CrudController;
-import com.apiestoque.crud.domain.product.category.Category;
 import com.apiestoque.crud.domain.product.category.dto.CategoryRequestDTO;
 import com.apiestoque.crud.domain.product.category.dto.CategoryResponseDTO;
 import com.apiestoque.crud.domain.product.category.dto.CategoryUpdateDTO;
 import com.apiestoque.crud.domain.product.dto.ProductDetailedResponseDTO;
-import com.apiestoque.crud.repositories.CategoryRepository;
-import com.apiestoque.crud.repositories.ProductRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 import java.util.List;
-import java.util.stream.Collectors;
+
+import com.apiestoque.crud.services.CategoryService;
 
 @RestController
 @RequestMapping("/api/category")
 public class CategoryController implements CrudController<String, CategoryRequestDTO, CategoryUpdateDTO, CategoryResponseDTO> {
     @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private ProductRepository productRepository;
+    private CategoryService categoryService;
 
     @Override
     @PostMapping
     public ResponseEntity<CategoryResponseDTO> create(@RequestBody @Validated CategoryRequestDTO data) {
-        if (categoryRepository.existsByName(data.name())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria com esse nome já existe.");
-        }
-
-        Category newCategory = new Category();
-        newCategory.setName(data.name());
-
-        Category savedCategory = this.categoryRepository.save(newCategory);
-        CategoryResponseDTO responseDTO = new CategoryResponseDTO(savedCategory);
-
-        return ResponseEntity.status(201).body(responseDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.create(data));
     }
 
     @Override
     @PatchMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> update(@PathVariable String id,
-        @RequestBody @Validated CategoryUpdateDTO data) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
-
-        if (data.name() != null && !data.name().equals(category.getName()) &&
-                categoryRepository.existsByName(data.name())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria com esse nome já existe.");
-        }
-
-        category.setName(data.name());
-        Category updatedCategory = categoryRepository.save(category);
-
-        return ResponseEntity.ok(new CategoryResponseDTO(updatedCategory));
+                                                      @RequestBody @Validated CategoryUpdateDTO data) {
+        return ResponseEntity.ok(categoryService.update(id, data));
     }
 
     @Override
     @GetMapping
     public ResponseEntity<Page<CategoryResponseDTO>> getAll(Pageable pageable) {
-        Page<CategoryResponseDTO> categoryPage = categoryRepository.findAll(pageable)
-                .map(CategoryResponseDTO::new);
-        return ResponseEntity.ok(categoryPage);
+        return ResponseEntity.ok(categoryService.getAll(pageable));
     }
-
 
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> getById(@PathVariable String id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
-
-        return ResponseEntity.ok(new CategoryResponseDTO(category));
+        return ResponseEntity.ok(categoryService.getById(id));
     }
 
     @GetMapping("/name/{name}")
     public ResponseEntity<List<CategoryResponseDTO>> getCategoryByName(@PathVariable String name) {
-        List<CategoryResponseDTO> categoryList = categoryRepository.findByName(name).stream()
-                .map(CategoryResponseDTO::new)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(categoryList.isEmpty() ? List.of() : categoryList);
+        return ResponseEntity.ok(categoryService.getByName(name));
     }
 
     @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<ProductDetailedResponseDTO> delete(@PathVariable String id) {
-        categoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
-
-        if (productRepository.findByCategoryId(id).size() > 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A categoria possuí produtos associados e não pode ser excluída!");
-        }
-
-        this.categoryRepository.deleteById(id);
-
+        categoryService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
