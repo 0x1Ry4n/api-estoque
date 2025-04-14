@@ -1,0 +1,92 @@
+{
+    "info": {
+        "name": "Order",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Create Order",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"customerId\": \"540173dc-ad1e-4359-94a8-247fd7f8a020\",\n    \"productId\": \"3ff98712-6026-4eed-b00c-035911da158e\",\n    \"quantity\": 10,\n    \"totalPrice\": 100.00,\n    \"paymentMethod\": \"CREDIT_CARD\",\n    \"status\": \"DELIVERED\"\n}"
+                },
+                "url": {
+                    "raw": "http://127.0.0.1:8000/orders",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "orders"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "List All Orders",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
+                    }
+                ],
+                "url": {
+                    "raw": "http://127.0.0.1:8000/orders",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "orders"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "List Orders By Customer",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY"
+                    }
+                ],
+                "url": {
+                    "raw": "http://127.0.0.1:8000/orders/customer/540173dc-ad1e-4359-94a8-247fd7f8a020",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "orders",
+                        "customer",
+                        "540173dc-ad1e-4359-94a8-247fd7f8a020"
+                    ]
+                }
+            }
+        }
+    ]
+}

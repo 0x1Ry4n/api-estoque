@@ -1,0 +1,5 @@
+flask
+deepface
+psycopg2-binary
+opencv-python
+tf-keras

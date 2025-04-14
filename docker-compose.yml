@@ -1,0 +1,119 @@
+services:
+  sqlserver:
+    container_name: sqlserver
+    build:
+      context: .
+      dockerfile: ./api-estoque/Dockerfile.database
+    environment:
+      SA_PASSWORD: "${SA_PASSWORD}"
+      ACCEPT_EULA: "Y"
+      MSSQL_AGENT_ENABLED: "True"
+    ports:
+      - "${DB_LOCAL_PORT}:${DB_DOCKER_PORT}"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - api_network
+    healthcheck:
+      test: ["CMD", "nc", "-zv", "localhost", "${DB_DOCKER_PORT}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  db-init:
+    build:
+      context: .
+      dockerfile: ./api-estoque/Dockerfile.initializedb
+    container_name: db-init
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      DB_USERNAME: "${DB_USERNAME}"
+      SA_PASSWORD: "${SA_PASSWORD}"
+    networks:
+      - api_network
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    networks:
+      - api_network
+    ports:
+      - "${REDIS_LOCAL_PORT}:${REDIS_DOCKER_PORT}"
+    volumes:
+      - redis_data:/data
+    command: redis-server --save 60 1 --loglevel warning
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  deepface-api:
+    container_name: deepface_api
+    build:
+      context: ./api-estoque/deepface-api/
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - api_network
+    ports:
+      - "${DEEPFACE_API_LOCAL_PORT}:${DEEPFACE_API_DOCKER_PORT}"
+    depends_on:
+      - sqlserver
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app-spring:
+    container_name: app-spring
+    build:
+      context: .
+      dockerfile: ./api-estoque/Dockerfile.application
+    ports:
+      - "${SPRING_LOCAL_PORT}:${SPRING_DOCKER_PORT}"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:sqlserver://sqlserver:${DB_DOCKER_PORT};databaseName=${DB_NAME};encrypt=false;trustServerCertificate=true;socketTimeout=30000;loginTimeout=30"
+      SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
+      SPRING_DATASOURCE_PASSWORD: "${SA_PASSWORD}"
+      SPRING_LOCAL_PORT: "${SPRING_LOCAL_PORT}"
+      REDIS_HOST: "${REDIS_HOST}"
+      REDIS_LOCAL_PORT: "${REDIS_LOCAL_PORT}"
+      REDIS_TIMEOUT: "${REDIS_TIMEOUT}"
+      JWT_SECRET: "${JWT_SECRET}"
+      JWT_EXPIRATION: "${JWT_EXPIRATION}"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      deepface-api:
+        condition: service_started 
+    networks:
+      - api_network
+
+  frontend:
+    build:
+      context: ./frontend-estoque
+      dockerfile: Dockerfile
+    container_name: frontend-estoque
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app-spring
+    networks:
+      - api_network
+
+volumes:
+  redis_data:
+  sqlserver_data:
+
+networks:
+  api_network:
+    driver: bridge

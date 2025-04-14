@@ -1,0 +1,5 @@
+FROM mcr.microsoft.com/mssql-tools:latest
+
+COPY ./api-estoque/scripts/init.sql /usr/init.sql
+
+CMD bash -c "sleep 15 && /opt/mssql-tools/bin/sqlcmd -S sqlserver -U \"$DB_USERNAME\" -P \"$SA_PASSWORD\" -d master -i /usr/init.sql"

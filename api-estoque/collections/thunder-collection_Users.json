@@ -1,0 +1,160 @@
+{
+    "info": {
+        "_postman_id": "ddd0640f-ad6c-4615-bff5-ba25e7f40776",
+        "name": "Users",
+        "description": "",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Create User",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"username\": \"ryan12346\",\"email\": \"ryan24@gmail.com\",\"password\": \"teste1234\",\"role\": \"USER\"}"
+                },
+                "url": {
+                    "raw": "http://127.0.0.1:8000/auth/register/user",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "auth",
+                        "register",
+                        "user"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Generate User Token",
+            "request": {
+                "method": "POST",
+                "url": {
+                    "raw": "http://127.0.0.1:8000/auth/login",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "auth",
+                        "login"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"email\": \"admin@example.com\",\"password\": \"root\"}"
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Verify User Token",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRlc3RlMTIzQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI2OTkwMzk4fQ.9U3NRBU_DYG4iBcCNHbUYWVHU7utGZXcsYpU8a1DgOA",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "http://127.0.0.1:8000/auth/me",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "auth",
+                        "me"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Refresh User Token",
+            "request": {
+                "method": "POST",
+                "url": {
+                    "raw": "http://127.0.0.1:8000/api/v1/auth/jwt/refresh",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "jwt",
+                        "refresh"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"refresh\": \"token\"}"
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Retrieve Actual User",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI1ODM1NzQxLCJpYXQiOjE3MjU3NDkzNDEsImp0aSI6IjFkOTg5NGI5MGNkMTRkZWRhNDA2NGNiY2EwNmRlYzU1IiwidXNlcl9pZCI6Mn0.Ljd-Ujvud4mkBd_vHHa_62KtYt8135ukkWc-Pvd2DhE",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "http://127.0.0.1:8000/api/v1/auth/users/me/",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "users",
+                        "me"
+                    ]
+                }
+            },
+            "response": []
+        }
+    ]
+}

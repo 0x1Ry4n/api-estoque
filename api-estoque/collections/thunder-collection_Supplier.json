@@ -1,0 +1,87 @@
+{
+    "info": {
+        "_postman_id": "ff13e31c-8b9b-472c-873e-5f30a7c03491",
+        "name": "Supplier",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Create Supplier",
+            "request": {
+                "url": "http://127.0.0.1:8000/supplier",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"name\": \"Fornecedor Exemplo\",\n    \"email\": \"fornecedor2234@example.com\",\n    \"phone\": \"+55 11 91234-562178\"\n}"
+                }
+            }
+        },
+        {
+            "name": "Update Supplier By Id",
+            "request": {
+                "url": "http://127.0.0.1:8000/supplier/ecc11073-07d1-465e-9f53-e39297fa70be",
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW5AZ21haWwuY29tIiwiZXhwIjoxNzI3MDQyOTU4fQ.dyIieOrhOQlU37G9Ich2uG5ZOYsRCmYGlPHZClc7eCo",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"name\": \"Teste\"\n}"
+                }
+            }
+        },
+        {
+            "name": "List Supplier By Id",
+            "request": {
+                "url": "http://127.0.0.1:8000/supplier/ecc11073-07d1-465e-9f53-e39297fa70be",
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY",
+                        "type": "text"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "List Products By Supplier",
+            "request": {
+                "url": "http://127.0.0.1:8000/supplier/ecc11073-07d1-465e-9f53-e39297fa70be/products",
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InJ5YW4yQGdtYWlsLmNvbSIsImV4cCI6MTcyNzA0MTg5MH0.3m1XwHpTKjUEokeXVL2RS_YpxCwulkf7hEkVNCJcSvY",
+                        "type": "text"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "List All Suppliers",
+            "request": {
+                "url": "http://127.0.0.1:8000/supplier",
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI3MTUzMjU3fQ.L-AdUwLhfvauJpN6F4TBk3crh202mW6OPULj911f39o",
+                        "type": "text"
+                    }
+                ]
+            }
+        }
+    ]
+}
