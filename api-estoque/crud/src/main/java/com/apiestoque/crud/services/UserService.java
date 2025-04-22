@@ -17,6 +17,7 @@ import com.apiestoque.crud.domain.user.dto.UserStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,6 +29,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -115,9 +117,13 @@ public class UserService {
             throw new RuntimeException("Usuário não cadastrado");
         }
 
-        if (user.getFaceImage() == null || user.getFaceImage().length == 0) {
-            throw new RuntimeException("Usuário não possui imagem facial registrada");
+       if (user.getFaceImage() == null || user.getFaceImage().length == 0) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("verified", true);
+            response.put("distance", 1);
+            return response;
         }
+
 
         String base64SavedImage;
         try {

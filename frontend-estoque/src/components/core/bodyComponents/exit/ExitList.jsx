@@ -15,7 +15,8 @@ import {
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
-import { addDays, format } from 'date-fns';
+import { addDays, format } from "date-fns";
+import { fileExporters } from "../../../../utils/utils";
 import api from "../../../../api";
 import Swal from "sweetalert2";
 
@@ -79,7 +80,11 @@ const ExitList = () => {
         setSnackbarSeverity("success");
         fetchExits();
       } catch (error) {
-        setSnackbarMessage("Erro ao deletar a Saída.");
+        setSnackbarMessage(
+          `Erro ao deletar a saída: ${
+            error.response?.data?.message || error.response?.data?.error || error.message
+          }`
+        );
         setSnackbarSeverity("error");
       } finally {
         setSnackbarOpen(true);
@@ -92,7 +97,7 @@ const ExitList = () => {
       if (isEditing) {
         await api.patch(`/exits/${selectedExit.id}`, {
           quantity: selectedExit.quantity,
-          exitDate: selectedExit.exitDate
+          exitDate: selectedExit.exitDate,
         });
         setSnackbarMessage("Saída atualizada com sucesso!");
       } else {
@@ -103,7 +108,9 @@ const ExitList = () => {
       setSnackbarSeverity("success");
       fetchExits();
     } catch (error) {
-      setSnackbarMessage(`Erro ao salvar a Saída: ${error.response.data.message}`);
+      setSnackbarMessage(
+        `Erro ao salvar a Saída: ${error.response.data.message}`
+      );
       setSnackbarSeverity("error");
     } finally {
       handleClose();
@@ -113,35 +120,36 @@ const ExitList = () => {
 
   const handleStatusChange = async (id) => {
     const { value: status } = await Swal.fire({
-      title: 'Alterar Status',
-      input: 'select',
+      title: "Alterar Status",
+      input: "select",
       inputOptions: exitStatusMap,
-      inputPlaceholder: 'Selecione um status',
+      inputPlaceholder: "Selecione um status",
       showCancelButton: true,
       confirmButtonText: "Editar",
       cancelButtonText: "Cancelar",
       inputValidator: (value) => {
         if (!value) {
-          return 'Você precisa selecionar um status!';
+          return "Você precisa selecionar um status!";
         }
-      }
+      },
     });
 
     if (status) {
       try {
         await api.patch(`/exits/${id}/status`, { status: status });
-        setSnackbarMessage('Status atualizado com sucesso!');
-        setSnackbarSeverity('success');
+        setSnackbarMessage("Status atualizado com sucesso!");
+        setSnackbarSeverity("success");
         fetchExits();
       } catch (error) {
-        setSnackbarMessage(`Erro ao atualizar o status: ${error.response.data.message}`);
-        setSnackbarSeverity('error');
+        setSnackbarMessage(
+          `Erro ao atualizar o status: ${error.response.data.message}`
+        );
+        setSnackbarSeverity("error");
       } finally {
         setSnackbarOpen(true);
       }
     }
   };
-
 
   const handleRefresh = () => {
     fetchExits();
@@ -209,17 +217,41 @@ const ExitList = () => {
         padding: "20px",
         backgroundColor: "#f5f5f5",
         borderRadius: "8px",
-        width: '95%'
+        width: "95%",
       }}
     >
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={handleRefresh}
-        sx={{ mb: 2 }}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
       >
-        Atualizar Lista
-      </Button>
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
+        >
+          Atualizar Lista
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() =>
+            fileExporters.exportToExcel("Saídas", "saidas.xlsx", rows)
+          }
+        >
+          Exportar Excel
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => fileExporters.exportToPDF("saidas.pdf", rows)}
+        >
+          Exportar PDF
+        </Button>
+      </div>
       <div
         style={{
           height: 400,
@@ -260,17 +292,19 @@ const ExitList = () => {
             variant="outlined"
             fullWidth
             margin="normal"
-            value={selectedExit?.exitDate
-              ? new Date(selectedExit.exitDate).toISOString().split('T')[0]
-              : ""}
+            value={
+              selectedExit?.exitDate
+                ? new Date(selectedExit.exitDate).toISOString().split("T")[0]
+                : ""
+            }
             onChange={(e) =>
               setSelectedExit({
                 ...selectedExit,
-                exitDate: e.target.value
+                exitDate: e.target.value,
               })
             }
             InputLabelProps={{
-              shrink: true
+              shrink: true,
             }}
             sx={{ mb: 3 }}
           />

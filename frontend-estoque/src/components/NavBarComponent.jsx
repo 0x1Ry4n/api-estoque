@@ -56,6 +56,11 @@ export default function NavBarComponent() {
     navigate('/user'); 
   };
 
+  const handleSettingsClick = () => {
+    handleClose();
+    navigate('/settings');
+  }
+
   return (
     <Grid container>
       <Grid item md={12}>
@@ -85,7 +90,7 @@ export default function NavBarComponent() {
                     sx={{ mx: 2 }}
                     aria-haspopup="true"
                   >
-                    <Tooltip title="account settings">
+                    <Tooltip title="Perfil">
                       <Avatar sx={{ width: 32, height: 32 }}>{user?.username?.charAt(0).toUpperCase()}</Avatar>
                     </Tooltip>
                   </IconButton>
@@ -106,7 +111,7 @@ export default function NavBarComponent() {
                   </MenuItem>
                   <Divider />
 
-                  <MenuItem>
+                  <MenuItem onClick={handleSettingsClick}>
                     <ListItemIcon>
                       <Settings fontSize="small" />
                     </ListItemIcon>

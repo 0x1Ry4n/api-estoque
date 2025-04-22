@@ -13,10 +13,11 @@ import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   Refresh as RefreshIcon,
-} from "@mui/icons-material"; // Incluído o ícone de refresh
+} from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import api from "../../../../api";
+import { fileExporters } from "../../../../utils/utils";
 
 const Categories = () => {
   const [open, setOpen] = useState(false);
@@ -28,10 +29,9 @@ const Categories = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    fetchCategories(); // Atualiza a lista de categorias ao carregar o componente
+    fetchCategories();
   }, []);
 
-  // Função para atualizar a lista de categorias
   const fetchCategories = async () => {
     try {
       const response = await api.get("/category");
@@ -71,11 +71,11 @@ const Categories = () => {
         await api.delete(`/category/${ids[0]}`);
         setSnackbarMessage("Categoria deletada com sucesso!");
         setSnackbarSeverity("success");
-        fetchCategories(); 
+        fetchCategories();
       } catch (error) {
         setSnackbarMessage(
           `Erro ao deletar a categoria: ${
-            error.response?.data?.error || error.message
+            error.response?.data?.message || error.response?.data?.error || error.message
           }`
         );
         setSnackbarSeverity("error");
@@ -105,7 +105,7 @@ const Categories = () => {
         setSnackbarMessage("Categoria adicionada com sucesso!");
       }
       setSnackbarSeverity("success");
-      fetchCategories(); 
+      fetchCategories();
     } catch (error) {
       setSnackbarMessage(
         `Erro ao salvar a categoria: ${
@@ -120,7 +120,7 @@ const Categories = () => {
   };
 
   const handleRefresh = () => {
-    fetchCategories(); 
+    fetchCategories();
     setSnackbarMessage("Lista de categorias atualizada!");
     setSnackbarSeverity("info");
     setSnackbarOpen(true);
@@ -152,17 +152,42 @@ const Categories = () => {
         padding: "20px",
         backgroundColor: "#f5f5f5",
         borderRadius: "8px",
-        width: "95%"
+        width: "95%",
       }}
     >
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={handleRefresh} 
-        sx={{ mb: 2 }}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
       >
-        Atualizar Lista
-      </Button>
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
+        >
+          Atualizar Lista
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() =>
+            fileExporters.exportToExcel("Categorias", "categorias.xlsx", rows)
+          }
+        >
+          Exportar Excel
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => fileExporters.exportToPDF("categorias.pdf", rows)}
+        >
+          Exportar PDF
+        </Button>
+      </div>
+
       <div
         style={{
           height: 400,

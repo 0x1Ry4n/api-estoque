@@ -1,28 +1,26 @@
 import React from "react";
-import { Box } from "@mui/material";
 import ApexCharts from "react-apexcharts";
+import { Box } from "@mui/material";
 
-export default function SalesByProduct({ orders }) {
-  // Criação de um dicionário para acumular a contagem de pedidos por produto
-  const productSales = {};
+export default function SalesByProduct({ receivements }) {
+  const productCountMap = {};
 
-  // Loop pelos pedidos para acumular as contagens por produto
-  orders.forEach(order => {
-    const productId = order.inventory.productId;
-
-    if (productSales[productId]) {
-      productSales[productId].count += 1; // Incrementa a contagem de pedidos
+  receivements.forEach(r => {
+    const productId = r.productId;
+    if (productCountMap[productId]) {
+      productCountMap[productId].count += 1;
     } else {
-      productSales[productId] = {
-        count: 1, // Inicializa a contagem para o produto
-        productName: order.inventory.productName, // Nome do produto
+      productCountMap[productId] = {
+        count: 1,
+        inventoryCode: r.inventoryCode,
       };
     }
   });
 
-  // Obtendo os nomes dos produtos para os rótulos e as contagens para a série
-  const labels = Object.values(productSales).map(product => product.productName); // Nomes dos produtos
-  const series = Object.values(productSales).map(product => product.count); // Contagens
+  const labels = Object.values(productCountMap).map(
+    r => `${r.inventoryCode} - ${r.count} entradas`
+  );
+  const series = Object.values(productCountMap).map(r => r.count);
 
   const donutOption = {
     labels: labels,
@@ -31,7 +29,7 @@ export default function SalesByProduct({ orders }) {
       fontSize: "14",
     },
     title: {
-      text: "Vendas por Produto",
+      text: "Inventários com mais entradas",
     },
   };
 

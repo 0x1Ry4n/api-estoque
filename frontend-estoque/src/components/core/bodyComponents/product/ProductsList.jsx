@@ -20,7 +20,8 @@ import { DataGrid } from "@mui/x-data-grid";
 import api from "../../../../api";
 import Swal from "sweetalert2";
 import { Controller, useForm } from "react-hook-form";
-import { addDays, format } from 'date-fns';
+import { addDays, format } from "date-fns";
+import { fileExporters } from "../../../../utils/utils";
 
 const Products = () => {
   const {
@@ -112,7 +113,8 @@ const Products = () => {
       } catch (error) {
         console.log(error);
         setSnackbarMessage(
-          `Erro ao deletar o produto: ${error.response?.data?.error || error.message
+          `Erro ao deletar o produto: ${
+            error.response?.data?.message || error.response?.data?.error || error.message
           }`
         );
         setSnackbarSeverity("error");
@@ -146,7 +148,8 @@ const Products = () => {
       setSnackbarSeverity("success");
     } catch (error) {
       setSnackbarMessage(
-        `Erro ao salvar o produto: ${error.response?.data?.error || error.message
+        `Erro ao salvar o produto: ${
+          error.response?.data?.error || error.message
         }`
       );
       setSnackbarSeverity("error");
@@ -267,14 +270,38 @@ const Products = () => {
         width: "95%",
       }}
     >
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={handleRefresh}
-        sx={{ mb: 2 }}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
       >
-        Atualizar Lista
-      </Button>
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
+        >
+          Atualizar Lista
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() =>
+            fileExporters.exportToExcel("Produtos", "produtos.xlsx", rows)
+          }
+        >
+          Exportar Excel
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => fileExporters.exportToPDF("produtos.pdf", rows)}
+        >
+          Exportar PDF
+        </Button>
+      </div>
       <div
         style={{
           height: 400,
@@ -398,7 +425,7 @@ const Products = () => {
               })
             }
             InputLabelProps={{
-              shrink: true
+              shrink: true,
             }}
             sx={{ mb: 3 }}
           />

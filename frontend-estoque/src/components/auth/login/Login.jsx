@@ -390,7 +390,7 @@ const Login = () => {
                 "&:hover": { bgcolor: "#004d40" },
                 py: 1.5,
               }}
-              disabled={(userType === "user" && !faceImage) || isLoading}
+              disabled={isLoading}
             >
               Entrar
               {isLoading && <CircularProgress size={24} sx={{ ml: 1 }} />}
@@ -426,14 +426,14 @@ const Login = () => {
                     sx={{ flexGrow: 1, maxWidth: 200 }}
                   >
                     Verificar
-                    {isLoading && <CircularProgress size={24} sx={{ ml: 1 }} />}
+                    {isLoading && <CircularProgress size={16} sx={{ ml: 1 }} />}
                   </Button>
                   <Button
                     variant="outlined"
                     onClick={() => setFaceImage(null)}
                     startIcon={<CameraAlt />}
                     disabled={isLoading}
-                    sx={{ flexGrow: 1, maxWidth: 200 }}
+                    sx={{ flexGrow: 1, maxWidth: 150 }}
                   >
                     Capturar Novamente
                   </Button>

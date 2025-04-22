@@ -9,10 +9,11 @@ import {
   Alert,
   TextField,
 } from "@mui/material";
-import { Delete as DeleteIcon, Edit as EditIcon, Refresh as RefreshIcon, Visibility, VisibilityOff } from '@mui/icons-material';
+import { Edit as EditIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
+import { fileExporters } from "../../../../utils/utils";
 import Swal from "sweetalert2";
-import api from '../../../../api';
+import api from "../../../../api";
 
 const UserList = () => {
   const [open, setOpen] = useState(false);
@@ -25,12 +26,11 @@ const UserList = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const [showPassword, setShowPassword] = useState(false);
 
   const userStatusMap = {
     ACTIVE: "Ativo",
-    INACTIVE: "Inativo"
-  }
+    INACTIVE: "Inativo",
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -38,17 +38,18 @@ const UserList = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await api.get('/auth/users');
-      const formattedUsers = response.data.map(user => ({
+      const response = await api.get("/auth/users");
+      const formattedUsers = response.data.map((user) => ({
         ...user,
         role: user.role === "ADMIN" ? "Administrador" : "Usuário Comum",
-        status: user.status === "ACTIVE" ? "Ativo" : "Inativo"
+        status: user.status === "ACTIVE" ? "Ativo" : "Inativo",
       }));
 
       setRows(formattedUsers);
     } catch (error) {
-      console.error("Erro ao buscar usuários: ", error);
-      setSnackbarMessage("Erro ao carregar usuários.");
+      setSnackbarMessage(
+        `Erro ao carregar os usuários: ${error.response?.data?.message}`
+      );
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }
@@ -70,9 +71,7 @@ const UserList = () => {
     setUsername("");
     setEmail("");
     setPassword("");
-    setShowPassword(false);
   };
-
 
   const handleSave = async () => {
     const updatedUserData = {
@@ -83,14 +82,17 @@ const UserList = () => {
 
     try {
       await api.put(`/auth/users/${selectedUser.id}`, updatedUserData);
-      setRows(rows.map(row =>
-        row.id === selectedUser.id ? { ...row, username, email } : row
-      ));
+      setRows(
+        rows.map((row) =>
+          row.id === selectedUser.id ? { ...row, username, email } : row
+        )
+      );
       setSnackbarMessage("Usuário atualizado com sucesso!");
       setSnackbarSeverity("success");
     } catch (error) {
-      console.error("Erro ao atualizar usuário: ", error);
-      setSnackbarMessage("Erro ao atualizar usuário.");
+      setSnackbarMessage(
+        `Erro ao atualizar o usuário: ${error.response?.data?.message}`
+      );
       setSnackbarSeverity("error");
     } finally {
       setSnackbarOpen(true);
@@ -100,29 +102,31 @@ const UserList = () => {
 
   const handleStatusChange = async (id) => {
     const { value: status } = await Swal.fire({
-      title: 'Alterar Status',
-      input: 'select',
+      title: "Alterar Status",
+      input: "select",
       inputOptions: userStatusMap,
-      inputPlaceholder: 'Selecione um status',
+      inputPlaceholder: "Selecione um status",
       showCancelButton: true,
       confirmButtonText: "Editar",
       cancelButtonText: "Cancelar",
       inputValidator: (value) => {
         if (!value) {
-          return 'Você precisa selecionar um status!';
+          return "Você precisa selecionar um status!";
         }
-      }
+      },
     });
 
     if (status) {
       try {
         await api.patch(`/auth/users/${id}/status`, { status: status });
-        setSnackbarMessage('Status atualizado com sucesso!');
-        setSnackbarSeverity('success');
+        setSnackbarMessage("Status atualizado com sucesso!");
+        setSnackbarSeverity("success");
         fetchUsers();
       } catch (error) {
-        setSnackbarMessage(`Erro ao atualizar o status: ${error.response?.data?.message}`);
-        setSnackbarSeverity('error');
+        setSnackbarMessage(
+          `Erro ao atualizar o status: ${error.response?.data?.message}`
+        );
+        setSnackbarSeverity("error");
       } finally {
         setSnackbarOpen(true);
       }
@@ -131,40 +135,44 @@ const UserList = () => {
 
   const handlePasswordChange = async (id) => {
     const { value: password } = await Swal.fire({
-      title: 'Alterar Senha',
-      input: 'password',
-      inputLabel: 'Nova senha',
-      inputPlaceholder: 'Digite a nova senha',
+      title: "Alterar Senha",
+      input: "password",
+      inputLabel: "Nova senha",
+      inputPlaceholder: "Digite a nova senha",
       inputAttributes: {
-        autocapitalize: 'off',
-        autocorrect: 'off'
+        autocapitalize: "off",
+        autocorrect: "off",
       },
       showCancelButton: true,
-      confirmButtonText: 'Salvar',
-      cancelButtonText: 'Cancelar',
+      confirmButtonText: "Salvar",
+      cancelButtonText: "Cancelar",
       inputValidator: (value) => {
         if (!value) {
-          return 'Você precisa digitar uma senha!';
+          return "Você precisa digitar uma senha!";
         }
-      }
+      },
     });
-  
+
     if (password) {
       try {
         await api.patch(`/auth/users/${id}/password`, { password });
-  
-        setSnackbarMessage('Senha alterada com sucesso!');
-        setSnackbarSeverity('success');
+
+        setSnackbarMessage("Senha alterada com sucesso!");
+        setSnackbarSeverity("success");
         fetchUsers();
       } catch (error) {
-        setSnackbarMessage(`Erro ao alterar a senha: ${error.response?.data?.message || error.message}`);
-        setSnackbarSeverity('error');
+        setSnackbarMessage(
+          `Erro ao alterar a senha: ${
+            error.response?.data?.message || error.message
+          }`
+        );
+        setSnackbarSeverity("error");
       } finally {
         setSnackbarOpen(true);
       }
     }
   };
-  
+
   const handleRefresh = () => {
     fetchUsers();
     setSnackbarMessage("Lista de usuários atualizada!");
@@ -212,24 +220,67 @@ const UserList = () => {
   ];
 
   return (
-    <div style={{ padding: '20px', backgroundColor: '#f5f5f5', borderRadius: '8px', width: '95%' }}>
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={handleRefresh}
-        sx={{ mb: 2 }}
+    <div
+      style={{
+        padding: "20px",
+        backgroundColor: "#f5f5f5",
+        borderRadius: "8px",
+        width: "95%",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
       >
-        Atualizar Lista
-      </Button>
-      <div style={{ height: 400, width: '100%', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', overflow: 'hidden' }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-        />
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
+        >
+          Atualizar Lista
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() =>
+            fileExporters.exportToExcel(
+              "Usuários",
+              "usuarios.xlsx",
+              rows
+            )
+          }
+        >
+          Exportar Excel
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => fileExporters.exportToPDF("usuarios.pdf", rows)}
+        >
+          Exportar PDF
+        </Button>
+      </div>
+      <div
+        style={{
+          height: 400,
+          width: "100%",
+          backgroundColor: "white",
+          borderRadius: "8px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          overflow: "hidden",
+        }}
+      >
+        <DataGrid rows={rows} columns={columns} />
       </div>
 
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{isEditing ? "Editar Usuário" : "Adicionar Usuário"}</DialogTitle>
+        <DialogTitle>
+          {isEditing ? "Editar Usuário" : "Adicionar Usuário"}
+        </DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -272,8 +323,15 @@ const UserList = () => {
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={() => setSnackbarOpen(false)}>
-        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity}>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+        >
           {snackbarMessage}
         </Alert>
       </Snackbar>

@@ -32,10 +32,12 @@ public class ExitService {
     @Transactional
     public ExitResponseDTO create(ExitRequestDTO data) {
         Product product = productRepository.findById(data.productId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado. Insira um produto válido!"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Produto não encontrado. Insira um produto válido!"));
 
         Inventory inventory = inventoryRepository.findById(data.inventoryId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado para o produto!"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Inventário não encontrado para o produto!"));
 
         if (data.quantity() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantidade de saída deve ser maior que zero!");
@@ -46,11 +48,10 @@ public class ExitService {
         }
 
         Exit newExit = new Exit(
-            product, 
-            data.quantity(), 
-            inventory.getInventoryCode(), 
-            data.exitStatus()
-        );
+                product,
+                data.quantity(),
+                inventory.getInventoryCode(),
+                data.exitStatus());
         exitRepository.save(newExit);
 
         inventory.setQuantity(inventory.getQuantity() - data.quantity());
@@ -80,7 +81,8 @@ public class ExitService {
 
         if (quantityDifference != 0) {
             Inventory inventory = inventoryRepository.findByInventoryCode(exit.getInventoryCode())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi encontrado nenhum inventário para o produto!"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Não foi encontrado nenhum inventário para o produto!"));
 
             Product product = inventory.getProduct();
 
@@ -99,7 +101,7 @@ public class ExitService {
     @Transactional
     public ExitResponseDTO updateStatus(String id, ExitStatus status) {
         Exit receivement = exitRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Saída não encontrada."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Saída não encontrada."));
 
         if (status == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status não pode ser nulo.");
@@ -123,7 +125,8 @@ public class ExitService {
     @Transactional
     public void delete(String id) {
         Exit exit = exitRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Saída de produto não encontrada."));
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Saída de produto não encontrada."));
 
         Inventory inventory = inventoryRepository.findByInventoryCode(exit.getInventoryCode())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventário não encontrado."));

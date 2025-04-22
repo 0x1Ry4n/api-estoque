@@ -10,31 +10,28 @@ import {
   Typography,
 } from "@mui/material";
 
-export default function TopSellingProducts({ orders }) {
-  const productSales = {};
+export default function TopSellingProducts({ exits }) {
+  const productMap = {};
 
-  orders.forEach(order => {
-    const productId = order.inventory?.productId;
-    const productName = order.inventory?.productName; // Usando optional chaining
-    const price = order.inventory?.unitPrice; // Usando optional chaining
-    const totalPrice = order.totalPrice;
+  exits.forEach(exit => {
+    const { productId, productName, unitPrice, totalPrice, quantity } = exit;
 
-    if (productId && productName && price !== undefined) { // Verificando se as propriedades estão definidas
-      if (productSales[productId]) {
-        productSales[productId].quantity += order.quantity;
-        productSales[productId].amount += totalPrice;
-      } else {
-        productSales[productId] = {
+    if (productId && productName && unitPrice !== undefined && quantity !== undefined) {
+      if (!productMap[productId]) {
+        productMap[productId] = {
           name: productName,
-          price: price,
-          quantity: order.quantity,
-          amount: totalPrice,
+          price: unitPrice,
+          quantity: 0,
+          amount: 0,
         };
       }
+
+      productMap[productId].quantity += quantity;
+      productMap[productId].amount += totalPrice;
     }
   });
 
-  const topProducts = Object.values(productSales);
+  const topProducts = Object.values(productMap);
 
   return (
     <Box
@@ -47,7 +44,7 @@ export default function TopSellingProducts({ orders }) {
       }}
     >
       <Typography variant="h6" fontWeight={"bold"} sx={{ mx: 3 }}>
-        Produtos mais vendidos
+        Produtos com mais Saídas
       </Typography>
       <TableContainer>
         <Table>
@@ -63,9 +60,13 @@ export default function TopSellingProducts({ orders }) {
             {topProducts.map((product, id) => (
               <TableRow key={id}>
                 <TableCell>{product.name}</TableCell>
-                <TableCell>${product.price ? product.price.toFixed(2) : 'N/A'}</TableCell> 
+                <TableCell>
+                  {product.price !== undefined ? `$${product.price.toFixed(2)}` : "N/A"}
+                </TableCell>
                 <TableCell>{product.quantity}</TableCell>
-                <TableCell>${product.amount ? product.amount.toFixed(2) : 'N/A'}</TableCell> 
+                <TableCell>
+                  {product.amount !== undefined ? `$${product.amount.toFixed(2)}` : "N/A"}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

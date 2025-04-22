@@ -23,7 +23,6 @@ import {
   AddCircleOutline,
   CreditCardOutlined,
   GroupOutlined,
-  ShowChartOutlined,
   ExpandMore,
   ExpandLess,
   Menu as MenuIcon,
@@ -38,7 +37,7 @@ export default function SideBarComponent() {
   const location = useLocation();
   const currentPage = location.pathname;
 
-  const isSmallScreen = useMediaQuery("(max-width:600px)"); 
+  const isSmallScreen = useMediaQuery("(max-width:600px)");
 
   const [selected, setSelected] = useState(0);
   const [open, setOpen] = useState(true);
@@ -55,12 +54,13 @@ export default function SideBarComponent() {
     { title: "Inventário", route: "inventory", component: <Inventory2Outlined /> },
     { title: "Entradas", route: "receivements", component: <AddCircleOutline /> },
     { title: "Saídas", route: "exits", component: <CreditCardOutlined /> },
-    { title: "Usuários", route: "create-user", component: <GroupOutlined /> }, 
-    { title: "Crescimento", route: "growth", component: <ShowChartOutlined /> },
-  ];  
+    { title: "Usuários", route: "create-user", component: <GroupOutlined /> },
+  ];
 
   const filteredSideBarComponent = user?.role === "USER"
-    ? sideBarComponent.filter((item) => item.title !== "Usuários")
+    ? sideBarComponent.filter((item) =>
+      !["Usuários", "Home", "Mapa"].some((term) => item.title.includes(term))
+    )
     : sideBarComponent;
 
   const handleSelectedComponent = (index) => {
@@ -84,7 +84,7 @@ export default function SideBarComponent() {
               onClick={() => {
                 handleSelectedComponent(index);
                 navigate(comp.route.toLowerCase());
-                if (isSmallScreen) toggleDrawer(); 
+                if (isSmallScreen) toggleDrawer();
               }}
               selected={index === selected && currentPage === "/" + comp.route.toLowerCase()}
               sx={{

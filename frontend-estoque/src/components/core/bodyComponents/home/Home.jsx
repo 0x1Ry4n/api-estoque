@@ -1,27 +1,24 @@
 import React, { Component } from "react";
-import { Box, Grid } from "@mui/material";
-
 import UilReceipt from "@iconscout/react-unicons/icons/uil-receipt";
 import UilBox from "@iconscout/react-unicons/icons/uil-box";
 import UilTruck from "@iconscout/react-unicons/icons/uil-truck";
-import UilCheckCircle from "@iconscout/react-unicons/icons/uil-check-circle";
 import InfoCard from "../../subComponents/InfoCard";
 import TotalSales from "./TotalSales";
-import Channels from "./Channels";
 import TopSellingProduct from "./TopSellingProduct";
 import api from "../../../../api";
 import SalesByProduct from "./SalesByProduct";
+import { Box, Grid } from "@mui/material";
 
 export default class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      orders: [],
+      receivements: [],
+      exits: [],
       pendingCount: 0,
       inProgressCount: 0,
-      deliveredCount: 0,
-      pickedCount: 0,
       invoiceCount: 0,
+      loading: true, 
     };
   }
 
@@ -31,30 +28,39 @@ export default class Home extends Component {
 
   fetchAllOrders = async () => {
     try {
-      const response = await api.get('/orders/details');
-      const orders = response.data.content;
+      let response = await api.get("/exits");
+      const exits = response.data?.content || [];
 
-      const pendingCount = orders.filter(order => order.orderStatus === 'PENDING').length;
-      const inProgressCount = orders.filter(order => order.orderStatus === 'IN_PROGRESS').length;
-      const deliveredCount = orders.filter(order => order.orderStatus === 'DELIVERED').length;
-      const pickedCount = orders.filter(order => order.orderStatus === 'PICKED').length;
-      const invoiceCount = orders.filter(order => order.orderStatus === 'INVOICE').length;
+      const pendingCount = exits.filter(exit => exit.status === "PENDING").length;
+      const inProgressCount = exits.filter(exit => exit.status === "IN_PROGRESS").length;
+      const invoiceCount = exits.filter(exit => exit.status === "COMPLETED").length;
 
-      this.setState({ 
-        orders,
+      response = await api.get("/receivements");
+      const receivements = response.data?.content || [];
+
+      this.setState({
+        exits,
+        receivements,
         pendingCount,
         inProgressCount,
-        deliveredCount,
-        pickedCount,
         invoiceCount,
+        loading: false,
       });
     } catch (error) {
-      console.error("Erro ao buscar pedidos:", error);
+      console.error("Erro ao buscar saídas:", error);
+      this.setState({ loading: false });
     }
-  }
+  };
 
   render() {
-    const { pendingCount, inProgressCount, deliveredCount, pickedCount, invoiceCount } = this.state;
+    const {
+      pendingCount,
+      inProgressCount,
+      invoiceCount,
+      exits,
+      receivements,
+      loading,
+    } = this.state;
 
     const cardComponent = [
       {
@@ -72,15 +78,8 @@ export default class Home extends Component {
         my: 0,
       },
       {
-        icon: <UilCheckCircle size={60} color={"#F6F4EB"} />,
-        title: "Entregue",
-        subTitle: deliveredCount,
-        mx: 5,
-        my: 0,
-      },
-      {
         icon: <UilReceipt size={60} color={"#F6F4EB"} />,
-        title: "Faturado",
+        title: "Completado",
         subTitle: invoiceCount,
         mx: 3,
         my: 0,
@@ -88,12 +87,7 @@ export default class Home extends Component {
     ];
 
     return (
-      <Box
-        sx={{
-          margin: 0,
-          padding: 3,
-        }}
-      >
+      <Box sx={{ margin: 0, padding: 3 }}>
         <Grid
           container
           sx={{
@@ -111,23 +105,26 @@ export default class Home extends Component {
           ))}
         </Grid>
 
-        <Grid container sx={{ marginX: 3 }}>
-          <Grid item md={8}>
-            <TotalSales orders={this.state.orders} />
-          </Grid>
-          <Grid item md={4}>
-            <SalesByProduct orders={this.state.orders} />
-          </Grid>
-        </Grid>
+        {!loading && (
+          <>
+            <Grid container sx={{ marginX: 3 }}>
+              <Grid item md={8}>
+                <TotalSales receivements={receivements} exits={exits} />
+              </Grid>
+              <Grid item md={4}>
+                {receivements.length > 0 && (
+                  <SalesByProduct receivements={receivements} />
+                )}
+              </Grid>
+            </Grid>
 
-        <Grid container sx={{ margin: 3 }}>
-          <Grid item md={6}>
-            <Channels orders={this.state.orders} />
-          </Grid>
-          <Grid item md={6}>
-            <TopSellingProduct orders={this.state.orders} />
-          </Grid>
-        </Grid>
+            <Grid container sx={{ margin: 3 }}>
+              <Grid item md={8}>
+                <TopSellingProduct exits={exits} />
+              </Grid>
+            </Grid>
+          </>
+        )}
       </Box>
     );
   }

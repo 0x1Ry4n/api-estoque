@@ -9,9 +9,6 @@ import {
   Snackbar,
   Alert,
   Autocomplete,
-  InputLabel,
-  Select,
-  MenuItem,
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -20,6 +17,7 @@ import {
 } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { addDays, format } from "date-fns";
+import { fileExporters } from "../../../../utils/utils";
 import api from "../../../../api";
 import Swal from "sweetalert2";
 
@@ -100,7 +98,11 @@ const ReceivementList = () => {
         setSnackbarSeverity("success");
         fetchReceivements();
       } catch (error) {
-        setSnackbarMessage("Erro ao deletar o recebimento.");
+        setSnackbarMessage(
+          `Erro ao deletar o recebimento: ${
+            error.response?.data?.message || error.message
+          }`
+        );
         setSnackbarSeverity("error");
       } finally {
         setSnackbarOpen(true);
@@ -144,29 +146,29 @@ const ReceivementList = () => {
 
   const handleStatusChange = async (id) => {
     const { value: status } = await Swal.fire({
-      title: 'Alterar Status',
-      input: 'select',
+      title: "Alterar Status",
+      input: "select",
       inputOptions: receivementStatusMap,
-      inputPlaceholder: 'Selecione um status',
+      inputPlaceholder: "Selecione um status",
       showCancelButton: true,
       confirmButtonText: "Editar",
       cancelButtonText: "Cancelar",
       inputValidator: (value) => {
         if (!value) {
-          return 'Você precisa selecionar um status!';
+          return "Você precisa selecionar um status!";
         }
-      }
+      },
     });
 
     if (status) {
       try {
         await api.patch(`/receivements/${id}/status`, { status: status });
-        setSnackbarMessage('Status atualizado com sucesso!');
-        setSnackbarSeverity('success');
+        setSnackbarMessage("Status atualizado com sucesso!");
+        setSnackbarSeverity("success");
         fetchReceivements();
       } catch (error) {
-        setSnackbarMessage('Erro ao atualizar o status.');
-        setSnackbarSeverity('error');
+        setSnackbarMessage("Erro ao atualizar o status.");
+        setSnackbarSeverity("error");
       } finally {
         setSnackbarOpen(true);
       }
@@ -249,14 +251,38 @@ const ReceivementList = () => {
         width: "95%",
       }}
     >
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={handleRefresh}
-        sx={{ mb: 2 }}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
       >
-        Atualizar Lista
-      </Button>
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
+        >
+          Atualizar Lista
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() =>
+            fileExporters.exportToExcel("Recebimentos", "recebimentos.xlsx", rows)
+          }
+        >
+          Exportar Excel
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => fileExporters.exportToPDF("recebimentos.pdf", rows)}
+        >
+          Exportar PDF
+        </Button>
+      </div>
       <div
         style={{
           height: 400,
@@ -374,7 +400,9 @@ const ReceivementList = () => {
             margin="normal"
             value={
               selectedReceivement?.receivingDate
-                ? new Date(selectedReceivement.receivingDate).toISOString().split('T')[0]
+                ? new Date(selectedReceivement.receivingDate)
+                    .toISOString()
+                    .split("T")[0]
                 : ""
             }
             onChange={(e) =>
@@ -384,7 +412,7 @@ const ReceivementList = () => {
               })
             }
             InputLabelProps={{
-              shrink: true
+              shrink: true,
             }}
             sx={{ mb: 3 }}
           />

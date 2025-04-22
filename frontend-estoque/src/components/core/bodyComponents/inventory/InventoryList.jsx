@@ -14,6 +14,7 @@ import {
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
+import { fileExporters } from "../../../../utils/utils";
 import api from "../../../../api";
 import Swal from "sweetalert2";
 
@@ -82,7 +83,9 @@ const Inventory = () => {
       } catch (error) {
         console.log(error.response.data.message);
         setSnackbarMessage(
-          "Erro ao deletar item de inventário: " + error.response.data.message
+          `Erro ao deletar o inventário: ${
+            error.response?.data?.message || error.response?.data?.error || error.message
+          }`
         );
         setSnackbarSeverity("error");
       } finally {
@@ -195,17 +198,41 @@ const Inventory = () => {
         padding: "20px",
         backgroundColor: "#f5f5f5",
         borderRadius: "8px",
-         width: '95%'
+        width: "95%",
       }}
     >
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={handleRefresh}
-        sx={{ mb: 2 }}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
       >
-        Atualizar Lista
-      </Button>
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
+        >
+          Atualizar Lista
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() =>
+            fileExporters.exportToExcel("Inventários", "inventarios.xlsx", rows)
+          }
+        >
+          Exportar Excel
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => fileExporters.exportToPDF("inventarios.pdf", rows)}
+        >
+          Exportar PDF
+        </Button>
+      </div>
       <div
         style={{
           height: 400,

@@ -9,9 +9,7 @@ import {
   Snackbar,
   Alert,
   MenuItem,
-  Select,
   InputAdornment,
-  InputLabel,
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -24,7 +22,7 @@ import {
   WebOutlined,
   LocationOnOutlined,
 } from "@mui/icons-material";
-
+import { fileExporters } from "../../../../utils/utils";
 import InputMask from "react-input-mask";
 import { DataGrid } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
@@ -93,8 +91,8 @@ const Suppliers = () => {
       } catch (error) {
         console.log(error);
         setSnackbarMessage(
-          `Erro ao deletar fornecedor: ${
-            error.response?.data?.error || error.message
+          `Erro ao deletar o fornecedor: ${
+            error.response?.data?.message || error.response?.data?.error || error.message
           }`
         );
         setSnackbarSeverity("error");
@@ -199,14 +197,38 @@ const Suppliers = () => {
         width: "95%",
       }}
     >
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={handleRefresh}
-        sx={{ mb: 2 }}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
       >
-        Atualizar Lista
-      </Button>
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
+        >
+          Atualizar Lista
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() =>
+            fileExporters.exportToExcel("Fornecedores", "fornecedores.xlsx", rows)
+          }
+        >
+          Exportar Excel
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => fileExporters.exportToPDF("fornecedores.pdf", rows)}
+        >
+          Exportar PDF
+        </Button>
+      </div>
       <div
         style={{
           height: 400,

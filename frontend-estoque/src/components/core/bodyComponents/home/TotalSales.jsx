@@ -1,39 +1,40 @@
-import { Box } from "@mui/material";
 import React from "react";
 import ApexCharts from "react-apexcharts";
+import { Box } from "@mui/material";
 
-export default function TotalSales({ orders }) {
-  // Contar a quantidade de vendas por data
-  const salesData = orders.reduce((acc, order) => {
-    const date = new Date(order.orderDate).toLocaleDateString();
-    acc[date] = (acc[date] || 0) + 1; // Incrementa o contador para a data correspondente
+export default function TotalSales({ receivements, exits }) {
+  const receivementData = receivements.reduce((acc, receivement) => {
+    const date = new Date(receivement.receivingDate).toLocaleDateString();
+    acc[date] = (acc[date] || 0) + 1;
     return acc;
   }, {});
 
-  const dates = Object.keys(salesData); // Extrai as datas
-  const quantities = Object.values(salesData); // Extrai as quantidades
+  const exitData = exits.reduce((acc, exit) => {
+    const date = new Date(exit.exitDate).toLocaleDateString();
+    acc[date] = (acc[date] || 0) + 1;
+    return acc;
+  }, {});
+
+  const allDates = Array.from(new Set([
+    ...Object.keys(receivementData),
+    ...Object.keys(exitData),
+  ])).sort((a, b) => new Date(a) - new Date(b)); 
+
+  const receivementQuantity = allDates.map(date => receivementData[date] || 0);
+  const exitQuantity = allDates.map(date => exitData[date] || 0);
 
   const options = {
     title: {
-      text: "Vendas totais",
+      text: "Recebimentos x Saídas",
       align: "left",
-      style: {
-        fontSize: "16px",
-        color: "#666",
-      },
+      style: { fontSize: "16px", color: "#666" },
     },
     subtitle: {
-      text: "Vendas ao longo do tempo",
+      text: "Comparação entre Recebimentos e Saídas por Produto",
       align: "left",
-      style: {
-        fontSize: "16px",
-        color: "#666",
-      },
+      style: { fontSize: "16px", color: "#666" },
     },
-    stroke: {
-      curve: "smooth",
-      width: 3,
-    },
+    stroke: { curve: "smooth", width: 3 },
     legend: {
       position: "top",
       horizontalAlign: "center",
@@ -44,19 +45,13 @@ export default function TotalSales({ orders }) {
     markers: {
       size: 4,
       strokeWidth: 2,
-      hover: {
-        size: 9,
-      },
+      hover: { size: 9 },
     },
-    theme: {
-      mode: "light",
-    },
+    theme: { mode: "light" },
     chart: {
       height: 328,
       type: "line",
-      zoom: {
-        enabled: true,
-      },
+      zoom: { enabled: true },
       dropShadow: {
         enabled: true,
         top: 3,
@@ -66,27 +61,23 @@ export default function TotalSales({ orders }) {
       },
     },
     xaxis: {
-      categories: dates, // Usando as datas
+      categories: allDates,
     },
   };
 
   const series = [
-    {
-      name: "Num. Vendas",
-      data: quantities, // Usando as quantidades contadas
-    },
+    { name: "Entradas", data: receivementQuantity },
+    { name: "Saídas", data: exitQuantity },
   ];
 
   return (
-    <Box
-      sx={{
-        margin: 3,
-        bgcolor: "white",
-        borderRadius: 2,
-        padding: 3,
-        height: "100%",
-      }}
-    >
+    <Box sx={{
+      margin: 3,
+      bgcolor: "white",
+      borderRadius: 2,
+      padding: 3,
+      height: "100%",
+    }}>
       <ApexCharts
         options={options}
         series={series}
