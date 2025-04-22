@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 public record ReceivementResponseDTO(
     String id,
     String productId,
+    String productName,
+    BigDecimal unitPrice,
     String supplierId,
     String supplierName,
     String inventoryCode,
@@ -19,6 +21,8 @@ public record ReceivementResponseDTO(
         this(
             receivement.getId(),
             receivement.getProduct().getId(),
+            receivement.getProduct().getName(),
+            receivement.getProduct().getUnitPrice(),
             receivement.getSupplier().getId(),
             receivement.getSupplier().getSocialReason(),
             receivement.getInventoryCode(),

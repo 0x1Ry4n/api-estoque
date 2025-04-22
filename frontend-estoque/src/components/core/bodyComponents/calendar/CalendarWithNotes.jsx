@@ -1,17 +1,36 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
-import { Box, Paper, Typography, Button, TextField, Modal, Grid, Snackbar, Alert, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
-import { format } from 'date-fns';
-import { saveAs } from 'file-saver';
+import ptBrLocale from '@fullcalendar/core/locales/pt-br';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import DownloadIcon from '@mui/icons-material/Download'; 
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'; 
-import DescriptionIcon from '@mui/icons-material/Description'; 
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  TextField,
+  Modal,
+  Grid,
+  Snackbar,
+  Alert,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
+import {
+  PictureAsPdf as PictureAsPdfIcon,
+  Description as DescriptionIcon,
+  Download as DownloadIcon
+} from '@mui/icons-material';
+import { format } from 'date-fns';
+import { saveAs } from 'file-saver';
 
 const CalendarWithNotes = () => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -25,7 +44,7 @@ const CalendarWithNotes = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [calendarView, setCalendarView] = useState('dayGridMonth');
 
-  const calendarRef = useRef(); 
+  const calendarRef = useRef();
 
   useEffect(() => {
     const savedNotes = localStorage.getItem('calendarNotes');
@@ -36,6 +55,8 @@ const CalendarWithNotes = () => {
         title: loadedNotes[date].title,
         start: date,
         allDay: true,
+        backgroundColor: getPriorityColor(loadedNotes[date].priority),
+        borderColor: getPriorityColor(loadedNotes[date].priority),
         extendedProps: loadedNotes[date],
       }));
       setEvents(loadedEvents);
@@ -45,6 +66,15 @@ const CalendarWithNotes = () => {
   useEffect(() => {
     localStorage.setItem('calendarNotes', JSON.stringify(notes));
   }, [notes]);
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'Alta': return '#f44336';
+      case 'Média': return '#ff9800';
+      case 'Baixa': return '#4caf50';
+      default: return '#2196f3';
+    }
+  };
 
   const handleDateClick = (info) => {
     setSelectedDate(info.date);
@@ -63,6 +93,13 @@ const CalendarWithNotes = () => {
   };
 
   const handleSaveNote = () => {
+    if (!currentNote.title || !currentNote.priority) {
+      setSnackbarMessage('Título e prioridade são obrigatórios!');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
     const formattedDate = format(selectedDate, 'yyyy-MM-dd');
     const updatedNotes = {
       ...notes,
@@ -74,6 +111,8 @@ const CalendarWithNotes = () => {
       title: updatedNotes[date].title,
       start: date,
       allDay: true,
+      backgroundColor: getPriorityColor(updatedNotes[date].priority),
+      borderColor: getPriorityColor(updatedNotes[date].priority),
       extendedProps: updatedNotes[date],
     }));
     setEvents(updatedEvents);
@@ -94,6 +133,8 @@ const CalendarWithNotes = () => {
       title: updatedNotes[date].title,
       start: date,
       allDay: true,
+      backgroundColor: getPriorityColor(updatedNotes[date].priority),
+      borderColor: getPriorityColor(updatedNotes[date].priority),
       extendedProps: updatedNotes[date],
     }));
     setEvents(updatedEvents);
@@ -116,29 +157,39 @@ const CalendarWithNotes = () => {
   };
 
   const exportEventsToCSV = () => {
-    const csvContent = [
-      ['Data', 'Título', 'Nota', 'Prioridade'].join(','),
-      ...Object.keys(notes).map((date) =>
-        [
-          format(new Date(date), 'dd/MM/yyyy'),
-          `"${notes[date].title.replace(/"/g, '""')}"`,
-          `"${notes[date].note.replace(/"/g, '""')}"`,
-          notes[date].priority,
-        ].join(',')
-      ),
-    ].join('\n');
+    if (Object.keys(notes).length === 0) {
+      setSnackbarMessage('Nenhuma nota para exportar!');
+      setSnackbarSeverity('warning');
+      setSnackbarOpen(true);
+      return;
+    }
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, 'calendario_notas.csv');
+    const headers = ['Data', 'Título', 'Descrição', 'Prioridade'];
+    const csvRows = [
+      headers.join(';'),
+      ...Object.keys(notes).map(date => {
+        const note = notes[date];
+        return [
+          format(new Date(date), 'dd/MM/yyyy'),
+          `"${note.title.replace(/"/g, '""')}"`,
+          `"${note.note.replace(/"/g, '""')}"`,
+          note.priority
+        ].join(';');
+      })
+    ];
+
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, `notas_calendario_${format(new Date(), 'yyyyMMdd_HHmmss')}.csv`);
   };
 
   const exportCalendarToPDF = () => {
     html2canvas(calendarRef.current).then((canvas) => {
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF();
-      const imgWidth = 190; 
-      const pageHeight = pdf.internal.pageSize.height; 
-      const imgHeight = (canvas.height * imgWidth) / canvas.width; 
+      const pdf = new jsPDF('landscape');
+      const imgWidth = 280;
+      const pageHeight = pdf.internal.pageSize.height;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
 
       let position = 0;
@@ -148,70 +199,204 @@ const CalendarWithNotes = () => {
 
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
-        pdf.addPage();
+        pdf.addPage('landscape');
         pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
 
-      pdf.save('calendario_notas.pdf');
+      pdf.save(`calendario_notas_${format(new Date(), 'yyyyMMdd_HHmmss')}.pdf`);
     });
   };
 
   const exportNotesToPDF = () => {
+    if (Object.keys(notes).length === 0) {
+      setSnackbarMessage('Nenhuma nota para exportar!');
+      setSnackbarSeverity('warning');
+      setSnackbarOpen(true);
+      return;
+    }
+
     const doc = new jsPDF();
-    doc.text('Notas do Calendário', 10, 10);
-    Object.keys(notes).forEach((date, index) => {
+
+    doc.setFontSize(18);
+    doc.text('Notas do Calendário', 105, 15, null, null, 'center');
+
+    doc.setFontSize(12);
+    doc.text(`Gerado em: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 105, 25, null, null, 'center');
+
+    doc.line(10, 30, 200, 30);
+
+    let y = 40;
+    Object.keys(notes).forEach(date => {
       const note = notes[date];
-      doc.text(`${format(new Date(date), 'dd/MM/yyyy')}: ${note.title} - ${note.note} (Prioridade: ${note.priority})`, 10, 20 + index * 10);
+
+      if (y > 250) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text(format(new Date(date), 'dd/MM/yyyy (eeee)'), 10, y);
+
+      const priorityColor = {
+        'Baixa': '#4CAF50',
+        'Média': '#FFC107',
+        'Alta': '#F44336'
+      }[note.priority] || '#000000';
+
+      doc.setTextColor(priorityColor);
+      doc.text(`Prioridade: ${note.priority}`, 180, y, null, null, 'right');
+      doc.setTextColor('#000000');
+
+      doc.setFont(undefined, 'normal');
+      doc.text(`Título: ${note.title}`, 10, y + 8);
+
+      const splitNote = doc.splitTextToSize(note.note, 180);
+      doc.text('Descrição:', 10, y + 16);
+      doc.text(splitNote, 10, y + 24);
+
+      doc.line(10, y + 32 + (splitNote.length * 5), 200, y + 32 + (splitNote.length * 5));
+
+      y += 40 + (splitNote.length * 5);
     });
-    doc.save('notas_do_calendario.pdf');
+
+    doc.save(`notas_calendario_${format(new Date(), 'yyyyMMdd_HHmmss')}.pdf`);
   };
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const headerToolbar = isMobile
+    ? {
+      left: 'prev,next',
+      center: 'title',
+      right: 'dayGridMonth,listWeek'
+    }
+    : {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+    };
+
   return (
-    <Box sx={{ padding: 4 }}>
-      <Paper elevation={4} sx={{ padding: 4, borderRadius: 2 }}>
-        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
+    <Box sx={{
+      width: isMobile ? '100vw' : '80vw',
+      minHeight: '100vh',
+      p: isMobile ? 4 : 6,
+      boxSizing: 'border-box',
+      borderRadius: 1,
+      mx: 'auto',
+      '& .fc-toolbar-title': {
+        width: '100%',
+        textAlign: 'center',
+        fontSize: '1.25rem',
+        fontWeight: 600,
+      },
+    }}>
+      <Paper elevation={4} sx={{ padding: 10, borderRadius: 2 }}>
+        <Typography variant="h5" sx={{ mt: 2, mb: 3, fontWeight: 'bolder' }}>
           Calendário de Notas
         </Typography>
 
-        <div ref={calendarRef}>
+        <div sx={{ maxWidth: "100%", overflowX: "auto" }} ref={calendarRef}>
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
             initialView={calendarView}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
+            headerToolbar={headerToolbar}
+            buttonText={{
+              today: 'Hoje',
+              month: 'Mês',
+              week: 'Semana',
+              day: 'Dia',
+              list: 'Lista'
             }}
+            locale={ptBrLocale}
             height="auto"
-            contentHeight="800px" // Aumentando a altura do calendário
             events={events}
             dateClick={handleDateClick}
             eventClick={handleEventClick}
-            locale="pt-br"
             selectable={true}
+            eventDisplay="block"
+            eventTimeFormat={{
+              hour: '2-digit',
+              minute: '2-digit',
+              meridiem: false
+            }}
           />
         </div>
 
-        <Grid container spacing={2} sx={{ mt: 3 }}>
+        <Grid
+          container
+          spacing={2}
+          direction="row"
+          alignItems="center"
+          justifyContent="center"
+          sx={{ mt: 3 }}
+        >
           <Grid item>
-            <Button variant="contained" color="secondary" onClick={exportEventsToCSV} startIcon={<DownloadIcon />}>
-              Exportar para CSV
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={exportEventsToCSV}
+              startIcon={<DownloadIcon />}
+              disabled={Object.keys(notes).length === 0}
+              sx={{
+                width: 220,
+                boxShadow: 2,
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: 4,
+                },
+              }}
+            >
+              Exportar CSV
             </Button>
           </Grid>
 
           <Grid item>
-            <Button variant="contained" color="primary" onClick={exportNotesToPDF} startIcon={<DescriptionIcon />}>
-              Exportar Notas para PDF
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={exportNotesToPDF}
+              startIcon={<DescriptionIcon />}
+              disabled={Object.keys(notes).length === 0}
+              sx={{
+                width: 220,
+                boxShadow: 2,
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: 4,
+                },
+              }}
+            >
+              Exportar PDF
             </Button>
           </Grid>
 
           <Grid item>
-            <Button variant="contained" color="primary" onClick={exportCalendarToPDF} startIcon={<PictureAsPdfIcon />} sx={{ ml: 2 }}>
-              Exportar Calendário para PDF
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={exportCalendarToPDF}
+              startIcon={<PictureAsPdfIcon />}
+              sx={{
+                width: 220,
+                boxShadow: 2,
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: 4,
+                },
+              }}
+            >
+              Exportar Pág.
             </Button>
           </Grid>
         </Grid>
+
 
         <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box
@@ -220,7 +405,7 @@ const CalendarWithNotes = () => {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: 400,
+              width: { xs: '90%', sm: 500 },
               bgcolor: 'background.paper',
               borderRadius: 2,
               boxShadow: 24,
@@ -228,7 +413,7 @@ const CalendarWithNotes = () => {
             }}
           >
             <Typography variant="h6" gutterBottom>
-              Nota para {selectedDate ? format(selectedDate, 'dd/MM/yyyy') : ''}
+              {isEditing ? 'Editar Nota' : 'Nova Nota'} - {selectedDate && format(selectedDate, 'dd/MM/yyyy')}
             </Typography>
 
             <TextField
@@ -237,9 +422,11 @@ const CalendarWithNotes = () => {
               value={currentNote.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               sx={{ mb: 2 }}
+              required
             />
+
             <TextField
-              label="Nota"
+              label="Descrição"
               multiline
               fullWidth
               rows={4}
@@ -247,12 +434,14 @@ const CalendarWithNotes = () => {
               onChange={(e) => handleInputChange('note', e.target.value)}
               sx={{ mb: 2 }}
             />
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Prioridade</InputLabel>
+
+            <FormControl fullWidth sx={{ mb: 3 }}>
+              <InputLabel>Prioridade *</InputLabel>
               <Select
                 value={currentNote.priority}
                 onChange={(e) => handleInputChange('priority', e.target.value)}
                 label="Prioridade"
+                required
               >
                 <MenuItem value="Baixa">Baixa</MenuItem>
                 <MenuItem value="Média">Média</MenuItem>
@@ -260,19 +449,44 @@ const CalendarWithNotes = () => {
               </Select>
             </FormControl>
 
-            <Button variant="contained" color="success" onClick={handleSaveNote}>
-              {isEditing ? 'Salvar Alterações' : 'Salvar Nota'}
-            </Button>
-            {isEditing && (
-              <Button variant="outlined" color="error" onClick={handleDeleteNote} sx={{ ml: 2 }}>
-                Excluir Nota
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Button variant="outlined" onClick={() => setModalOpen(false)}>
+                Cancelar
               </Button>
-            )}
+              <Box>
+                {isEditing && (
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={handleDeleteNote}
+                    sx={{ mr: 2 }}
+                  >
+                    Excluir
+                  </Button>
+                )}
+                <Button
+                  variant="contained"
+                  onClick={handleSaveNote}
+                  disabled={!currentNote.title || !currentNote.priority}
+                >
+                  {isEditing ? 'Salvar' : 'Criar'}
+                </Button>
+              </Box>
+            </Box>
           </Box>
         </Modal>
 
-        <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
-          <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert
+            onClose={handleSnackbarClose}
+            severity={snackbarSeverity}
+            sx={{ width: '100%' }}
+          >
             {snackbarMessage}
           </Alert>
         </Snackbar>

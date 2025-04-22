@@ -7,6 +7,7 @@ import com.apiestoque.crud.domain.user.dto.RegisterUserDTO;
 import com.apiestoque.crud.domain.user.dto.UserResponseDTO;
 import com.apiestoque.crud.repositories.UserRepository;
 import com.apiestoque.crud.infra.response.ApiResponse;
+import com.apiestoque.crud.infra.response.ApiResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
@@ -19,7 +20,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -28,9 +29,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -47,18 +48,26 @@ public class UserService {
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public LoginResponseDTO authenticateUser(AuthenticationDTO data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
+
         var auth = this.authenticationManager.authenticate(usernamePassword);
 
         User user = (User) auth.getPrincipal();
 
-        if (user.getRole() == UserRole.USER) {
+        if (user.getStatus() == UserStatus.INACTIVE) {
+            throw new RuntimeException("Esta conta de usuário foi desativada.");
+        }
+
+        if (user.getFaceImage() != null && user.getRole() == UserRole.USER) {
             String key = "face_validation:" + user.getEmail();
             String validation = redisTemplate.opsForValue().get(key);
 
             if (validation == null || !validation.equals("valid")) {
-                throw new RuntimeException("Verificação facial necessária");
+                throw new RuntimeException("Verificação facial necessária.");
             }
 
             redisTemplate.delete(key);
@@ -71,10 +80,10 @@ public class UserService {
     @Transactional
     public UserResponseDTO updateStatus(String id, UserStatus status) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
 
         if (status == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status não pode ser nulo.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O status não pode ser nulo.");
         }
 
         userRepository.updateUserStatus(user.getId(), status.name());
@@ -85,14 +94,16 @@ public class UserService {
     @Transactional
     public UserResponseDTO updatePassword(String id, String password) {
         User user = userRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
 
         if (password == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A senha não pode ser nula.");
         }
 
-        String encryptedPassword = new BCryptPasswordEncoder().encode(password);
+        String encryptedPassword = passwordEncoder.encode(password);
         user.setPassword(encryptedPassword);
+
+        userRepository.save(user);
 
         return new UserResponseDTO(user);
     }
@@ -102,11 +113,11 @@ public class UserService {
         ObjectMapper objectMapper = new ObjectMapper();
 
         if (capturedImage == null || capturedImage.isBlank()) {
-            throw new IllegalArgumentException("Imagem capturada não pode ser nula ou vazia");
+            throw new IllegalArgumentException("A imagem capturada não pode ser nula ou vazia");
         }
 
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("E-mail não pode ser nulo ou vazio");
+            throw new IllegalArgumentException("O e-mail não pode ser nulo ou vazio");
         }
 
         User user = userRepository.findUserByEmail(email);
@@ -116,7 +127,10 @@ public class UserService {
         }
 
         if (user.getFaceImage() == null || user.getFaceImage().length == 0) {
-            throw new RuntimeException("Usuário não possui imagem facial registrada");
+            Map<String, Object> response = new HashMap<>();
+            response.put("verified", true);
+            response.put("distance", 1);
+            return response;
         }
 
         String base64SavedImage;
@@ -176,50 +190,53 @@ public class UserService {
         return result;
     }
 
-    public ApiResponse registerAdmin(RegisterUserDTO data) {
+    public ApiResult registerAdmin(RegisterUserDTO data) {
         if (userRepository.findByUsername("admin") == null) {
-            return new ApiResponse("Master user does not exist.");
+            return new ApiResult(new ApiResponse("message", "O Usuário master não existe."), HttpStatus.BAD_REQUEST);
         }
 
         if (data.role() == null || !data.role().equals(UserRole.ADMIN)) {
-            return new ApiResponse("A role of admin is required for this endpoint.");
+            return new ApiResult(
+                    new ApiResponse("message", "A regra de administrador é necessária para acessar esse endpoint."),
+                    HttpStatus.BAD_REQUEST);
         }
 
         if (this.userRepository.findByUsername(data.username()) != null) {
-            return new ApiResponse("Username já existe.");
+            return new ApiResult(new ApiResponse("message", "O Username inserido já existe."), HttpStatus.BAD_REQUEST);
         }
 
         if (this.userRepository.findByEmail(data.email()) != null) {
-            return new ApiResponse("Email já existe.");
+            return new ApiResult(new ApiResponse("message", "O Email inserido já existe."), HttpStatus.BAD_REQUEST);
         }
 
-        String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
+        String encryptedPassword = passwordEncoder.encode(data.password());
         User newUser = new User(data.username(), data.email(), encryptedPassword, data.status(), data.role(), null);
+
         this.userRepository.save(newUser);
 
-        return new ApiResponse("Admin user registered successfully.");
+        return new ApiResult(new ApiResponse("message", "Usuário admin registrado com sucesso."), HttpStatus.CREATED);
     }
 
-
-
-    public ApiResponse registerUser(RegisterUserDTO data) {
+    public ApiResult registerUser(RegisterUserDTO data) {
         if (userRepository.findByUsername("admin") == null) {
-            return new ApiResponse("Master user does not exist.");
+            return new ApiResult(new ApiResponse("message", "O Usuário master não existe."), HttpStatus.BAD_REQUEST);
         }
 
         if (data.role() == null || !data.role().equals(UserRole.USER)) {
-            return new ApiResponse("A role of user is required for this endpoint.");
+            return new ApiResult(
+                    new ApiResponse("message", "A regra de administrador é necessária para acessar esse endpoint."),
+                    HttpStatus.BAD_REQUEST);
         }
 
         if (this.userRepository.findByUsername(data.username()) != null) {
-            return new ApiResponse("Username já existe.");
+            return new ApiResult(new ApiResponse("message", "O Username inserido já existe."), HttpStatus.BAD_REQUEST);
         }
 
         if (this.userRepository.findByEmail(data.email()) != null) {
-            return new ApiResponse("Email já existe.");
+            return new ApiResult(new ApiResponse("message", "O Email inserido já existe."), HttpStatus.BAD_REQUEST);
         }
 
-        String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
+        String encryptedPassword = passwordEncoder.encode(data.password());
         User newUser = new User(data.username(), data.email(), encryptedPassword, data.status(), data.role(), null);
 
         if (data.faceImage() != null && !data.faceImage().isEmpty()) {
@@ -233,7 +250,7 @@ public class UserService {
 
         this.userRepository.save(newUser);
 
-        return new ApiResponse("User registered successfully.");
+        return new ApiResult(new ApiResponse("message", "Usuário registrado com sucesso."), HttpStatus.CREATED);
     }
 
     public String refreshToken(String refreshToken) {
@@ -244,7 +261,7 @@ public class UserService {
         String username = tokenService.getUsernameFromToken(refreshToken);
         User user = userRepository.findByUsername(username);
         if (user == null) {
-            throw new RuntimeException("User not found.");
+            throw new RuntimeException("Usuário não encontrado.");
         }
 
         return tokenService.generateToken(user);
@@ -254,7 +271,6 @@ public class UserService {
         return new UserResponseDTO(
                 user.getId(),
                 user.getUsernameOriginal(),
-                Optional.empty(),
                 user.getEmail(),
                 user.getRole().toString(),
                 user.getStatus().toString(),
@@ -267,7 +283,6 @@ public class UserService {
         return users.stream().map(user -> new UserResponseDTO(
                 user.getId(),
                 user.getUsernameOriginal(),
-                Optional.ofNullable(user.getPassword()),
                 user.getEmail(),
                 user.getRole().toString(),
                 user.getStatus().toString(),

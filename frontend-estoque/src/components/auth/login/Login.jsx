@@ -29,7 +29,7 @@ import LoginIcon from "@mui/icons-material/Login";
 import { useAuth } from "../../../context/AuthContext";
 import Webcam from "react-webcam";
 import api from "../../../api";
-import * as faceapi from "face-api.js";
+import * as faceapi from "@vladmandic/face-api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -38,12 +38,12 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState("user");
-  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isVerifyingFace, setIsVerifyingFace] = useState(false);
   const [faceImage, setFaceImage] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [faceDetection, setFaceDetection] = useState(null);
@@ -69,6 +69,7 @@ const Login = () => {
         setModelsLoaded(true);
       } catch (error) {
         console.error("Erro ao carregar modelos:", error);
+        setSnackbarSeverity("error");
         setSnackbarMessage("Erro ao carregar modelos de reconhecimento facial");
         setSnackbarOpen(true);
       } finally {
@@ -155,20 +156,26 @@ const Login = () => {
     e.preventDefault();
 
     if (userType === "user" && !faceImage) {
+      setSnackbarSeverity("warning");
       setSnackbarMessage("Por favor, verifique o rosto antes de continuar.");
       setSnackbarOpen(true);
       return;
     }
 
     try {
-      const isAuthenticated = await login(email, password);
-      if (isAuthenticated) {
+      const { success, token } = await login(email, password);
+
+      if (success) {
         navigate("/home");
       } else {
-        setError("Credenciais inválidas. Verifique seu e-mail e senha.");
+        setSnackbarSeverity("error");
+        setSnackbarMessage(token);
+        setSnackbarOpen(true);
       }
     } catch (err) {
-      setError("Erro ao tentar entrar. Tente novamente mais tarde.");
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Erro ao tentar entrar. Tente novamente mais tarde.");
+      setSnackbarOpen(true);
     }
   };
 
@@ -181,6 +188,7 @@ const Login = () => {
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     } else {
+      setSnackbarSeverity("warning");
       setSnackbarMessage("Nenhum rosto detectado. Posicione-se melhor.");
       setSnackbarOpen(true);
     }
@@ -189,6 +197,7 @@ const Login = () => {
   const verifyFace = async () => {
     try {
       if (!faceImage) {
+        setSnackbarSeverity("error");
         setSnackbarMessage("Nenhuma imagem facial capturada.");
         setSnackbarOpen(true);
         return;
@@ -203,6 +212,7 @@ const Login = () => {
         .withFaceDescriptors();
 
       if (detections.length === 0) {
+        setSnackbarSeverity("error");
         setSnackbarMessage("Nenhum rosto detectado na imagem capturada.");
         setSnackbarOpen(true);
         setIsLoading(false);
@@ -216,7 +226,8 @@ const Login = () => {
 
       if (response.status === 200) {
         if (response.data.error) {
-          setSnackbarMessage(`Erro: ${response.data.error}`);
+          setSnackbarSeverity("error");
+          setSnackbarMessage(`Erro ao verificar a face: ${response.data.error}`);
           setSnackbarOpen(true);
           setFaceImage(null);
           setIsLoading(false);
@@ -224,17 +235,20 @@ const Login = () => {
         }
 
         if (!response.data.verified) {
-          setSnackbarMessage(`Rosto incompatível com o cadastro de usuário!`);
+          setSnackbarSeverity("error");
+          setSnackbarMessage(`Erro ao verificar a face: Rosto incompatível com o cadastro de usuário!`);
           setSnackbarOpen(true);
           setFaceImage(null);
           setIsLoading(false);
           return;
         }
 
+        setSnackbarSeverity("success");
         setSnackbarMessage("Rosto verificado com sucesso!");
         setSnackbarOpen(true);
         setIsLoading(false);
       } else {
+        setSnackbarSeverity("error");
         setSnackbarMessage("Falha na verificação do rosto.");
         setSnackbarOpen(true);
         setFaceImage(null);
@@ -243,6 +257,7 @@ const Login = () => {
     } catch (error) {
       const errorMessage =
         error.response?.data?.error || "Erro ao verificar rosto.";
+      setSnackbarSeverity("error");
       setSnackbarMessage(errorMessage);
       setSnackbarOpen(true);
       setFaceImage(null);
@@ -252,18 +267,22 @@ const Login = () => {
 
   return (
     <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      minHeight="100vh"
-      bgcolor="#e0f2f1"
-      px={2}
-      py={4}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: isMobile ? '100vw' : '80vw',
+        minHeight: '425px',
+        p: isMobile ? 4 : 2,
+        boxSizing: 'border-box',
+        mx: 'auto',
+        mt: isMobile ? '50%' : '10%'
+      }}
     >
       <Box
         bgcolor="#fff"
         p={isMobile ? 3 : 4}
-        borderRadius={4}
+        borderRadius={2}
         boxShadow={4}
         padding={8}
         width={isMobile ? "95%" : "700px"}
@@ -272,7 +291,7 @@ const Login = () => {
           <Button
             startIcon={<ArrowBack />}
             onClick={() => setIsVerifyingFace(false)}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, color: 'black' }}
           >
             Voltar
           </Button>
@@ -282,7 +301,6 @@ const Login = () => {
           variant="h5"
           mb={3}
           textAlign="center"
-          color="#00796b"
           fontWeight="bold"
         >
           {isVerifyingFace ? (
@@ -293,12 +311,6 @@ const Login = () => {
             </>
           )}
         </Typography>
-
-        {error && (
-          <Typography color="error" mb={2} textAlign="center">
-            {error}
-          </Typography>
-        )}
 
         {!isVerifyingFace ? (
           <form onSubmit={handleLogin} style={{ margin: 'auto', width: '85%' }}>
@@ -361,7 +373,6 @@ const Login = () => {
 
             {userType === "user" && (
               <Box mt={2} textAlign="center">
-               
                 <Button
                   variant={faceImage ? "contained" : "outlined"}
                   color={faceImage ? "success" : "secondary"}
@@ -373,7 +384,7 @@ const Login = () => {
                 >
                   {faceImage
                     ? "Rosto capturado"
-                    : "Iniciar Reconhecimento Facial"}
+                    : "Reconhecimento Facial"}
                   {isLoading && <CircularProgress size={24} sx={{ ml: 1 }} />}
                 </Button>
               </Box>
@@ -390,7 +401,7 @@ const Login = () => {
                 "&:hover": { bgcolor: "#004d40" },
                 py: 1.5,
               }}
-              disabled={(userType === "user" && !faceImage) || isLoading}
+              disabled={isLoading}
             >
               Entrar
               {isLoading && <CircularProgress size={24} sx={{ ml: 1 }} />}
@@ -405,9 +416,11 @@ const Login = () => {
                     src={faceImage}
                     alt="Face capturada"
                     style={{
-                      width: '85%',
+                      maxWidth: "100%",
+                      maxHeight: "300px",
                       borderRadius: 8,
-                      marginBottom: 4,
+                      marginBottom: 16,
+                      transform: "scaleX(-1)",
                     }}
                   />
                 </Box>
@@ -423,19 +436,19 @@ const Login = () => {
                     startIcon={<Face />}
                     color="success"
                     disabled={isLoading}
-                    sx={{ flexGrow: 1, maxWidth: 200 }}
+                    sx={{ py: 1.5 }}
                   >
                     Verificar
-                    {isLoading && <CircularProgress size={24} sx={{ ml: 1 }} />}
+                    {isLoading && <CircularProgress size={16} sx={{ ml: 1 }} />}
                   </Button>
                   <Button
                     variant="outlined"
                     onClick={() => setFaceImage(null)}
                     startIcon={<CameraAlt />}
                     disabled={isLoading}
-                    sx={{ flexGrow: 1, maxWidth: 200 }}
+                    sx={{ py: 1.5 }}
                   >
-                    Capturar Novamente
+                    Capturar
                   </Button>
                 </Box>
               </Box>
@@ -446,12 +459,12 @@ const Login = () => {
                     ref={webcamRef}
                     audio={false}
                     screenshotFormat="image/jpeg"
-                    width={isMobile ? 320 : 640}
-                    height={isMobile ? 240 : 480}
+                    width={window.innerWidth < 600 ? 320 : 640}
+                    height={window.innerWidth < 600 ? 240 : 480}
                     videoConstraints={{
                       facingMode: "user",
-                      width: isMobile ? 320 : 640,
-                      height: isMobile ? 240 : 480,
+                      width: { ideal: window.innerWidth < 600 ? 320 : 640 },
+                      height: { ideal: window.innerWidth < 600 ? 240 : 480 }
                     }}
                     style={{
                       display: "block",
@@ -459,6 +472,8 @@ const Login = () => {
                       margin: "0 auto",
                       transform: "scaleX(-1)",
                       maxWidth: "100%",
+                      width: "100%",
+                      height: "auto"
                     }}
                   />
                   <canvas
@@ -490,7 +505,7 @@ const Login = () => {
                         sx={{ mt: 2, py: 1.5, width: "100%", maxWidth: 300 }}
                         disabled={isLoading}
                       >
-                        Capturar Foto
+                        Capturar
                         {isLoading && (
                           <CircularProgress size={24} sx={{ ml: 1 }} />
                         )}
@@ -517,17 +532,10 @@ const Login = () => {
           open={snackbarOpen}
           autoHideDuration={6000}
           onClose={() => setSnackbarOpen(false)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
           <Alert
             onClose={() => setSnackbarOpen(false)}
-            severity={
-              snackbarMessage.includes("sucesso")
-                ? "success"
-                : snackbarMessage.includes("Erro")
-                ? "error"
-                : "warning"
-            }
+            severity={snackbarSeverity}
             sx={{ width: "100%" }}
           >
             {snackbarMessage}

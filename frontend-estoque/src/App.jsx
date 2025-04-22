@@ -1,5 +1,6 @@
-import Inter from "../public/static/fonts/Inter.ttf";
-import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { ThemeProvider, CssBaseline } from "@mui/material";
+import { lightTheme, darkTheme } from "./context/theme";
 import RootComponent from "./components/RootComponent";
 import {
   Route,
@@ -9,10 +10,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import Home from "./components/core/bodyComponents/home/Home";
-import Revenue from "./components/core/bodyComponents/revenue/Revenue";
-import Growth from "./components/core/bodyComponents/growth/Growth";
-import Report from "./components/core/bodyComponents/report/Report";
-import Setting from "./components/core/bodyComponents/settings/Setting";
+import Settings from "./components/core/bodyComponents/settings/Settings";
 import Login from "./components/auth/login/Login";
 import PrivateRoute from './components/auth/privateRoute';
 import ProductManagement from "./components/core/bodyComponents/product/ProductManagement";
@@ -20,40 +18,27 @@ import CategoryManagement from "./components/core/bodyComponents/category/Catego
 import CustomerManagement from "./components/core/bodyComponents/customer/CustomerManagement";
 import SupplierManagement from "./components/core/bodyComponents/supplier/SupplierManagement";
 import InventoryManagement from "./components/core/bodyComponents/inventory/InventoryManagement";
-import OrderManagement from "./components/core/bodyComponents/order/OrderManagement";
 import QRCodeGenerator from "./components/core/bodyComponents/qrcode/QRCodeGenerator";
 import UserProfile from "./components/core/bodyComponents/user/UserProfile";
 import UserManagement from "./components/core/bodyComponents/user/UserManagement";
 import CalendarWithNotes from "./components/core/bodyComponents/calendar/CalendarWithNotes";
 import MapComponent from "./components/core/bodyComponents/maps/Maps";
-import 'leaflet/dist/leaflet.css';
 import ReceivementManagement from "./components/core/bodyComponents/receivement/ReceivementManagement";
 import ExitManagement from "./components/core/bodyComponents/exit/ExitManagement";
+import 'leaflet/dist/leaflet.css';
 
 function App() {
-  const theme = createTheme({
-    spacing: 4,
-    palette: {
-      mode: "light",
-    },
-    typography: {
-      fontFamily: "Inter",
-    },
-    components: {
-      MuiCssBaseline: {
-        styleOverrides: `
-          @font-face {
-            font-family: 'Inter';
-            font-style: normal;
-            font-display: swap;
-            font-weight: 400;
-            src: local('Raleway'), local('Raleway-Regular'), url(${Inter}) format('woff2');
-            unicodeRange: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF;
-          }
-        `,
-      },
-    },
-  });
+  const [darkMode, setDarkMode] = useState(
+    JSON.parse(localStorage.getItem("darkMode")) ?? false
+  );
+
+  const handleToggleTheme = (value) => {
+    setDarkMode(value);
+  };
+
+  useEffect(() => {
+    localStorage.setItem("darkMode", JSON.stringify(darkMode));
+  }, [darkMode]);
 
   const isAuthenticated = () => {
     return localStorage.getItem('token');
@@ -65,33 +50,31 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Navigate to={isAuthenticated() ? "/home" : "/login"} />} />
         <Route path="/" element={<PrivateRoute><RootComponent /></PrivateRoute>}>
-          <Route path="/home" element={<Home />} />
+          <Route path="/home" element={<PrivateRoute onlyAdmin={true}> <Home /> </PrivateRoute>} />
           <Route path="/calendar" element={<CalendarWithNotes />} />
-          <Route path="/maps" element={<MapComponent />} />
+          <Route path="/maps" element={<PrivateRoute onlyAdmin={true}> <MapComponent /> </PrivateRoute>} />
           <Route path="/user" element={<UserProfile />} />
-          <Route path="/create-user" element={<PrivateRoute onlyAdmin={true}> <UserManagement/> </PrivateRoute>} />          
+          <Route path="/create-user" element={<PrivateRoute onlyAdmin={true}> <UserManagement /> </PrivateRoute>} />
           <Route path="/categories" element={<CategoryManagement />} />
           <Route path="/suppliers" element={<SupplierManagement />} />
           <Route path="/products" element={<ProductManagement />} />
           <Route path="/inventory" element={<InventoryManagement />} />
           <Route path="/receivements" element={<ReceivementManagement />} />
           <Route path="/exits" element={<ExitManagement />} />
-          <Route path="/orders" element={<OrderManagement />} />
           <Route path="/customers" element={<CustomerManagement />} />
-          <Route path="/revenue" element={<Revenue />} />
-          <Route path="/growth" element={<Growth />} />
-          <Route path="/reports" element={<Report />} />
-          <Route path="/settings" element={<Setting />} />
           <Route path="/qrcode-generator" element={<QRCodeGenerator />} />
+          <Route path="/settings" element={<PrivateRoute onlyAdmin={true}> 
+            <Settings onToggleTheme={handleToggleTheme} /> 
+          </PrivateRoute>} />
         </Route>
       </Route>
     )
   );
 
   return (
-    <ThemeProvider theme={theme}>
-      <RouterProvider router={router} />
+    <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
       <CssBaseline />
+      <RouterProvider router={router} />
     </ThemeProvider>
   );
 }

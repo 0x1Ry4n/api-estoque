@@ -25,9 +25,9 @@ import {
   VisibilityOff,
 } from "@mui/icons-material";
 import { useForm, Controller } from "react-hook-form";
-import * as faceapi from "face-api.js";
 import Webcam from "react-webcam";
 import api from "../../../../api";
+import * as faceapi from "@vladmandic/face-api";
 
 const CreateUser = ({ onUserAdded }) => {
   const {
@@ -37,22 +37,22 @@ const CreateUser = ({ onUserAdded }) => {
     formState: { errors },
   } = useForm();
 
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Face detection state
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
+  const detectionInterval = useRef(null);
+
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [userFaceImage, setUserFaceImage] = useState(null);
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [isFaceDetected, setIsFaceDetected] = useState(false);
-  const [detectionScore, setDetectionScore] = useState(0);
+  const [userFaceImage, setUserFaceImage] = useState(null);
   const [faceDetection, setFaceDetection] = useState(null);
-  const detectionInterval = useRef(null);
+  const [faceRecognitionEnabled, setFaceRecognitionEnabled] = useState(JSON.parse(localStorage.getItem("facialRecognition")));
+  const [detectionScore, setDetectionScore] = useState(0);
 
   useEffect(() => {
     const loadModels = async () => {
@@ -128,7 +128,7 @@ const CreateUser = ({ onUserAdded }) => {
   const startCamera = () => {
     setIsCameraActive(true);
     setUserFaceImage(null);
-    
+
     if (detectionInterval.current) {
       clearInterval(detectionInterval.current);
     }
@@ -162,7 +162,7 @@ const CreateUser = ({ onUserAdded }) => {
 
   const onSubmit = async (data) => {
     try {
-      if (!userFaceImage) {
+      if (faceRecognitionEnabled && !userFaceImage) {
         setSnackbarMessage("Por favor, capture uma imagem facial antes de continuar.");
         setSnackbarSeverity("warning");
         setSnackbarOpen(true);
@@ -180,20 +180,26 @@ const CreateUser = ({ onUserAdded }) => {
         faceImage: userFaceImage,
       });
 
+      if (response.status === 400) {
+        setSnackbarSeverity("error");
+        setSnackbarMessage(response?.data?.message);
+        setSnackbarOpen(true);
+      }
+
       if (response.status === 201) {
         if (typeof onUserAdded === "function") {
           onUserAdded(response.data);
         }
 
         setSnackbarSeverity("success");
-        setSnackbarMessage("Usuário criado com sucesso!");
+        setSnackbarMessage(response?.data?.message);
         setSnackbarOpen(true);
         reset();
         setUserFaceImage(null);
       }
     } catch (error) {
       const errorMessage =
-        error.response?.data?.error || "Erro ao criar usuário. Tente novamente.";
+        error.response?.data?.message || error.response?.data?.error || error.message;
       setSnackbarSeverity("error");
       setSnackbarMessage(errorMessage);
       setSnackbarOpen(true);
@@ -203,27 +209,29 @@ const CreateUser = ({ onUserAdded }) => {
   };
 
   return (
-    <Box sx={{ maxWidth: "100%", padding: 3 }}>
-      <Paper elevation={4} sx={{ padding: 4, borderRadius: 3 }}>
+    <Box>
+      <Paper
+        elevation={4}
+        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: '95%' }}
+      >
         <Typography
           variant="h5"
           sx={{
-            mb: 4,
+            mb: 3,
             fontWeight: "bold",
             display: "flex",
             alignItems: "center",
-            color: "primary.main",
           }}
         >
-          <AccountCircle sx={{ mr: 2 }} />
+          <AccountCircle sx={{ mr: 1 }} />
           Cadastro de Usuário
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
-              <Card variant="outlined" sx={{ mb: 3 }}>
-                <CardContent>
+              <Card variant="outlined" sx={{ mb: 3, borderRadius: 2, backgroundColor: "#f5f5f5" }}>
+                <CardContent sx={{ p: 6 }}>
                   <Typography variant="h6" sx={{ mb: 3, fontWeight: "bold" }}>
                     Informações Pessoais
                   </Typography>
@@ -331,168 +339,174 @@ const CreateUser = ({ onUserAdded }) => {
                       />
                     )}
                   />
+
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      size="large"
+                      disabled={faceRecognitionEnabled && !userFaceImage || isLoading}
+                      sx={{
+                        minWidth: "200px",
+                        py: 1.5,
+                        fontSize: "1rem",
+                      }}
+                      startIcon={isLoading ? <CircularProgress size={24} /> : <Save />}
+                    >
+                      Finalizar Cadastro
+                    </Button>
+                  </Box>
                 </CardContent>
               </Card>
-
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  disabled={!userFaceImage || isLoading}
-                  sx={{
-                    minWidth: "200px",
-                    py: 1.5,
-                    fontSize: "1rem",
-                  }}
-                  startIcon={isLoading ? <CircularProgress size={24} /> : <Save />}
-                >
-                  Finalizar Cadastro
-                </Button>
-              </Box>
             </Grid>
 
-            <Grid item xs={12} md={6}>
-              <Card variant="outlined" sx={{ height: "100%" }}>
-                <CardContent sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                  <Typography variant="h6" sx={{ mb: 3, fontWeight: "bold" }}>
-                    Cadastro Facial
-                  </Typography>
+            {faceRecognitionEnabled && (
+              <Grid item xs={12} md={6}>
+                <Card variant="outlined" sx={{ height: "100%", borderRadius: 2 }}>
+                  <CardContent sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                    <Typography variant="h6" sx={{ mb: 3, fontWeight: "bold" }}>
+                      Cadastro Facial
+                    </Typography>
 
-                  <Box
-                    sx={{
-                      flexGrow: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      minHeight: "300px",
-                      backgroundColor: "#f5f5f5",
-                      borderRadius: "8px",
-                      p: 2,
-                      position: "relative",
-                    }}
-                  >
-                    {!isCameraActive && !userFaceImage ? (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={startCamera}
-                        startIcon={<CameraAlt />}
-                        sx={{ py: 2 }}
-                        disabled={!modelsLoaded || isLoading}
-                      >
-                        {modelsLoaded ? "Iniciar Câmera" : "Carregando modelos..."}
-                        {isLoading && <CircularProgress size={24} sx={{ ml: 1 }} />}
-                      </Button>
-                    ) : userFaceImage ? (
-                      <Box textAlign="center">
-                        <Box position="relative" display="inline-block">
-                          <img
-                            src={userFaceImage}
-                            alt="Face capturada"
-                            style={{
-                              maxWidth: "100%",
-                              maxHeight: "300px",
-                              borderRadius: 8,
-                              marginBottom: 16,
-                            }}
-                          />
-                        </Box>
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        minHeight: "300px",
+                        backgroundColor: "#f5f5f5",
+                        borderRadius: "8px",
+                        p: 2,
+                        position: "relative",
+                      }}
+                    >
+                      {!isCameraActive && !userFaceImage ? (
                         <Button
                           variant="contained"
+                          color="primary"
                           onClick={startCamera}
-                          startIcon={<Refresh />}
-                          sx={{ mt: 2 }}
+                          startIcon={<CameraAlt />}
+                          sx={{ py: 2 }}
+                          disabled={!modelsLoaded || isLoading}
                         >
-                          Tirar Outra Foto
+                          {modelsLoaded ? "Iniciar Câmera" : "Carregando modelos..."}
+                          {isLoading && <CircularProgress size={24} sx={{ ml: 1 }} />}
                         </Button>
-                      </Box>
-                    ) : (
-                      <Box textAlign="center" position="relative">
-                        <Box position="relative" display="inline-block">
-                          <Webcam
-                            ref={webcamRef}
-                            audio={false}
-                            screenshotFormat="image/jpeg"
-                            width={640}
-                            height={480}
-                            videoConstraints={{
-                              facingMode: "user",
-                              width: 640,
-                              height: 480,
-                            }}
-                            style={{
-                              display: "block",
-                              borderRadius: 8,
-                              margin: "0 auto",
-                              transform: "scaleX(-1)",
-                              maxWidth: "100%",
-                            }}
-                          />
-                          <canvas
-                            ref={canvasRef}
-                            style={{
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              width: "100%",
-                              height: "100%",
-                              pointerEvents: "none",
-                              transform: "scaleX(-1)",
-                            }}
-                          />
+                      ) : userFaceImage ? (
+                        <Box textAlign="center">
+                          <Box position="relative" display="inline-block">
+                            <img
+                              src={userFaceImage}
+                              alt="Face capturada"
+                              style={{
+                                maxWidth: "100%",
+                                maxHeight: "300px",
+                                borderRadius: 8,
+                                marginBottom: 16,
+                                transform: "scaleX(-1)",
+                              }}
+                            />
+                          </Box>
+                          <br />
+                          <Button
+                            variant="outlined"
+                            onClick={startCamera}
+                            startIcon={<Refresh />}
+                            sx={{ mt: 2 }}
+                          >
+                            Tirar Outra Foto
+                          </Button>
                         </Box>
+                      ) : (
+                        <Box textAlign="center" position="relative">
+                          <Box position="relative" display="inline-block">
+                            <Webcam
+                              ref={webcamRef}
+                              audio={false}
+                              screenshotFormat="image/jpeg"
+                              width={window.innerWidth < 600 ? 320 : 640}
+                              height={window.innerWidth < 600 ? 240 : 480}
+                              videoConstraints={{
+                                facingMode: "user",
+                                width: { ideal: window.innerWidth < 600 ? 320 : 640 },
+                                height: { ideal: window.innerWidth < 600 ? 240 : 480 }
+                              }}
+                              style={{
+                                display: "block",
+                                borderRadius: 8,
+                                margin: "0 auto",
+                                transform: "scaleX(-1)",
+                                maxWidth: "100%",
+                                width: "100%",
+                                height: "auto"
+                              }}
+                            />
+                            <canvas
+                              ref={canvasRef}
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "100%",
+                                height: "100%",
+                                pointerEvents: "none",
+                                transform: "scaleX(-1)",
+                              }}
+                            />
+                          </Box>
 
-                        <Box mt={3}>
-                          {faceDetection ? (
-                            <Box>
-                              <Typography variant="body1" color="text.secondary">
-                                Confiança da detecção:{" "}
-                                {Math.round(detectionScore * 100)}%
-                              </Typography>
+                          <Box>
+                            {faceDetection ? (
+                              <Box>
+                                <Typography variant="body1" color="text.secondary">
+                                  Confiança da detecção:{" "}
+                                  {Math.round(detectionScore * 100)}%
+                                </Typography>
 
-                              <Button
-                                variant="contained"
-                                onClick={captureFace}
-                                startIcon={<CameraAlt />}
-                                sx={{ mt: 2, py: 1.5, width: "100%", maxWidth: 300 }}
-                                disabled={isLoading}
-                              >
-                                Capturar Foto
-                                {isLoading && (
-                                  <CircularProgress size={24} sx={{ ml: 1 }} />
-                                )}
-                              </Button>
-                            </Box>
-                          ) : (
-                            <Box>
-                              <Typography variant="body1" color="error" mt={1}>
-                                Posicione seu rosto dentro do quadro
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary" mt={1}>
-                                Certifique-se de que seu rosto está bem iluminado e
-                                visível
-                              </Typography>
-                            </Box>
-                          )}
+                                <Button
+                                  variant="contained"
+                                  onClick={captureFace}
+                                  startIcon={<CameraAlt />}
+                                  sx={{ mt: 2, py: 1.5, width: "90%", maxWidth: 300 }}
+                                  disabled={isLoading}
+                                >
+                                  Capturar Foto
+                                  {isLoading && (
+                                    <CircularProgress size={24} sx={{ ml: 1 }} />
+                                  )}
+                                </Button>
+                              </Box>
+                            ) : (
+                              <Box>
+                                <Typography variant="body1" color="error" mt={1}>
+                                  Posicione seu rosto dentro do quadro
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" mt={1}>
+                                  Certifique-se de que seu rosto está bem iluminado e
+                                  visível
+                                </Typography>
+                              </Box>
+                            )}
+                          </Box>
                         </Box>
-                      </Box>
-                    )}
-                  </Box>
+                      )}
+                    </Box>
 
-                  <Typography variant="body2" sx={{ mt: 2, color: "text.secondary" }}>
-                    {userFaceImage
-                      ? "Foto capturada com sucesso!"
-                      : isCameraActive
-                      ? isFaceDetected
-                        ? "Rosto detectado! Clique em Capturar Foto"
-                        : "Posicione seu rosto na câmera"
-                      : "Clique para iniciar a câmera"}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+                    <Typography variant="body2" sx={{ mt: 2, color: "text.secondary" }}>
+                      {userFaceImage
+                        ? "Foto capturada com sucesso!"
+                        : isCameraActive
+                          ? isFaceDetected
+                            ? "Rosto detectado! Clique em Capturar Foto"
+                            : "Posicione seu rosto na câmera"
+                          : "Clique para iniciar a câmera"}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            )}
           </Grid>
         </Box>
       </Paper>
@@ -501,7 +515,6 @@ const CreateUser = ({ onUserAdded }) => {
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}

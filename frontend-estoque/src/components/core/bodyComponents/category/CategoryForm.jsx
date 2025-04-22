@@ -10,8 +10,8 @@ import {
   Alert,
 } from '@mui/material';
 import { AddCircleOutline, CategoryOutlined } from '@mui/icons-material';
-import api from './../../../../api'; 
 import { useForm, Controller } from 'react-hook-form';
+import api from './../../../../api';
 
 const CategoryForm = ({ onCategoryAdded }) => {
   const { control, handleSubmit, reset, formState: { errors } } = useForm();
@@ -28,7 +28,7 @@ const CategoryForm = ({ onCategoryAdded }) => {
       const response = await api.post('/category', categoryData);
       if (response.status === 201) {
         if (typeof onCategoryAdded === 'function') {
-          onCategoryAdded(response.data); 
+          onCategoryAdded(response.data);
         } else {
           console.error('onCategoryAdded is not a function');
         }
@@ -36,10 +36,10 @@ const CategoryForm = ({ onCategoryAdded }) => {
         setSnackbarMessage('Categoria cadastrada com sucesso!');
         setSnackbarSeverity('success');
         setSnackbarOpen(true);
-        reset();  
+        reset();
       }
     } catch (error) {
-      setSnackbarMessage('Erro ao cadastrar categoria: ' + (error.response?.data?.message || 'Erro desconhecido.'));
+      setSnackbarMessage('Erro ao cadastrar categoria: ' + (error.response?.data?.message || error.response?.data?.error || error.message));
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
     }
@@ -51,7 +51,7 @@ const CategoryForm = ({ onCategoryAdded }) => {
 
   return (
     <Box>
-      <Paper elevation={4} sx={{ padding: 10, borderRadius: 2, backgroundColor: '#f5f5f5',  width: "95%",}}>
+      <Paper elevation={4} sx={{ padding: 6, borderRadius: 2, backgroundColor: '#f5f5f5', width: "95%", }}>
         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
           <CategoryOutlined sx={{ mr: 1 }} />
           Cadastrar Categoria
@@ -80,7 +80,7 @@ const CategoryForm = ({ onCategoryAdded }) => {
                 InputLabelProps={{
                   shrink: true,
                 }}
-                sx={{ mb: 2 }} 
+                sx={{ mb: 2 }}
               />
             )}
           />

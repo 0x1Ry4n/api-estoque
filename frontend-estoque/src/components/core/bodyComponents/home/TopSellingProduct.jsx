@@ -1,6 +1,6 @@
-import React from "react";
 import {
   Box,
+  Divider,
   Table,
   TableBody,
   TableCell,
@@ -8,64 +8,136 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useMediaQuery,
+  useTheme,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel
 } from "@mui/material";
+import { useState } from "react";
 
-export default function TopSellingProducts({ orders }) {
-  const productSales = {};
+export default function TopSellingProducts({ receivements, exits }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  orders.forEach(order => {
-    const productId = order.inventory?.productId;
-    const productName = order.inventory?.productName; // Usando optional chaining
-    const price = order.inventory?.unitPrice; // Usando optional chaining
-    const totalPrice = order.totalPrice;
+  const [filter, setFilter] = useState("exits");
 
-    if (productId && productName && price !== undefined) { // Verificando se as propriedades estão definidas
-      if (productSales[productId]) {
-        productSales[productId].quantity += order.quantity;
-        productSales[productId].amount += totalPrice;
-      } else {
-        productSales[productId] = {
+  const receivementsMap = {};
+  const exitsMap = {};
+
+  receivements.forEach(receivement => {
+    const { productId, productName, unitPrice, totalPrice, quantity } = receivement;
+
+    if (productId && productName && unitPrice !== undefined && quantity !== undefined) {
+      if (!receivementsMap[productId]) {
+        receivementsMap[productId] = {
           name: productName,
-          price: price,
-          quantity: order.quantity,
-          amount: totalPrice,
+          price: unitPrice,
+          quantity: 0,
+          amount: 0,
         };
       }
+
+      receivementsMap[productId].quantity += quantity;
+      receivementsMap[productId].amount += totalPrice;
     }
   });
 
-  const topProducts = Object.values(productSales);
+  exits.forEach(exit => {
+    const { productId, productName, unitPrice, totalPrice, quantity } = exit;
+
+    if (productId && productName && unitPrice !== undefined && quantity !== undefined) {
+      if (!exitsMap[productId]) {
+        exitsMap[productId] = {
+          name: productName,
+          price: unitPrice,
+          quantity: 0,
+          amount: 0,
+        };
+      }
+
+      exitsMap[productId].quantity += quantity;
+      exitsMap[productId].amount += totalPrice;
+    }
+  });
+
+  const topReceivements = Object.values(receivementsMap)
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 10);
+
+  const topExits = Object.values(exitsMap)
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 10);
+
+  const dataToShow = filter === "receivements" ? topReceivements : topExits;
 
   return (
     <Box
       sx={{
-        margin: 3,
+        margin: { xs: 1, sm: 3 },
         bgcolor: "white",
         borderRadius: 2,
-        padding: 3,
+        padding: { xs: 1, sm: 3 },
         height: "95%",
+        overflowX: "auto"
       }}
     >
-      <Typography variant="h6" fontWeight={"bold"} sx={{ mx: 3 }}>
-        Produtos mais vendidos
-      </Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>
+        <Typography
+          variant={isMobile ? "h5" : "h4"}
+          sx={{
+            fontWeight: 'bold',
+            fontSize: {
+              xs: '1rem',
+              sm: '1.5rem',
+              md: '1.5rem'
+            },
+            mb: { xs: 2, sm: 3 },
+            ml: { xs: 1, sm: 4 },
+            mt: { xs: 2, sm: 6, md: 10 },
+            lineHeight: 1.2,
+          }}
+        >
+          {filter === "receivements" ? "Produtos com mais Recebimentos" : "Produtos com mais Saídas"}
+        </Typography>
+
+        <FormControl size="small" sx={{ minWidth: 180, mt: { xs: 1, sm: 6 }, mr: { xs: 1, sm: 4 } }}>
+          <InputLabel>Tipo</InputLabel>
+          <Select
+            value={filter}
+            label="Tipo"
+            onChange={(e) => setFilter(e.target.value)}
+          >
+            <MenuItem value="exits">Saídas</MenuItem>
+            <MenuItem value="receivements">Recebimentos</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
+      <Divider sx={{ my: 2 }} />
+
       <TableContainer>
-        <Table>
+        <Table size={isMobile ? "small" : "medium"}>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bolder" }}>Nome Produto</TableCell>
-              <TableCell sx={{ fontWeight: "bolder" }}>Preço Unitário</TableCell>
-              <TableCell sx={{ fontWeight: "bolder" }}>Quantidade</TableCell>
-              <TableCell sx={{ fontWeight: "bolder" }}>Valor Total</TableCell>
+              <TableCell sx={{ fontWeight: "bolder", whiteSpace: "nowrap" }}>Nome Produto</TableCell>
+              <TableCell sx={{ fontWeight: "bolder", whiteSpace: "nowrap" }}>Preço Unitário</TableCell>
+              <TableCell sx={{ fontWeight: "bolder", whiteSpace: "nowrap" }}>Quantidade</TableCell>
+              <TableCell sx={{ fontWeight: "bolder", whiteSpace: "nowrap" }}>Valor Total</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {topProducts.map((product, id) => (
+            {dataToShow.map((product, id) => (
               <TableRow key={id}>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>${product.price ? product.price.toFixed(2) : 'N/A'}</TableCell> 
-                <TableCell>{product.quantity}</TableCell>
-                <TableCell>${product.amount ? product.amount.toFixed(2) : 'N/A'}</TableCell> 
+                <TableCell sx={{ whiteSpace: "nowrap" }}>{product.name}</TableCell>
+                <TableCell sx={{ whiteSpace: "nowrap" }}>
+                  {product.price !== undefined ? `$${product.price.toFixed(2)}` : "N/A"}
+                </TableCell>
+                <TableCell sx={{ whiteSpace: "nowrap" }}>{product.quantity}</TableCell>
+                <TableCell sx={{ whiteSpace: "nowrap" }}>
+                  {product.amount !== undefined ? `$${product.amount.toFixed(2)}` : "N/A"}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

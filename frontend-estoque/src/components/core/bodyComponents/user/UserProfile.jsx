@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, Paper, Grid, CircularProgress, Avatar, Button } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Box, Typography, Paper, Grid, CircularProgress, Avatar, Button, useMediaQuery, useTheme } from '@mui/material';
 import { AccountCircle } from '@mui/icons-material';
 import api from './../../../../api';
-import { useNavigate } from 'react-router-dom';
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -47,8 +50,16 @@ const UserProfile = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-      <Paper elevation={6} sx={{ p: 4, width: '100%', maxWidth: 500, borderRadius: 2 }}>
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      ml: !isMobile ? '25%' : '',
+      width: isMobile ? '100vw' : '40vw',
+      p: isMobile ? 4 : 2,
+      mt: 2,
+      boxSizing: 'border-box',
+    }}>
+      <Paper elevation={6} sx={{ p: 10, width: '100%', maxWidth: 500, borderRadius: 2 }}>
         <Grid container spacing={4}>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
             <Avatar sx={{ width: 100, height: 100, bgcolor: '#00796b' }}>

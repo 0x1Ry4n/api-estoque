@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -9,9 +9,7 @@ import {
   Snackbar,
   Alert,
   MenuItem,
-  Select,
   InputAdornment,
-  InputLabel,
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -24,9 +22,9 @@ import {
   WebOutlined,
   LocationOnOutlined,
 } from "@mui/icons-material";
-
+import { fileExporters } from "../../../../utils/utils";
 import InputMask from "react-input-mask";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import api from "../../../../api";
 
@@ -38,6 +36,12 @@ const Suppliers = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [isEditing, setIsEditing] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 0,
+    pageSize: 20,
+    totalElements: 0,
+    totalPages: 0
+  })
 
   const communicationPreferenceMap = {
     EMAIL: "Email",
@@ -47,14 +51,19 @@ const Suppliers = () => {
   };
 
   useEffect(() => {
-    fetchSuppliers();
+    fetchSuppliers(pagination.page, pagination.pageSize);
   }, []);
 
-  const fetchSuppliers = async () => {
+  const fetchSuppliers = async (page, pageSize) => {
     try {
-      const response = await api.get("/supplier");
-      setRows(response.data.content);
-      console.log(response.data.content);
+      const res = await api.get(`/supplier?page=${page}&size=${pageSize}`);
+      setRows(res.data.content);
+      setPagination({
+        page: res.data.number,
+        pageSize: res.data.size,
+        totalElements: res.data.totalElements,
+        totalPages: res.data.totalPages
+      })
     } catch (error) {
       console.error("Erro ao buscar fornecedores: ", error);
       setSnackbarMessage("Erro ao carregar fornecedores.");
@@ -91,11 +100,8 @@ const Suppliers = () => {
         setSnackbarMessage("Fornecedor deletado com sucesso!");
         setSnackbarSeverity("success");
       } catch (error) {
-        console.log(error);
         setSnackbarMessage(
-          `Erro ao deletar fornecedor: ${
-            error.response?.data?.error || error.message
-          }`
+          `Erro ao deletar o fornecedor: ${error.response?.data?.message || error.response?.data?.error || error.message}`
         );
         setSnackbarSeverity("error");
       } finally {
@@ -131,9 +137,7 @@ const Suppliers = () => {
       setSnackbarSeverity("success");
     } catch (error) {
       setSnackbarMessage(
-        `Erro ao salvar fornecedor: ${
-          error.response?.data?.error || error.message
-        }`
+        `Erro ao salvar o fornecedor: ${error.response?.data?.message || error.response?.data?.error || error.message}`
       );
       setSnackbarSeverity("error");
     } finally {
@@ -143,7 +147,7 @@ const Suppliers = () => {
   };
 
   const handleRefresh = () => {
-    fetchSuppliers();
+    fetchSuppliers(pagination.page, pagination.pageSize);
     setSnackbarMessage("Lista de fornecedores atualizada!");
     setSnackbarSeverity("info");
     setSnackbarOpen(true);
@@ -199,14 +203,31 @@ const Suppliers = () => {
         width: "95%",
       }}
     >
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={handleRefresh}
-        sx={{ mb: 2 }}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
       >
-        Atualizar Lista
-      </Button>
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
+        >
+          Atualizar Lista
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() =>
+            fileExporters.exportToExcel("Fornecedores", "fornecedores.xlsx", rows)
+          }
+        >
+          Exportar Excel
+        </Button>
+      </div>
       <div
         style={{
           height: 400,
@@ -217,7 +238,23 @@ const Suppliers = () => {
           overflow: "hidden",
         }}
       >
-        <DataGrid rows={rows} columns={columns} />
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rowCount={pagination.totalElements}
+          paginationMode="server"
+          paginationModel={{
+            page: pagination.page,
+            pageSize: pagination.pageSize,
+          }}
+          onPaginationModelChange={({ page, pageSize }) => {
+            const newPagination = { ...pagination, page, pageSize };
+            setPagination(newPagination);
+            fetchSuppliers(page, pageSize);
+          }}
+          pageSizeOptions={[20, 50, 100]}
+        />
       </div>
 
       <Dialog open={open} onClose={handleClose}>
@@ -418,6 +455,7 @@ const Suppliers = () => {
         <Alert
           onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
+          sx={{ width: "100%" }}
         >
           {snackbarMessage}
         </Alert>

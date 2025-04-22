@@ -13,7 +13,8 @@ import {
   Delete as DeleteIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { fileExporters } from "../../../../utils/utils";
 import api from "../../../../api";
 import Swal from "sweetalert2";
 
@@ -26,15 +27,28 @@ const Inventory = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [isEditing, setIsEditing] = useState(false);
   const [products, setProducts] = useState([]);
+  const [pagination, setPagination] = useState({
+    page: 0,
+    pageSize: 20,
+    totalElements: 0,
+    totalPages: 0
+  })
 
   useEffect(() => {
-    fetchInventory();
+    fetchInventory(pagination.page, pagination.pageSize);
   }, []);
 
-  const fetchInventory = async () => {
+  const fetchInventory = async (page, pageSize) => {
     try {
-      const response = await api.get("/products/inventory");
-      setRows(response.data.content);
+      const res = await api.get(`/products/inventory?page=${page}&size=${pageSize}`);
+      setRows(res.data.content);
+      setPagination({
+        page: res.data.number,
+        pageSize: res.data.size,
+        totalElements: res.data.totalElements,
+        totalPages: res.data.totalPages
+      })
+
       await fetchProducts();
     } catch (error) {
       console.error("Erro ao buscar inventário: ", error);
@@ -80,9 +94,8 @@ const Inventory = () => {
         setSnackbarMessage("Item de inventário deletado com sucesso!");
         setSnackbarSeverity("success");
       } catch (error) {
-        console.log(error.response.data.message);
         setSnackbarMessage(
-          "Erro ao deletar item de inventário: " + error.response.data.message
+          `Erro ao deletar o inventário: ${error.response?.data?.message || error.response?.data?.error || error.message}`
         );
         setSnackbarSeverity("error");
       } finally {
@@ -114,7 +127,7 @@ const Inventory = () => {
       }
       setSnackbarSeverity("success");
     } catch (error) {
-      setSnackbarMessage("Erro ao salvar item de inventário.");
+      setSnackbarMessage(`Erro ao salvar o inventário: ${error.response?.data?.message || error.response?.data?.error || error.message}`);
       setSnackbarSeverity("error");
     } finally {
       handleClose();
@@ -195,17 +208,34 @@ const Inventory = () => {
         padding: "20px",
         backgroundColor: "#f5f5f5",
         borderRadius: "8px",
-         width: '95%'
+        width: "95%",
       }}
     >
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={handleRefresh}
-        sx={{ mb: 2 }}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
       >
-        Atualizar Lista
-      </Button>
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
+        >
+          Atualizar Lista
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() =>
+            fileExporters.exportToExcel("Inventários", "inventarios.xlsx", rows)
+          }
+        >
+          Exportar Excel
+        </Button>
+      </div>
       <div
         style={{
           height: 400,
@@ -216,7 +246,23 @@ const Inventory = () => {
           overflow: "hidden",
         }}
       >
-        <DataGrid rows={rows} columns={columns} />
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rowCount={pagination.totalElements}
+          paginationMode="server"
+          paginationModel={{
+            page: pagination.page,
+            pageSize: pagination.pageSize,
+          }}
+          onPaginationModelChange={({ page, pageSize }) => {
+            const newPagination = { ...pagination, page, pageSize };
+            setPagination(newPagination);
+            fetchInventory(page, pageSize);
+          }}
+          pageSizeOptions={[20, 50, 100]}
+        />
       </div>
 
       <Dialog open={open} onClose={handleClose}>
@@ -306,6 +352,7 @@ const Inventory = () => {
         <Alert
           onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
+          sx={{ width: "100%" }}
         >
           {snackbarMessage}
         </Alert>

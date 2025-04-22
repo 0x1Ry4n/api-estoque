@@ -16,20 +16,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiResponse> handleResponseStatusException(ResponseStatusException ex) {
-        ApiResponse apiResponse = new ApiResponse(ex.getReason());
+        ApiResponse apiResponse = new ApiResponse("error", ex.getReason());
         return ResponseEntity.status(ex.getStatusCode()).body(apiResponse);
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<ApiResponse> handleNoHandlerFoundException(NoHandlerFoundException ex) {
-        ApiResponse apiResponse = new ApiResponse("Rota não encontrada.");
+        ApiResponse apiResponse = new ApiResponse("error", "Rota não encontrada.");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleException(Exception ex) {
         logger.error("Erro interno do servidor: {}", ex.getMessage(), ex);
-        ApiResponse apiResponse = new ApiResponse("Erro interno do servidor.");
+        ApiResponse apiResponse = new ApiResponse("error", "Erro interno do servidor.");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
     }
 }

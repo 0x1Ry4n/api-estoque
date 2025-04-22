@@ -8,7 +8,6 @@ import {
   InputAdornment,
   Snackbar,
   Alert,
-  Select,
   MenuItem,
 } from "@mui/material";
 import {
@@ -25,30 +24,33 @@ import api from "./../../../../api";
 import { useForm, Controller } from "react-hook-form";
 
 const SupplierForm = ({ onSupplierAdded }) => {
+
   const {
     control,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm();
+
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState("");
 
   const onSubmit = async (data) => {
     try {
       const response = await api.post("/supplier", data);
+      
       if (response.status === 201) {
         onSupplierAdded?.(response.data);
         setSnackbarMessage("Fornecedor cadastrado com sucesso!");
         reset();
-      } else {
-        setSnackbarMessage(
-          "Erro ao cadastrar fornecedor: " + response.data.message
-        );
-      }
+      } 
+
       setSnackbarOpen(true);
     } catch (error) {
-      setSnackbarMessage("Erro ao cadastrar fornecedor");
+      setSnackbarMessage(`
+        Erro ao cadastrar fornecedor: ${error.response?.data?.message || error.response?.data?.error || error.message}
+      `);
+      
       setSnackbarOpen(true);
     }
   };
@@ -60,7 +62,7 @@ const SupplierForm = ({ onSupplierAdded }) => {
       <Paper
         elevation={4}
         sx={{
-          padding: 10,
+          padding: 6,
           borderRadius: 3,
           backgroundColor: "#f5f5f5",
           width: "95%",

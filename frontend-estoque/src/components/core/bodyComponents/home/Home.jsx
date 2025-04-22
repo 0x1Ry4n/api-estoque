@@ -1,134 +1,148 @@
-import React, { Component } from "react";
-import { Box, Grid } from "@mui/material";
-
+import { useState, useEffect } from "react";
 import UilReceipt from "@iconscout/react-unicons/icons/uil-receipt";
 import UilBox from "@iconscout/react-unicons/icons/uil-box";
 import UilTruck from "@iconscout/react-unicons/icons/uil-truck";
-import UilCheckCircle from "@iconscout/react-unicons/icons/uil-check-circle";
+import UilCancel from "@iconscout/react-unicons/icons/uil-cancel";
 import InfoCard from "../../subComponents/InfoCard";
 import TotalSales from "./TotalSales";
-import Channels from "./Channels";
-import TopSellingProduct from "./TopSellingProduct";
+import TopSellingProducts from "./TopSellingProduct";
 import api from "../../../../api";
 import SalesByProduct from "./SalesByProduct";
+import { Box, Grid, useMediaQuery, useTheme, Typography } from "@mui/material";
 
-export default class Home extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      orders: [],
-      pendingCount: 0,
-      inProgressCount: 0,
-      deliveredCount: 0,
-      pickedCount: 0,
-      invoiceCount: 0,
-    };
-  }
+const Home = () => {
+  const [state, setState] = useState({
+    receivements: [],
+    exits: [],
+    pendingCount: 0,
+    returnedCount: 0,
+    invoiceCount: 0,
+    loading: true,
+  });
 
-  componentDidMount() {
-    this.fetchAllOrders();
-  }
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  fetchAllOrders = async () => {
+  const fetchAllOrders = async () => {
     try {
-      const response = await api.get('/orders/details');
-      const orders = response.data.content;
+      let response = await api.get("/exits");
+      const exits = response.data?.content || [];
 
-      const pendingCount = orders.filter(order => order.orderStatus === 'PENDING').length;
-      const inProgressCount = orders.filter(order => order.orderStatus === 'IN_PROGRESS').length;
-      const deliveredCount = orders.filter(order => order.orderStatus === 'DELIVERED').length;
-      const pickedCount = orders.filter(order => order.orderStatus === 'PICKED').length;
-      const invoiceCount = orders.filter(order => order.orderStatus === 'INVOICE').length;
+      const pendingCount = exits.filter(exit => exit.status === "PENDING").length;
+      const returnedCount = exits.filter(exit => exit.status === "RETURNED").length;
+      const invoiceCount = exits.filter(exit => exit.status === "COMPLETED").length;
+      const canceledCount = exits.filter(exit => exit.status === "CANCELED").length
 
-      this.setState({ 
-        orders,
+      response = await api.get("/receivements");
+      const receivements = response.data?.content || [];
+      setState({
+        exits,
+        receivements,
         pendingCount,
-        inProgressCount,
-        deliveredCount,
-        pickedCount,
+        returnedCount,
         invoiceCount,
+        canceledCount,
+        loading: false,
       });
     } catch (error) {
-      console.error("Erro ao buscar pedidos:", error);
+      console.error("Erro ao buscar saídas:", error);
+      setState(prev => ({ ...prev, loading: false }));
     }
-  }
+  };
 
-  render() {
-    const { pendingCount, inProgressCount, deliveredCount, pickedCount, invoiceCount } = this.state;
+  useEffect(() => {
+    fetchAllOrders();
+  }, []);
 
-    const cardComponent = [
-      {
-        icon: <UilBox size={60} color={"#F6F4EB"} />,
-        title: "Pendente",
-        subTitle: pendingCount,
-        mx: 3,
-        my: 0,
-      },
-      {
-        icon: <UilTruck size={60} color={"#F6F4EB"} />,
-        title: "Progresso",
-        subTitle: inProgressCount,
-        mx: 5,
-        my: 0,
-      },
-      {
-        icon: <UilCheckCircle size={60} color={"#F6F4EB"} />,
-        title: "Entregue",
-        subTitle: deliveredCount,
-        mx: 5,
-        my: 0,
-      },
-      {
-        icon: <UilReceipt size={60} color={"#F6F4EB"} />,
-        title: "Faturado",
-        subTitle: invoiceCount,
-        mx: 3,
-        my: 0,
-      },
-    ];
+  const {
+    pendingCount,
+    returnedCount,
+    invoiceCount,
+    exits,
+    receivements,
+    loading,
+  } = state;
 
-    return (
-      <Box
+  const cardComponent = [
+    {
+      icon: <UilCancel size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
+      title: "Cancelado",
+      subTitle: pendingCount,
+      mx: 1,
+      my: 0,
+    },
+    {
+      icon: <UilBox size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
+      title: "Pendente",
+      subTitle: pendingCount,
+      mx: 1,
+      my: 0,
+    },
+    {
+      icon: <UilTruck size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
+      title: "Retornado",
+      subTitle: returnedCount,
+      mx: 1,
+      my: 0,
+    },
+    {
+      icon: <UilReceipt size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
+      title: "Completado",
+      subTitle: invoiceCount,
+      mx: 1,
+      my: 0,
+    },
+  ];
+
+  return (
+    <Box sx={{
+      width: isMobile ? '97vw' : '80vw',
+      minHeight: '100vh',
+      p: isMobile ? 4 : 2,
+      boxSizing: 'border-box',
+      mx: 'auto',
+    }}>
+      <Grid
+        container
+        spacing={isMobile ? 2 : 4}
         sx={{
-          margin: 0,
-          padding: 3,
+          justifyContent: { xs: "center", sm: "space-between" },
+          mx: { xs: 0, sm: 0 },
         }}
       >
-        <Grid
-          container
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginX: 3,
-            borderRadius: 2,
-            padding: 0,
-          }}
-        >
-          {cardComponent.map((card, index) => (
-            <Grid item md={2} key={index}>
-              <InfoCard card={card} />
+        {cardComponent.map((card, index) => (
+          <Grid item xs={12} sm={6} md={4} key={index}>
+            <InfoCard card={card} />
+          </Grid>
+        ))}
+      </Grid>
+
+      {!loading && exits.length === 0 && receivements.length === 0 ? (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Typography variant="h6">Nenhum dado disponível</Typography>
+        </Box>
+      ) : (
+        <>
+          <Grid container spacing={isMobile ? 1 : 2} sx={{ mt: 2, mx: { xs: 0, sm: 0 } }}>
+            <Grid item xs={12} md={8}>
+              <TotalSales receivements={receivements} exits={exits} />
             </Grid>
-          ))}
-        </Grid>
+            <Grid item xs={12} md={4} sx={{ mt: 2 }}>
+              {receivements.length > 0 && (
+                <SalesByProduct receivements={receivements} />
+              )}
+            </Grid>
+          </Grid>
 
-        <Grid container sx={{ marginX: 3 }}>
-          <Grid item md={8}>
-            <TotalSales orders={this.state.orders} />
+          <Grid container spacing={isMobile ? 1 : 2} sx={{ mt: 2, mx: { xs: 0, sm: 0 }}}>
+            <Grid item xs={12}>
+              <TopSellingProducts receivements={receivements} exits={exits}  />
+            </Grid>
           </Grid>
-          <Grid item md={4}>
-            <SalesByProduct orders={this.state.orders} />
-          </Grid>
-        </Grid>
+        </>
+      )}
+    </Box>
+  );
+};
 
-        <Grid container sx={{ margin: 3 }}>
-          <Grid item md={6}>
-            <Channels orders={this.state.orders} />
-          </Grid>
-          <Grid item md={6}>
-            <TopSellingProduct orders={this.state.orders} />
-          </Grid>
-        </Grid>
-      </Box>
-    );
-  }
-}
+export default Home;

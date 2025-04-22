@@ -6,7 +6,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
-  const [user, setUser] = useState(null); 
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const checkTokenExpiration = () => {
@@ -17,19 +17,18 @@ export const AuthProvider = ({ children }) => {
 
     checkTokenExpiration();
 
-    const interval = setInterval(checkTokenExpiration, 60000); 
+    const interval = setInterval(checkTokenExpiration, 60000);
     return () => clearInterval(interval);
   }, [token]);
 
   useEffect(() => {
     const fetchUser = async () => {
       if (token) {
-        setAuthToken(token); 
+        setAuthToken(token);
         try {
           const response = await api.get('/auth/me');
           setUser(response.data);
         } catch (err) {
-          console.error("Erro ao buscar user:", err);
           logout();
         }
       } else {
@@ -49,13 +48,10 @@ export const AuthProvider = ({ children }) => {
         setToken(token);
         localStorage.setItem('token', token);
         setAuthToken(token);
-        return true;
-      } else {
-        return false;
+        return { success: true, token: response?.data?.token };
       }
     } catch (error) {
-      console.error("Erro ao fazer login: ", error);
-      return false;
+      return { success: false, token: error?.response?.data?.token || "Erro ao fazer login" };
     }
   };
 
