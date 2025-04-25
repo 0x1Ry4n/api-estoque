@@ -27,10 +27,10 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "face-api.js": "^0.22.2",
-    "jspdf": "^2.5.2",
-    "jspdf-autotable": "^5.0.2",
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^5.0.2",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
     "leaflet-routing-machine": "^3.2.12",
@@ -46,7 +46,8 @@
     "react-router-dom": "^6.11.2",
     "react-webcam": "^7.2.0",
     "sweetalert2": "^11.14.4",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

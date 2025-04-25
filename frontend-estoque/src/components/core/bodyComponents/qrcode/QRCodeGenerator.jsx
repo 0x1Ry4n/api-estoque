@@ -14,7 +14,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 const QRCodeGenerator = () => {
   const [baseCode, setBaseCode] = useState(''); 
   const [quantity, setQuantity] = useState(1);
-  const [accumulator, setAccumulator] = useState(1); // Estado para o acumulador
+  const [accumulator, setAccumulator] = useState(1);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
