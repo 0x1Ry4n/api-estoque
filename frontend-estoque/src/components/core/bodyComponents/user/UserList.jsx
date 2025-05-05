@@ -184,7 +184,6 @@ const UserList = () => {
     { field: "id", headerName: "ID", width: 90 },
     { field: "username", headerName: "Nome de Usuário", width: 150 },
     { field: "email", headerName: "Email", width: 200 },
-    { field: "password", headerName: "Password", width: 200, hide: true },
     { field: "role", headerName: "Cargo", width: 150 },
     { field: "status", headerName: "Status", width: 100 },
     {

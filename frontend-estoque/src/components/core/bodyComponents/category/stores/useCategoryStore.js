@@ -85,7 +85,7 @@ export const useCategoryStore = create((set, get) => ({
     } catch (error) {
       showSnackbar(
         `Erro ao deletar a categoria: ${
-          error.response?.data?.message || error.message
+          error.response?.data?.error || error.message
         }`,
         "error"
       );

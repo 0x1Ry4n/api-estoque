@@ -75,14 +75,15 @@ const InventoryForm = ({ onInventoryAdded }) => {
 
   const handleScan = (data) => {
     if (data) {
-      console.log(data);
       reset({ inventoryCode: data.text }); 
       setOpenModal(false);
     }
   };
 
   const handleError = (err) => {
-    console.error(err);
+    setSnackbarSeverity('error');
+    setSnackbarMessage(`Erro ao escanear o qrcode: ${err}`);
+    setSnackbarOpen(true);
   };
 
   const openCameraModal = () => {

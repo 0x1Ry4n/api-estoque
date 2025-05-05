@@ -3,7 +3,7 @@ package com.apiestoque.crud.controllers;
 import com.apiestoque.crud.controllers.base.CrudController;
 import com.apiestoque.crud.domain.exit.dto.ExitRequestDTO;
 import com.apiestoque.crud.domain.exit.dto.ExitResponseDTO;
-import com.apiestoque.crud.domain.exit.dto.ExitStatusUpdateDTO;
+import com.apiestoque.crud.domain.exit.dto.ExitStatusUpdateDTO;     
 import com.apiestoque.crud.services.ExitService;
 
 import jakarta.validation.Valid;

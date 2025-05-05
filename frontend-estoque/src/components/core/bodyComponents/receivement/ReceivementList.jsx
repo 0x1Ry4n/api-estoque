@@ -39,8 +39,6 @@ const ReceivementList = () => {
     RETURNED: "Retornado",
   };
 
-  console.log(selectedReceivement);
-
   useEffect(() => {
     const fetchProducts = async () => {
       const response = await api.get("/products");
@@ -60,7 +58,6 @@ const ReceivementList = () => {
   const fetchReceivements = async () => {
     try {
       const response = await api.get("/receivements");
-      console.log(response.data.content);
       setRows(response.data.content);
     } catch (error) {
       console.error("Erro ao buscar os recebimentos: ", error);

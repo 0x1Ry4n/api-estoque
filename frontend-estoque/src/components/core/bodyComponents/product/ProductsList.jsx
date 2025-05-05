@@ -61,7 +61,6 @@ const Products = () => {
   const fetchProducts = async () => {
     try {
       const response = await api.get("/products");
-      console.log(response.data.content);
       setRows(response.data.content);
     } catch (error) {
       console.error("Erro ao buscar produtos: ", error);

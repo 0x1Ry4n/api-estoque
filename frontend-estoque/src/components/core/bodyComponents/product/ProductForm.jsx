@@ -57,7 +57,9 @@ const ProductForm = ({ onProductAdded }) => {
   }, []);
 
   const handleError = (err) => {
-    console.error(err);
+    setSnackbarSeverity('error');
+    setSnackbarMessage(`Erro ao escanear o qrcode: ${err}`);
+    setSnackbarOpen(true);
   };
 
   const openCameraModal = () => {
@@ -76,7 +78,6 @@ const ProductForm = ({ onProductAdded }) => {
 
   const handleScan = (data) => {
     if (data) {
-      console.log(data);
       reset({ productCode: data.text }); 
       setOpenModal(false);
     }

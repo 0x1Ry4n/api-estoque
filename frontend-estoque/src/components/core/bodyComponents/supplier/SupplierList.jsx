@@ -52,7 +52,6 @@ const Suppliers = () => {
     try {
       const response = await api.get("/supplier");
       setRows(response.data.content);
-      console.log(response.data.content);
     } catch (error) {
       console.error("Erro ao buscar fornecedores: ", error);
       setSnackbarMessage("Erro ao carregar fornecedores.");
@@ -89,7 +88,6 @@ const Suppliers = () => {
         setSnackbarMessage("Fornecedor deletado com sucesso!");
         setSnackbarSeverity("success");
       } catch (error) {
-        console.log(error);
         setSnackbarMessage(
           `Erro ao deletar o fornecedor: ${
             error.response?.data?.message || error.response?.data?.error || error.message

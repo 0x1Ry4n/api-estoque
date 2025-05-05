@@ -259,7 +259,6 @@ public class UserService {
         return new UserResponseDTO(
                 user.getId(),
                 user.getUsernameOriginal(),
-                Optional.empty(),
                 user.getEmail(),
                 user.getRole().toString(),
                 user.getStatus().toString(),
@@ -272,7 +271,6 @@ public class UserService {
         return users.stream().map(user -> new UserResponseDTO(
                 user.getId(),
                 user.getUsernameOriginal(),
-                Optional.ofNullable(user.getPassword()),
                 user.getEmail(),
                 user.getRole().toString(),
                 user.getStatus().toString(),

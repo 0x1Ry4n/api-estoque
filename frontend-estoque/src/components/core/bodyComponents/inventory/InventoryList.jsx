@@ -81,7 +81,6 @@ const Inventory = () => {
         setSnackbarMessage("Item de inventário deletado com sucesso!");
         setSnackbarSeverity("success");
       } catch (error) {
-        console.log(error.response.data.message);
         setSnackbarMessage(
           `Erro ao deletar o inventário: ${
             error.response?.data?.message || error.response?.data?.error || error.message
