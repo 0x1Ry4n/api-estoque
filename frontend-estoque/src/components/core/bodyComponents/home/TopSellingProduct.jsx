@@ -8,9 +8,14 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useMediaQuery,
+  useTheme
 } from "@mui/material";
 
 export default function TopSellingProducts({ exits }) {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
   const productMap = {};
 
   exits.forEach(exit => {
@@ -36,35 +41,36 @@ export default function TopSellingProducts({ exits }) {
   return (
     <Box
       sx={{
-        margin: 3,
+        margin: { xs: 1, sm: 3 },
         bgcolor: "white",
         borderRadius: 2,
-        padding: 3,
+        padding: { xs: 1, sm: 3 },
         height: "95%",
+        overflowX: "auto"
       }}
     >
-      <Typography variant="h6" fontWeight={"bold"} sx={{ mx: 3 }}>
+      <Typography variant="h6" fontWeight={"bold"} sx={{ mx: { xs: 0, sm: 3 }, mb: 2 }}>
         Produtos com mais Saídas
       </Typography>
       <TableContainer>
-        <Table>
+        <Table size={isSmallScreen ? "small" : "medium"}>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bolder" }}>Nome Produto</TableCell>
-              <TableCell sx={{ fontWeight: "bolder" }}>Preço Unitário</TableCell>
-              <TableCell sx={{ fontWeight: "bolder" }}>Quantidade</TableCell>
-              <TableCell sx={{ fontWeight: "bolder" }}>Valor Total</TableCell>
+              <TableCell sx={{ fontWeight: "bolder", whiteSpace: "nowrap" }}>Nome Produto</TableCell>
+              <TableCell sx={{ fontWeight: "bolder", whiteSpace: "nowrap" }}>Preço Unitário</TableCell>
+              <TableCell sx={{ fontWeight: "bolder", whiteSpace: "nowrap" }}>Quantidade</TableCell>
+              <TableCell sx={{ fontWeight: "bolder", whiteSpace: "nowrap" }}>Valor Total</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {topProducts.map((product, id) => (
               <TableRow key={id}>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>
+                <TableCell sx={{ whiteSpace: "nowrap" }}>{product.name}</TableCell>
+                <TableCell sx={{ whiteSpace: "nowrap" }}>
                   {product.price !== undefined ? `$${product.price.toFixed(2)}` : "N/A"}
                 </TableCell>
-                <TableCell>{product.quantity}</TableCell>
-                <TableCell>
+                <TableCell sx={{ whiteSpace: "nowrap" }}>{product.quantity}</TableCell>
+                <TableCell sx={{ whiteSpace: "nowrap" }}>
                   {product.amount !== undefined ? `$${product.amount.toFixed(2)}` : "N/A"}
                 </TableCell>
               </TableRow>

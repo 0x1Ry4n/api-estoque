@@ -7,7 +7,7 @@ import TotalSales from "./TotalSales";
 import TopSellingProduct from "./TopSellingProduct";
 import api from "../../../../api";
 import SalesByProduct from "./SalesByProduct";
-import { Box, Grid } from "@mui/material";
+import { Box, Grid, useMediaQuery, useTheme } from "@mui/material";
 
 export default class Home extends Component {
   constructor(props) {
@@ -87,39 +87,38 @@ export default class Home extends Component {
     ];
 
     return (
-      <Box sx={{ margin: 0, padding: 3 }}>
+      <Box sx={{ margin: 0, padding: { xs: 1, sm: 3 } }}>
         <Grid
           container
+          spacing={2}
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginX: 3,
-            borderRadius: 2,
-            padding: 0,
+            justifyContent: { xs: "center", sm: "space-between" },
+            mx: { xs: 0, sm: 0 },
+            mb: 2
           }}
         >
           {cardComponent.map((card, index) => (
-            <Grid item md={2} key={index}>
+            <Grid item xs={12} sm={6} md={4} key={index}>
               <InfoCard card={card} />
             </Grid>
           ))}
         </Grid>
-
+    
         {!loading && (
           <>
-            <Grid container sx={{ marginX: 3 }}>
-              <Grid item md={8}>
+            <Grid container spacing={2} sx={{ mx: { xs: 0, sm: 0 } }}>
+              <Grid item xs={12} md={8}>
                 <TotalSales receivements={receivements} exits={exits} />
               </Grid>
-              <Grid item md={4}>
+              <Grid item xs={12} md={4}>
                 {receivements.length > 0 && (
                   <SalesByProduct receivements={receivements} />
                 )}
               </Grid>
             </Grid>
-
-            <Grid container sx={{ margin: 3 }}>
-              <Grid item md={8}>
+    
+            <Grid container spacing={2} sx={{ mx: { xs: 0, sm: 0 }, mt: 2 }}>
+              <Grid item xs={12}>
                 <TopSellingProduct exits={exits} />
               </Grid>
             </Grid>

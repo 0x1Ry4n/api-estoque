@@ -34,9 +34,11 @@ const MapComponent = () => {
         setLoadingSuppliers(true);
         const response = await api.get("/supplier");
         const suppliersData = response.data?.content || [];
-        
+
         const suppliersWithCoords = await geocodeSuppliers(suppliersData);
-        
+
+        console.log("Coords: ", suppliersWithCoords);
+
         setSuppliers(suppliersWithCoords);
       } catch (error) {
         console.error("Erro ao carregar fornecedores:", error);
@@ -58,7 +60,7 @@ const MapComponent = () => {
   const geocodeCEP = async (cep) => {
     try {
       const cleanCEP = cep.replace(/\D/g, '');
-      
+
       if (cleanCEP.length !== 8) {
         throw new Error('CEP inválido');
       }
@@ -87,7 +89,7 @@ const MapComponent = () => {
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.localidade + ', ' + data.uf)}`
         );
         const cityData = await cityResponse.json();
-        
+
         if (cityData.length > 0) {
           return {
             latitude: parseFloat(cityData[0].lat),
@@ -107,15 +109,15 @@ const MapComponent = () => {
   const geocodeSuppliers = async (suppliers) => {
     setGeocodingProgress(0);
     setGeocodingError(null);
-    
+
     const results = [];
     let processed = 0;
-    
+
     for (const supplier of suppliers) {
       try {
-        if (supplier.zipCode) {
-          const coords = await geocodeCEP(supplier.zipCode);
-          
+        if (supplier.cep) {
+          const coords = await geocodeCEP(supplier.cep);
+
           if (coords) {
             results.push({
               ...supplier,
@@ -148,13 +150,13 @@ const MapComponent = () => {
           fullAddress: null
         });
       }
-      
+
       processed++;
       setGeocodingProgress(Math.round((processed / suppliers.length) * 100));
-      
+
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-    
+
     return results;
   };
 
@@ -293,8 +295,8 @@ const MapComponent = () => {
     return (
       <Box sx={{ minWidth: 250 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Avatar 
-            src={supplier.logo || 'https://cdn-icons-png.flaticon.com/512/2909/2909526.png'} 
+          <Avatar
+            src={supplier.logo || 'https://cdn-icons-png.flaticon.com/512/2909/2909526.png'}
             sx={{ width: 56, height: 56, mr: 2 }}
           />
           <Box>
@@ -302,20 +304,35 @@ const MapComponent = () => {
             <Typography variant="body2" color="text.secondary">{supplier.category}</Typography>
           </Box>
         </Box>
-        
+
         <Divider sx={{ my: 1 }} />
-        
+
+        <Box sx={{ mb: 1, gap: 2 }}>
+          <TextField
+            label="Anotações"
+            value={supplier?.note ? supplier.note : ""}
+            onChange={(e) => handleNoteChange(index, e.target.value)}
+            variant="outlined"
+            fullWidth
+          />
+          <Button sx={{ mt: 3 }} variant="outlined" color="error" onClick={() => deleteMarker(index)}>
+            Deletar 
+          </Button>
+        </Box>
+
+        <Divider sx={{ my: 1 }} />
+
         <Box sx={{ mb: 1 }}>
           <Typography variant="body2"><strong>Endereço:</strong> {supplier.fullAddress || supplier.address}</Typography>
           {supplier.zipCode && <Typography variant="body2"><strong>CEP:</strong> {supplier.zipCode}</Typography>}
         </Box>
-        
+
         <Box sx={{ mb: 1 }}>
           <Typography variant="body2"><strong>Contato:</strong> {supplier.contactName || 'Não informado'}</Typography>
           <Typography variant="body2"><strong>Telefone:</strong> {supplier.phone || 'Não informado'}</Typography>
           {supplier.email && <Typography variant="body2"><strong>Email:</strong> {supplier.email}</Typography>}
         </Box>
-        
+
         {supplier.products && (
           <Box sx={{ mt: 1 }}>
             <Typography variant="subtitle2">Produtos/Serviços:</Typography>
@@ -326,10 +343,10 @@ const MapComponent = () => {
             </Box>
           </Box>
         )}
-        
-        <Button 
-          variant="outlined" 
-          fullWidth 
+
+        <Button
+          variant="outlined"
+          fullWidth
           sx={{ mt: 2 }}
           onClick={() => window.location.href = `/suppliers/${supplier.id}`}
         >
@@ -446,12 +463,11 @@ const MapComponent = () => {
 
         {suppliers.map((supplier, index) => {
           if (!supplier.latitude || !supplier.longitude) return null;
-          
+
           return (
             <Marker
               key={`supplier-${index}`}
               position={[supplier.latitude, supplier.longitude]}
-              icon={supplierIcon}
             >
               <Popup>{renderSupplierPopup(supplier)}</Popup>
             </Marker>
@@ -468,14 +484,14 @@ const MapComponent = () => {
           >
             <Popup>
               <TextField
-                label="Nota"
+                label="Anotações"
                 value={marker.note}
                 onChange={(e) => handleNoteChange(index, e.target.value)}
                 variant="outlined"
                 fullWidth
               />
-              <Button variant="outlined" color="error" onClick={() => deleteMarker(index)}>
-                Deletar Marcador
+              <Button sx={{ mt: 3 }} variant="outlined" color="error" onClick={() => deleteMarker(index)}>
+                Deletar
               </Button>
             </Popup>
           </Marker>
@@ -489,7 +505,7 @@ const MapComponent = () => {
           <Polyline key={`line-${index}`} positions={line} />
         ))}
 
-        {distanceLine && ( 
+        {distanceLine && (
           <Polyline positions={distanceLine.map(marker => [marker.lat, marker.lng])} color="red" />
         )}
 
