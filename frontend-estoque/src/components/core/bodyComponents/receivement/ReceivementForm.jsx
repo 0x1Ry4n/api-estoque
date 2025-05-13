@@ -101,9 +101,9 @@ const ReceivementForm = ({ onReceivementAdded }) => {
 
   return (
     <Box>
-      <Paper
+      <Paper  
         elevation={4}
-        sx={{ padding: 10, borderRadius: 2, backgroundColor: "#f5f5f5", width: '95%'}}
+        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: '95%'}}
       >
         <Typography
           variant="h5"
@@ -117,9 +117,10 @@ const ReceivementForm = ({ onReceivementAdded }) => {
           <AddShoppingCartIcon sx={{ mr: 1 }} />
           Cadastrar Recebimento
         </Typography>
+
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={4}>
-            <Grid item md={12}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="quantity"
                 control={control}
@@ -149,7 +150,7 @@ const ReceivementForm = ({ onReceivementAdded }) => {
                 )}
               />
             </Grid>
-            <Grid item md={12}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="description"
                 control={control}
@@ -180,7 +181,7 @@ const ReceivementForm = ({ onReceivementAdded }) => {
                 )}
               />
             </Grid>
-            <Grid item md={6}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="productId"
                 control={control}
@@ -211,7 +212,7 @@ const ReceivementForm = ({ onReceivementAdded }) => {
                 )}
               />
             </Grid>
-            <Grid item md={6}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="inventoryId"
                 control={control}
@@ -241,7 +242,7 @@ const ReceivementForm = ({ onReceivementAdded }) => {
                 )}
               />
             </Grid>
-            <Grid item md={6}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="supplierId"
                 control={control}
@@ -271,7 +272,7 @@ const ReceivementForm = ({ onReceivementAdded }) => {
                 )}
               />
             </Grid>
-            <Grid item md={6}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="receivingDate"
                 control={control}

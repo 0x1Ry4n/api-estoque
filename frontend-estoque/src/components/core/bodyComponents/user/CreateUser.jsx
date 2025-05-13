@@ -40,7 +40,7 @@ const CreateUser = ({ onUserAdded }) => {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionInterval = useRef(null);
-  
+
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -203,27 +203,29 @@ const CreateUser = ({ onUserAdded }) => {
   };
 
   return (
-    <Box sx={{ maxWidth: "100%", padding: 2 }}>
-      <Paper elevation={4} sx={{ padding: 4, borderRadius: 3 }}>
+    <Box>
+      <Paper
+        elevation={4}
+        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: '95%' }}
+      >
         <Typography
           variant="h5"
           sx={{
-            mb: 4,
+            mb: 3,
             fontWeight: "bold",
             display: "flex",
             alignItems: "center",
-            color: "primary.main",
           }}
         >
-          <AccountCircle sx={{ mr: 2 }} />
+          <AccountCircle sx={{ mr: 1 }} />
           Cadastro de Usuário
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
-              <Card variant="outlined" sx={{ mb: 3 }}>
-                <CardContent sx={{ p: 4 }}>
+              <Card variant="outlined" sx={{ mb: 3, borderRadius: 2, backgroundColor: "#f5f5f5" }}>
+                <CardContent sx={{ p: 6 }}>
                   <Typography variant="h6" sx={{ mb: 3, fontWeight: "bold" }}>
                     Informações Pessoais
                   </Typography>
@@ -331,30 +333,30 @@ const CreateUser = ({ onUserAdded }) => {
                       />
                     )}
                   />
+
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      size="large"
+                      disabled={faceRecognitionEnabled && !userFaceImage || isLoading}
+                      sx={{
+                        minWidth: "200px",
+                        py: 1.5,
+                        fontSize: "1rem",
+                      }}
+                      startIcon={isLoading ? <CircularProgress size={24} /> : <Save />}
+                    >
+                      Finalizar Cadastro
+                    </Button>
+                  </Box>
                 </CardContent>
               </Card>
-
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  disabled={faceRecognitionEnabled && !userFaceImage || isLoading}
-                  sx={{
-                    minWidth: "200px",
-                    py: 1.5,
-                    fontSize: "1rem",
-                  }}
-                  startIcon={isLoading ? <CircularProgress size={24} /> : <Save />}
-                >
-                  Finalizar Cadastro
-                </Button>
-              </Box>
             </Grid>
 
             {faceRecognitionEnabled && (
               <Grid item xs={12} md={6}>
-                <Card variant="outlined" sx={{ height: "100%" }}>
+                <Card variant="outlined" sx={{ height: "100%", borderRadius: 2 }}>
                   <CardContent sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
                     <Typography variant="h6" sx={{ mb: 3, fontWeight: "bold" }}>
                       Cadastro Facial

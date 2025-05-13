@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { useState, useEffect } from "react";
 import UilReceipt from "@iconscout/react-unicons/icons/uil-receipt";
 import UilBox from "@iconscout/react-unicons/icons/uil-box";
 import UilTruck from "@iconscout/react-unicons/icons/uil-truck";
@@ -7,26 +7,22 @@ import TotalSales from "./TotalSales";
 import TopSellingProduct from "./TopSellingProduct";
 import api from "../../../../api";
 import SalesByProduct from "./SalesByProduct";
-import { Box, Grid, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Grid, useMediaQuery, useTheme, Typography } from "@mui/material";
 
-export default class Home extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      receivements: [],
-      exits: [],
-      pendingCount: 0,
-      inProgressCount: 0,
-      invoiceCount: 0,
-      loading: true, 
-    };
-  }
+const Home = () => {
+  const [state, setState] = useState({
+    receivements: [],
+    exits: [],
+    pendingCount: 0,
+    inProgressCount: 0,
+    invoiceCount: 0,
+    loading: true,
+  });
 
-  componentDidMount() {
-    this.fetchAllOrders();
-  }
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  fetchAllOrders = async () => {
+  const fetchAllOrders = async () => {
     try {
       let response = await api.get("/exits");
       const exits = response.data?.content || [];
@@ -38,7 +34,7 @@ export default class Home extends Component {
       response = await api.get("/receivements");
       const receivements = response.data?.content || [];
 
-      this.setState({
+      setState({
         exits,
         receivements,
         pendingCount,
@@ -48,83 +44,96 @@ export default class Home extends Component {
       });
     } catch (error) {
       console.error("Erro ao buscar saídas:", error);
-      this.setState({ loading: false });
+      setState(prev => ({ ...prev, loading: false }));
     }
   };
 
-  render() {
-    const {
-      pendingCount,
-      inProgressCount,
-      invoiceCount,
-      exits,
-      receivements,
-      loading,
-    } = this.state;
+  useEffect(() => {
+    fetchAllOrders();
+  }, []);
 
-    const cardComponent = [
-      {
-        icon: <UilBox size={60} color={"#F6F4EB"} />,
-        title: "Pendente",
-        subTitle: pendingCount,
-        mx: 3,
-        my: 0,
-      },
-      {
-        icon: <UilTruck size={60} color={"#F6F4EB"} />,
-        title: "Progresso",
-        subTitle: inProgressCount,
-        mx: 5,
-        my: 0,
-      },
-      {
-        icon: <UilReceipt size={60} color={"#F6F4EB"} />,
-        title: "Completado",
-        subTitle: invoiceCount,
-        mx: 3,
-        my: 0,
-      },
-    ];
+  const {
+    pendingCount,
+    inProgressCount,
+    invoiceCount,
+    exits,
+    receivements,
+    loading,
+  } = state;
 
-    return (
-      <Box sx={{ margin: 0, padding: { xs: 1, sm: 3 } }}>
-        <Grid
-          container
-          spacing={2}
-          sx={{
-            justifyContent: { xs: "center", sm: "space-between" },
-            mx: { xs: 0, sm: 0 },
-            mb: 2
-          }}
-        >
-          {cardComponent.map((card, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <InfoCard card={card} />
+  const cardComponent = [
+    {
+      icon: <UilBox size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
+      title: "Pendente",
+      subTitle: pendingCount,
+      mx: 1,
+      my: 0,
+    },
+    {
+      icon: <UilTruck size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
+      title: "Progresso",
+      subTitle: inProgressCount,
+      mx: 1,
+      my: 0,
+    },
+    {
+      icon: <UilReceipt size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
+      title: "Completado",
+      subTitle: invoiceCount,
+      mx: 1,
+      my: 0,
+    },
+  ];
+
+  return (
+    <Box sx={{
+      width: isMobile ? '100vw' : '80vw',
+      minHeight: '100vh',
+      p: isMobile ? 4 : 2,
+      boxSizing: 'border-box',
+      mx: 'auto',
+    }}>
+      <Grid
+        container
+        spacing={isMobile ? 2 : 4}
+        sx={{
+          justifyContent: { xs: "center", sm: "space-between" },
+          mx: { xs: 0, sm: 0 },
+        }}
+      >
+        {cardComponent.map((card, index) => (
+          <Grid item xs={12} sm={6} md={4} key={index}>
+            <InfoCard card={card} isMobile={isMobile} />
+          </Grid>
+        ))}
+      </Grid>
+
+      {!loading && exits.length === 0 && receivements.length === 0 ? (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Typography variant="h6">Nenhum dado disponível</Typography>
+        </Box>
+      ) : (
+        <>
+          <Grid container spacing={isMobile ? 1 : 2} sx={{ mt: 2, mx: { xs: 0, sm: 0 } }}>
+            <Grid item xs={12} md={8}>
+              <TotalSales receivements={receivements} exits={exits} isMobile={isMobile} />
             </Grid>
-          ))}
-        </Grid>
-    
-        {!loading && (
-          <>
-            <Grid container spacing={2} sx={{ mx: { xs: 0, sm: 0 } }}>
-              <Grid item xs={12} md={8}>
-                <TotalSales receivements={receivements} exits={exits} />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                {receivements.length > 0 && (
-                  <SalesByProduct receivements={receivements} />
-                )}
-              </Grid>
+            <Grid item xs={12} md={4} sx={{ mt: 2 }}>
+              {receivements.length > 0 && (
+                <SalesByProduct receivements={receivements} isMobile={isMobile} />
+              )}
             </Grid>
-    
-            <Grid container spacing={2} sx={{ mx: { xs: 0, sm: 0 }, mt: 2 }}>
-              <Grid item xs={12}>
-                <TopSellingProduct exits={exits} />
-              </Grid>
+          </Grid>
+
+          <Grid container spacing={isMobile ? 1 : 2} sx={{ mt: 2, mx: { xs: 0, sm: 0 }}}>
+            <Grid item xs={12}>
+              <TopSellingProduct exits={exits} isMobile={isMobile} />
             </Grid>
-          </>
-        )}
-      </Box>
-    );
-  }
-}
+          </Grid>
+        </>
+      )}
+    </Box>
+  );
+};
+
+export default Home;

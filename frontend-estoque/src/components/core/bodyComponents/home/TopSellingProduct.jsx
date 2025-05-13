@@ -1,6 +1,6 @@
-import React from "react";
 import {
   Box,
+  Divider,
   Table,
   TableBody,
   TableCell,
@@ -14,7 +14,7 @@ import {
 
 export default function TopSellingProducts({ exits }) {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const productMap = {};
 
@@ -49,11 +49,28 @@ export default function TopSellingProducts({ exits }) {
         overflowX: "auto"
       }}
     >
-      <Typography variant="h6" fontWeight={"bold"} sx={{ mx: { xs: 0, sm: 3 }, mb: 2 }}>
-        Produtos com mais Saídas
-      </Typography>
+      <Box sx={{}}>
+        <Typography
+          variant={isMobile ? "h5" : "h4"}
+          sx={{
+            fontWeight: 'bold',
+            fontSize: {
+              xs: '1rem',
+              sm: '1.5rem',
+              md: '1.5rem'
+            },
+            mb: { xs: 2, sm: 3, md: 4 },
+            ml: { xs: 4, sm: 4, md: 5 },
+            mt: { xs: 2, sm: 6, md: 10 },
+            lineHeight: 1.2,
+          }}
+        >
+          Produtos com mais Saídas
+        </Typography>
+        <Divider />
+      </Box>
       <TableContainer>
-        <Table size={isSmallScreen ? "small" : "medium"}>
+        <Table size={isMobile ? "small" : "medium"}>
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontWeight: "bolder", whiteSpace: "nowrap" }}>Nome Produto</TableCell>

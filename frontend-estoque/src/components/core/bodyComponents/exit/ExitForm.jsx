@@ -28,13 +28,13 @@ const ExitForm = ({ onExitAdded }) => {
   } = useForm();
   const [products, setProducts] = useState([]);
   const [inventories, setInventories] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null); 
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
-  useEffect(() => { 
+  useEffect(() => {
     const fetchProducts = async () => {
       const response = await api.get("/products");
       setProducts(response.data.content);
@@ -67,7 +67,7 @@ const ExitForm = ({ onExitAdded }) => {
         setSnackbarOpen(true);
 
         if (typeof onExitAdded === "function") {
-            onExitAdded(response.data);
+          onExitAdded(response.data);
         } else {
           console.error("onExitAdded is not a function");
         }
@@ -77,7 +77,7 @@ const ExitForm = ({ onExitAdded }) => {
     } catch (error) {
       setSnackbarMessage(
         "Erro ao cadastrar a saída: " +
-          (error.response?.data?.message || "Erro desconhecido.")
+        (error.response?.data?.message || "Erro desconhecido.")
       );
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
@@ -92,7 +92,7 @@ const ExitForm = ({ onExitAdded }) => {
     <Box>
       <Paper
         elevation={4}
-        sx={{ padding: 10, borderRadius: 2, backgroundColor: "#f5f5f5", width: '95%' }}
+        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: '95%' }}
       >
         <Typography
           variant="h5"
@@ -108,8 +108,8 @@ const ExitForm = ({ onExitAdded }) => {
         </Typography>
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={4}>
-            
-            <Grid item md={6}>
+
+            <Grid item md={6} xs={12}>
               <Controller
                 name="productId"
                 control={control}
@@ -122,7 +122,7 @@ const ExitForm = ({ onExitAdded }) => {
                     filterSelectedOptions
                     onChange={(_, value) => {
                       field.onChange(value ? value.id : "");
-                      setSelectedProduct(value); 
+                      setSelectedProduct(value);
                     }}
                     renderInput={(params) => (
                       <TextField
@@ -138,7 +138,7 @@ const ExitForm = ({ onExitAdded }) => {
                 )}
               />
             </Grid>
-            <Grid item md={6}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="inventoryId"
                 control={control}
@@ -165,7 +165,7 @@ const ExitForm = ({ onExitAdded }) => {
               />
             </Grid>
 
-            <Grid item md={6}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="quantity"
                 control={control}
@@ -181,7 +181,7 @@ const ExitForm = ({ onExitAdded }) => {
                     error={!!errors.quantity}
                     helperText={errors.quantity ? errors.quantity.message : ""}
                     sx={{ mb: 2 }}
-                    InputProps={{   
+                    InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
                           <AddIcon />
@@ -197,15 +197,15 @@ const ExitForm = ({ onExitAdded }) => {
             </Grid>
           </Grid>
 
-            <Button
-              variant="contained"
-              color="primary"
-              type="submit"
-              sx={{ mt: 4, display: 'flex', alignItems: 'center' }}
-              startIcon={<AddCircleOutline />}
-            >
-              Cadastrar Saída
-            </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            sx={{ mt: 4, display: 'flex', alignItems: 'center' }}
+            startIcon={<AddCircleOutline />}
+          >
+            Cadastrar Saída
+          </Button>
         </Box>
       </Paper>
 

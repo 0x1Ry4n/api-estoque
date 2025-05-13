@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import {
   Box,
   Button,
@@ -8,16 +8,21 @@ import {
   Snackbar,
   Alert,
   Grid,
+  useMediaQuery, 
+  useTheme
 } from '@mui/material';
 import { QRCodeCanvas } from 'qrcode.react';
 
 const QRCodeGenerator = () => {
-  const [baseCode, setBaseCode] = useState(''); 
+  const [baseCode, setBaseCode] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [accumulator, setAccumulator] = useState(1);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const canvasRefs = useRef([]);
 
@@ -26,16 +31,16 @@ const QRCodeGenerator = () => {
   };
 
   const handleQuantityChange = (event) => {
-    const value = parseInt(event.target.value, 10); 
+    const value = parseInt(event.target.value, 10);
     if (value > 0) {
-      setQuantity(value); 
-    } 
+      setQuantity(value);
+    }
   };
 
   const handleAccumulatorChange = (event) => {
     const value = parseInt(event.target.value, 10);
     if (value > 0) {
-      setAccumulator(value); // Atualiza o acumulador
+      setAccumulator(value);
     }
   };
 
@@ -46,7 +51,7 @@ const QRCodeGenerator = () => {
         const pngUrl = qrCodeCanvas.toDataURL('image/png');
         const downloadLink = document.createElement('a');
         downloadLink.href = pngUrl;
-        downloadLink.download = `${baseCode}-${String(accumulator + i).padStart(3, '0')}.png`; 
+        downloadLink.download = `${baseCode}-${String(accumulator + i).padStart(3, '0')}.png`;
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
@@ -64,12 +69,14 @@ const QRCodeGenerator = () => {
 
   return (
     <Box
-        sx={{
-            mt: 10,
-            height: '100vh',
-        }}>
+      sx={{
+        width: isMobile ? '100vw' : '80vw',
+        minHeight: '100vh',
+        p: isMobile ? 4 : 2,
+        boxSizing: 'border-box',
+      }}>
       <Paper elevation={4} sx={{ padding: 10, borderRadius: 2, backgroundColor: '#f5f5f5', width: '95%' }}>
-        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', textAlign: 'center'  }}>
+        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', textAlign: 'center' }}>
           Gerar Vários QR Codes
         </Typography>
         <TextField

@@ -118,7 +118,7 @@ const ProductForm = ({ onProductAdded }) => {
     <Box>
       <Paper
         elevation={4}
-        sx={{ padding: 10, borderRadius: 2, backgroundColor: "#f5f5f5", width: "95%"}}
+        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: "95%"}}
       >
         <Typography
           variant="h5"
@@ -134,7 +134,7 @@ const ProductForm = ({ onProductAdded }) => {
         </Typography>
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={4}>
-            <Grid item md={6}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="name"
                 control={control}
@@ -163,7 +163,7 @@ const ProductForm = ({ onProductAdded }) => {
                 )}
               />
             </Grid>
-            <Grid item md={6}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="unitPrice"
                 control={control}
@@ -195,7 +195,7 @@ const ProductForm = ({ onProductAdded }) => {
                 )}
               />
             </Grid>
-            <Grid item md={12}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="description"
                 control={control}
@@ -253,7 +253,7 @@ const ProductForm = ({ onProductAdded }) => {
                 )}
               />
             </Grid>
-            <Grid item md={6}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="categoryId"
                 control={control}
@@ -283,7 +283,7 @@ const ProductForm = ({ onProductAdded }) => {
                 )}
               />
             </Grid>
-            <Grid item md={6}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="suppliersId"
                 control={control}
@@ -314,7 +314,7 @@ const ProductForm = ({ onProductAdded }) => {
                 )}
               />
             </Grid>
-            <Grid item md={6}>
+            <Grid item md={6} xs={12}>
               <Controller
                 name="expirationDate"
                 control={control}

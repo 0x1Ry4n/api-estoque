@@ -1,10 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, FeatureGroup, useMap } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
-import { Button, Box, TextField, AppBar, Toolbar, Typography, Container, Grid, Tooltip, Avatar, Chip, Divider, CircularProgress, Alert } from '@mui/material';
-import L from 'leaflet';
+import { Dialog, Button, Box, TextField, AppBar, Toolbar, Typography, Container, Grid, Tooltip, Avatar, Chip, Divider, CircularProgress, Alert, InputAdornment, useMediaQuery, useTheme } from '@mui/material';
+import {
+  FilterList as FilterListIcon,          
+  LocationSearching as LocationSearchingIcon,   
+  Visibility as VisibilityIcon,          
+  VisibilityOff as VisibilityOffIcon,       
+  Polyline as PolylineIcon,            
+  ShowChart as ShowChartIcon,           
+  Clear as ClearIcon,               
+  Restore as RestoreIcon,             
+} from '@mui/icons-material';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
+import L from 'leaflet';
 import api from '../../../../api';
 
 const MapComponent = () => {
@@ -291,6 +301,9 @@ const MapComponent = () => {
     return null;
   };
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const renderSupplierPopup = (supplier) => {
     return (
       <Box sx={{ minWidth: 250 }}>
@@ -316,7 +329,7 @@ const MapComponent = () => {
             fullWidth
           />
           <Button sx={{ mt: 3 }} variant="outlined" color="error" onClick={() => deleteMarker(index)}>
-            Deletar 
+            Deletar
           </Button>
         </Box>
 
@@ -357,20 +370,54 @@ const MapComponent = () => {
   };
 
   return (
-    <Container sx={{ mt: 3, height: '800px', width: '100%' }}>
-      <AppBar position="static">
+    <Container sx={{
+      width: isMobile ? '100vw' : '80vw',
+      minHeight: '100vh',
+      p: isMobile ? 4 : 6,
+      backgroundColor: "#f5f5f5",
+      boxSizing: 'border-box',
+      borderRadius: 1,
+      mx: 'auto',
+    }}>
+      <AppBar position="static" sx={{ boxShadow: 2 }}>
         <Toolbar>
           <Typography variant="h6">Mapa de Fornecedores e Marcadores</Typography>
         </Toolbar>
       </AppBar>
 
       {loadingSuppliers && (
-        <Box sx={{ my: 2, display: 'flex', alignItems: 'center' }}>
-          <CircularProgress variant="determinate" value={geocodingProgress} sx={{ mr: 2 }} />
-          <Typography>
-            Carregando fornecedores... {geocodingProgress}% completo
-          </Typography>
-        </Box>
+        <Dialog
+          open={loadingSuppliers}
+          PaperProps={{
+            sx: {
+              p: 4,
+              backgroundColor: 'transparent',
+              boxShadow: 'none',
+              backgroundImage: 'none',
+            }
+          }}
+        >
+          <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+          }}>
+            <CircularProgress
+              variant="determinate"
+              value={geocodingProgress}
+              size={60}
+              thickness={4}
+              sx={{ mb: 3, color: 'primary.secondary' }}
+            />
+            <Typography variant="h6" gutterBottom sx={{ color: 'common.white' }}>
+              Carregando fornecedores...
+            </Typography>
+            <Typography sx={{ color: 'common.white' }}>
+              {geocodingProgress}% completo
+            </Typography>
+          </Box>
+        </Dialog>
       )}
 
       {geocodingError && (
@@ -380,7 +427,8 @@ const MapComponent = () => {
       )}
 
       <Box sx={{ my: 2 }}>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} alignItems="center">
+          {/* Filtro */}
           <Grid item xs={12} sm={6} md={4}>
             <TextField
               label="Filtrar Notas"
@@ -389,11 +437,25 @@ const MapComponent = () => {
               variant="outlined"
               size="small"
               fullWidth
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FilterListIcon />
+                  </InputAdornment>
+                ),
+              }}
             />
           </Grid>
+
+          {/* Buscar Localização */}
           <Grid item xs={12} sm={6} md={4}>
             <Tooltip title="Buscar Localização">
-              <Button variant="contained" fullWidth onClick={searchLocation}>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={searchLocation}
+                startIcon={<LocationSearchingIcon />}
+              >
                 Buscar Localização
               </Button>
             </Tooltip>
@@ -403,31 +465,60 @@ const MapComponent = () => {
 
       <Box sx={{ my: 2 }}>
         <Grid container spacing={2}>
+          {/* Mostrar/Esconder Polígonos */}
           <Grid item xs={12} sm={6} md={3}>
             <Tooltip title={showPolygons ? "Esconder Polígonos" : "Mostrar Polígonos"}>
-              <Button variant="outlined" fullWidth onClick={() => setShowPolygons(!showPolygons)}>
-                {showPolygons ? 'Esconder Polígonos' : 'Mostrar Polígonos'}
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => setShowPolygons(!showPolygons)}
+                startIcon={showPolygons ? <VisibilityOffIcon /> : <VisibilityIcon />}
+              >
+                {showPolygons ? 'Esconder' : 'Mostrar'} Polígonos
               </Button>
             </Tooltip>
           </Grid>
+
+          {/* Mostrar/Esconder Linhas */}
           <Grid item xs={12} sm={6} md={3}>
             <Tooltip title={showLines ? "Esconder Linhas" : "Mostrar Linhas"}>
-              <Button variant="outlined" fullWidth onClick={() => setShowLines(!showLines)}>
-                {showLines ? 'Esconder Linhas' : 'Mostrar Linhas'}
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => setShowLines(!showLines)}
+                startIcon={showLines ? <PolylineIcon /> : <ShowChartIcon />}
+              >
+                {showLines ? 'Esconder' : 'Mostrar'} Linhas
               </Button>
             </Tooltip>
           </Grid>
+
+          {/* Limpar Marcadores */}
           <Grid item xs={12} sm={6} md={3}>
             <Tooltip title="Limpar Marcadores">
-              <Button variant="outlined" color="warning" fullWidth onClick={clearMarkers}>
+              <Button
+                variant="outlined"
+                color="warning"
+                fullWidth
+                onClick={clearMarkers}
+                startIcon={<ClearIcon />}
+              >
                 Limpar Marcadores
               </Button>
             </Tooltip>
           </Grid>
+
+          {/* Restaurar Padrão */}
           <Grid item xs={12} sm={6} md={3}>
             <Tooltip title="Restaurar Marcadores Padrão">
-              <Button variant="outlined" color="secondary" fullWidth onClick={restoreDefaultMarkers}>
-                Restaurar Marcadores Padrão
+              <Button
+                variant="outlined"
+                color="secondary"
+                fullWidth
+                onClick={restoreDefaultMarkers}
+                startIcon={<RestoreIcon />}
+              >
+                Restaurar Padrão
               </Button>
             </Tooltip>
           </Grid>

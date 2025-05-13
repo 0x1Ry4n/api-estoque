@@ -1,16 +1,14 @@
 import { useState } from "react";
-import "../../public/styles/links.css";
 import {
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   ListItemButton,
-  IconButton,
   Box,
-  Collapse,
   Drawer,
   useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   HomeOutlined,
@@ -23,25 +21,22 @@ import {
   AddCircleOutline,
   CreditCardOutlined,
   GroupOutlined,
-  ExpandMore,
-  ExpandLess,
-  Menu as MenuIcon,
   Inventory2Outlined,
 } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import "../../public/styles/links.css";
 
-export default function SideBarComponent() {
+export default function SideBarComponent({ isSidebarOpen, toggleSidebar }) {
   const { user } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const navigate = useNavigate();
   const location = useLocation();
-  const currentPage = location.pathname;
-
-  const isSmallScreen = useMediaQuery("(max-width:600px)");
-
   const [selected, setSelected] = useState(0);
-  const [open, setOpen] = useState(true);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const currentPage = location.pathname;
 
   const sideBarComponent = [
     { title: "Home", route: "home", component: <HomeOutlined /> },
@@ -67,16 +62,8 @@ export default function SideBarComponent() {
     setSelected(index);
   };
 
-  const toggleSidebar = () => {
-    setOpen(!open);
-  };
-
-  const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-  };
-
   const SidebarContent = (
-    <List>
+    <List sx={{ ml: 2, pt: isMobile ? 12 : 8 }}>
       {filteredSideBarComponent.map((comp, index) => (
         <ListItem disablePadding key={index}>
           <Box width="100%">
@@ -84,23 +71,33 @@ export default function SideBarComponent() {
               onClick={() => {
                 handleSelectedComponent(index);
                 navigate(comp.route.toLowerCase());
-                if (isSmallScreen) toggleDrawer();
+                if (isMobile) toggleSidebar();
               }}
               selected={index === selected && currentPage === "/" + comp.route.toLowerCase()}
               sx={{
-                mb: 2,
+                mb: 1,
                 bgcolor: selected === index ? "#e0f2f1" : "transparent",
                 borderRadius: 2,
                 transition: "background-color 0.2s",
+                justifyContent: open || isMobile ? "initial" : "center",
+                px: 2.5,
+                minHeight: 48,
                 '&:hover': {
                   bgcolor: "#b2dfdb",
                 },
               }}
             >
-              <ListItemIcon sx={{ color: selected === index ? "#00796b" : "inherit" }}>
+              <ListItemIcon
+                sx={{
+                  color: selected === index ? "#00796b" : "inherit",
+                  minWidth: 0,
+                  mr: open || isMobile ? 3 : "auto",
+                  justifyContent: "center",
+                }}
+              >
                 {comp.component}
               </ListItemIcon>
-              {!isSmallScreen && (
+              {(open || isMobile) && (
                 <ListItemText
                   primary={comp.title}
                   primaryTypographyProps={{
@@ -119,41 +116,25 @@ export default function SideBarComponent() {
 
   return (
     <>
-      {isSmallScreen ? (
-        <>
-          <IconButton onClick={toggleDrawer} sx={{ position: "fixed", top: 15, left: 15 }}>
-            <MenuIcon />
-          </IconButton>
-          <Drawer
-            anchor="left"
-            open={drawerOpen}
-            onClose={toggleDrawer}
-            sx={{ width: "250px" }}
-          >
-            {SidebarContent}
-          </Drawer>
-        </>
-      ) : (
-        <Box
-          sx={{
-            position: "fixed",
-            left: 0,
-            top: 0,
-            bgcolor: "#ffffff",
-            height: "100vh",
-            boxShadow: 2,
+      <Drawer
+        variant="temporary"
+        open={isSidebarOpen}
+        onClose={toggleSidebar}
+        ModalProps={{
+          keepMounted: true,
+        }}
+        sx={{
+          '& .MuiDrawer-paper': {
+            backgroundColor: '#f5f5f5',
+            boxSizing: 'border-box',
+            width: 300,
             p: 2,
-            zIndex: 1000,
-            transition: "width 0.3s",
-            width: open ? "250px" : "60px",
-          }}
-        >
-          <IconButton onClick={toggleSidebar} sx={{ mt: 15 }}>
-            {open ? <ExpandLess /> : <ExpandMore />}
-          </IconButton>
-          <Collapse in={open}>{SidebarContent}</Collapse>
-        </Box>
-      )}
+            borderRight: 'none',
+          },
+        }}
+      >
+        {SidebarContent}
+      </Drawer>
     </>
   );
 }

@@ -1,44 +1,54 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import InventoryForm from "./InventoryForm";
-import InventoryList from "./InventoryList"; 
-import { Box, Typography } from "@mui/material";
+import InventoryList from "./InventoryList";
+import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 
 const InventoryManagement = () => {
   const [rows, setRows] = useState([]);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleAddInventoryItem = (newItem) => {
     setRows((prevRows) => [...prevRows, newItem]);
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: { xs: "column", md: "row" },
-        gap: 4,
-        mt: 10,
-        p: 4,
-        overflowX: "hidden",
-        width: "100%",
-      }}
-    >
-      <Box
-        sx={{
-          flex: 1,
-          minWidth: 0,
-        }}
-      >
+    <Box sx={{
+      width: isMobile ? '100vw' : '80vw',
+      minHeight: '100vh',
+      p: isMobile ? 4 : 2,
+      boxSizing: 'border-box',
+    }}>
+      <Box sx={{}}>
         <Typography
-          variant="h4"
+          variant={isMobile ? "h5" : "h4"}
           sx={{
-            mb: 4,
-            fontWeight: "bold",
+            fontWeight: 'bold',
+            fontSize: {
+              xs: '1.5rem',
+              sm: '1.75rem',
+              md: '2rem'
+            },
+            mb: { xs: 2, sm: 3, md: 4 },
+            ml: { xs: 0, sm: 4, md: 5 },
+            mt: { xs: 2, sm: 6, md: 10 },
+            lineHeight: 1.2,
           }}
         >
-          Gerenciamento de Inventário
+          {isMobile ? 'Inventário' : 'Gerenciamento de Inventário'}
         </Typography>
+      </Box>
+
+      <Box sx={{
+        mt: 2,
+        pb: isMobile ? 8 : 4,
+        width: isMobile ? '105%' : '100%',
+        overflowX: 'hidden'
+      }}>
+
         <InventoryForm onInventoryAdded={handleAddInventoryItem} />
-        <Box sx={{ mt: 3 }}>
+
+        <Box sx={{ mt: 5 }}>
           <InventoryList rows={rows} />
         </Box>
       </Box>

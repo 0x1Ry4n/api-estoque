@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import ApexCharts from "react-apexcharts";
 import { Box, useMediaQuery, useTheme, FormControl, MenuItem, Select, InputLabel } from "@mui/material";
 
@@ -220,7 +220,7 @@ export default function TotalSales({ receivements, exits }) {
       height: "100%",
       boxShadow: theme.shadows[1]
     }}>
-      <FormControl fullWidth size="small" sx={{ mt: 5, ml: 2, mb: 2, width: "25%" }}>
+      <FormControl fullWidth size="small" sx={{ mt: 5, ml: 2, mb: 2, width: "50%" }}>
         <InputLabel>Filtro</InputLabel>
         <Select
           label="Filtro"
