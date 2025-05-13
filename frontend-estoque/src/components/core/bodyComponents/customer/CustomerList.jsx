@@ -19,7 +19,7 @@ import {
   Edit as EditIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { fileExporters } from "../../../../utils/utils";
 import api from "../../../../api";
 
@@ -76,8 +76,7 @@ const Customers = () => {
       setSnackbarSeverity("success");
     } catch (error) {
       setSnackbarMessage(
-        `Erro ao deletar o cliente: ${
-          error.response?.data?.message || error.response?.data?.error || error.message
+        `Erro ao deletar o cliente: ${error.response?.data?.message || error.response?.data?.error || error.message
         }`
       );
       setSnackbarSeverity("error");
@@ -250,13 +249,6 @@ const Customers = () => {
         >
           Exportar Excel
         </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => fileExporters.exportToPDF("clientes.pdf", rows)}
-        >
-          Exportar PDF
-        </Button>
       </div>
       <div
         style={{
@@ -271,6 +263,7 @@ const Customers = () => {
         <DataGrid
           rows={rows}
           columns={columns}
+          localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
           page={page}
           pageSize={pageSize}
           rowCount={totalPages * pageSize}

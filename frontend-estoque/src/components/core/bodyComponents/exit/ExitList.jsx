@@ -14,7 +14,7 @@ import {
   Edit as EditIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { addDays, format } from "date-fns";
 import { fileExporters } from "../../../../utils/utils";
 import api from "../../../../api";
@@ -81,8 +81,7 @@ const ExitList = () => {
         fetchExits();
       } catch (error) {
         setSnackbarMessage(
-          `Erro ao deletar a saída: ${
-            error.response?.data?.message || error.response?.data?.error || error.message
+          `Erro ao deletar a saída: ${error.response?.data?.message || error.response?.data?.error || error.message
           }`
         );
         setSnackbarSeverity("error");
@@ -244,13 +243,6 @@ const ExitList = () => {
         >
           Exportar Excel
         </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => fileExporters.exportToPDF("saidas.pdf", rows)}
-        >
-          Exportar PDF
-        </Button>
       </div>
       <div
         style={{
@@ -262,7 +254,8 @@ const ExitList = () => {
           overflow: "hidden",
         }}
       >
-        <DataGrid rows={rows} columns={columns} />
+        <DataGrid localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rows={rows} columns={columns} />
       </div>
 
       <Dialog open={open} onClose={handleClose}>

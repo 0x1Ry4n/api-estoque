@@ -16,12 +16,12 @@ import {
   Visibility as VisibilityIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid } from "@mui/x-data-grid";
-import api from "../../../../api";
-import Swal from "sweetalert2";
+import { DataGrid, ptBR  } from "@mui/x-data-grid";
 import { Controller, useForm } from "react-hook-form";
 import { addDays, format } from "date-fns";
 import { fileExporters } from "../../../../utils/utils";
+import Swal from "sweetalert2";
+import api from "../../../../api";
 
 const Products = () => {
   const {
@@ -112,8 +112,7 @@ const Products = () => {
       } catch (error) {
         console.log(error);
         setSnackbarMessage(
-          `Erro ao deletar o produto: ${
-            error.response?.data?.message || error.response?.data?.error || error.message
+          `Erro ao deletar o produto: ${error.response?.data?.message || error.response?.data?.error || error.message
           }`
         );
         setSnackbarSeverity("error");
@@ -147,8 +146,7 @@ const Products = () => {
       setSnackbarSeverity("success");
     } catch (error) {
       setSnackbarMessage(
-        `Erro ao salvar o produto: ${
-          error.response?.data?.error || error.message
+        `Erro ao salvar o produto: ${error.response?.data?.error || error.message
         }`
       );
       setSnackbarSeverity("error");
@@ -293,13 +291,6 @@ const Products = () => {
         >
           Exportar Excel
         </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => fileExporters.exportToPDF("produtos.pdf", rows)}
-        >
-          Exportar PDF
-        </Button>
       </div>
       <div
         style={{
@@ -311,7 +302,8 @@ const Products = () => {
           overflow: "hidden",
         }}
       >
-        <DataGrid rows={rows} columns={columns} />
+        <DataGrid rows={rows} columns={columns} localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+        />
       </div>
 
       <Dialog open={open} onClose={handleClose}>

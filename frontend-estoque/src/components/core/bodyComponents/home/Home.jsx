@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import UilReceipt from "@iconscout/react-unicons/icons/uil-receipt";
 import UilBox from "@iconscout/react-unicons/icons/uil-box";
 import UilTruck from "@iconscout/react-unicons/icons/uil-truck";
+import UilCancel from "@iconscout/react-unicons/icons/uil-cancel";
 import InfoCard from "../../subComponents/InfoCard";
 import TotalSales from "./TotalSales";
 import TopSellingProduct from "./TopSellingProduct";
@@ -14,7 +15,7 @@ const Home = () => {
     receivements: [],
     exits: [],
     pendingCount: 0,
-    inProgressCount: 0,
+    returnedCount: 0,
     invoiceCount: 0,
     loading: true,
   });
@@ -28,8 +29,9 @@ const Home = () => {
       const exits = response.data?.content || [];
 
       const pendingCount = exits.filter(exit => exit.status === "PENDING").length;
-      const inProgressCount = exits.filter(exit => exit.status === "IN_PROGRESS").length;
+      const returnedCount = exits.filter(exit => exit.status === "RETURNED").length;
       const invoiceCount = exits.filter(exit => exit.status === "COMPLETED").length;
+      const canceledCount = exits.filter(exit => exit.status === "CANCELED").length
 
       response = await api.get("/receivements");
       const receivements = response.data?.content || [];
@@ -38,8 +40,9 @@ const Home = () => {
         exits,
         receivements,
         pendingCount,
-        inProgressCount,
+        returnedCount,
         invoiceCount,
+        canceledCount,
         loading: false,
       });
     } catch (error) {
@@ -54,7 +57,7 @@ const Home = () => {
 
   const {
     pendingCount,
-    inProgressCount,
+    returnedCount,
     invoiceCount,
     exits,
     receivements,
@@ -62,6 +65,13 @@ const Home = () => {
   } = state;
 
   const cardComponent = [
+    {
+      icon: <UilCancel size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
+      title: "Cancelado",
+      subTitle: pendingCount,
+      mx: 1,
+      my: 0,
+    },
     {
       icon: <UilBox size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
       title: "Pendente",
@@ -71,8 +81,8 @@ const Home = () => {
     },
     {
       icon: <UilTruck size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
-      title: "Progresso",
-      subTitle: inProgressCount,
+      title: "Retornado",
+      subTitle: returnedCount,
       mx: 1,
       my: 0,
     },
@@ -87,7 +97,7 @@ const Home = () => {
 
   return (
     <Box sx={{
-      width: isMobile ? '100vw' : '80vw',
+      width: isMobile ? '97vw' : '80vw',
       minHeight: '100vh',
       p: isMobile ? 4 : 2,
       boxSizing: 'border-box',

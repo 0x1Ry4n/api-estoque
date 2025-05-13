@@ -38,12 +38,12 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState("user");
-  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isVerifyingFace, setIsVerifyingFace] = useState(false);
   const [faceImage, setFaceImage] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [faceDetection, setFaceDetection] = useState(null);
@@ -69,6 +69,7 @@ const Login = () => {
         setModelsLoaded(true);
       } catch (error) {
         console.error("Erro ao carregar modelos:", error);
+        setSnackbarSeverity("error");
         setSnackbarMessage("Erro ao carregar modelos de reconhecimento facial");
         setSnackbarOpen(true);
       } finally {
@@ -155,6 +156,7 @@ const Login = () => {
     e.preventDefault();
 
     if (userType === "user" && !faceImage) {
+      setSnackbarSeverity("warning");
       setSnackbarMessage("Por favor, verifique o rosto antes de continuar.");
       setSnackbarOpen(true);
       return;
@@ -165,10 +167,14 @@ const Login = () => {
       if (isAuthenticated) {
         navigate("/home");
       } else {
-        setError("Credenciais inválidas. Verifique seu e-mail e senha.");
+        setSnackbarSeverity("error");
+        setSnackbarMessage("Credenciais inválidas. Verifique seu e-mail e senha.");
+        setSnackbarOpen(true);
       }
     } catch (err) {
-      setError("Erro ao tentar entrar. Tente novamente mais tarde.");
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Erro ao tentar entrar. Tente novamente mais tarde.");
+      setSnackbarOpen(true);
     }
   };
 
@@ -181,6 +187,7 @@ const Login = () => {
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     } else {
+      setSnackbarSeverity("warning");
       setSnackbarMessage("Nenhum rosto detectado. Posicione-se melhor.");
       setSnackbarOpen(true);
     }
@@ -189,6 +196,7 @@ const Login = () => {
   const verifyFace = async () => {
     try {
       if (!faceImage) {
+        setSnackbarSeverity("error");
         setSnackbarMessage("Nenhuma imagem facial capturada.");
         setSnackbarOpen(true);
         return;
@@ -203,6 +211,7 @@ const Login = () => {
         .withFaceDescriptors();
 
       if (detections.length === 0) {
+        setSnackbarSeverity("error");
         setSnackbarMessage("Nenhum rosto detectado na imagem capturada.");
         setSnackbarOpen(true);
         setIsLoading(false);
@@ -216,7 +225,8 @@ const Login = () => {
 
       if (response.status === 200) {
         if (response.data.error) {
-          setSnackbarMessage(`Erro: ${response.data.error}`);
+          setSnackbarSeverity("error");
+          setSnackbarMessage(`Erro ao verificar a face: ${response.data.error}`);
           setSnackbarOpen(true);
           setFaceImage(null);
           setIsLoading(false);
@@ -224,17 +234,20 @@ const Login = () => {
         }
 
         if (!response.data.verified) {
-          setSnackbarMessage(`Rosto incompatível com o cadastro de usuário!`);
+          setSnackbarSeverity("error");
+          setSnackbarMessage(`Erro ao verificar a face: Rosto incompatível com o cadastro de usuário!`);
           setSnackbarOpen(true);
           setFaceImage(null);
           setIsLoading(false);
           return;
         }
 
+        setSnackbarSeverity("success");
         setSnackbarMessage("Rosto verificado com sucesso!");
         setSnackbarOpen(true);
         setIsLoading(false);
       } else {
+        setSnackbarSeverity("error");
         setSnackbarMessage("Falha na verificação do rosto.");
         setSnackbarOpen(true);
         setFaceImage(null);
@@ -243,6 +256,7 @@ const Login = () => {
     } catch (error) {
       const errorMessage =
         error.response?.data?.error || "Erro ao verificar rosto.";
+      setSnackbarSeverity("error");
       setSnackbarMessage(errorMessage);
       setSnackbarOpen(true);
       setFaceImage(null);
@@ -252,18 +266,22 @@ const Login = () => {
 
   return (
     <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      minHeight="100vh"
-      bgcolor="#e0f2f1"
-      px={2}
-      py={4}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: isMobile ? '100vw' : '80vw',
+        minHeight: '425px',
+        p: isMobile ? 4 : 2,
+        boxSizing: 'border-box',
+        mx: 'auto',
+        mt: isMobile ? '50%' : '10%'
+      }}
     >
       <Box
         bgcolor="#fff"
         p={isMobile ? 3 : 4}
-        borderRadius={4}
+        borderRadius={2}
         boxShadow={4}
         padding={8}
         width={isMobile ? "95%" : "700px"}
@@ -293,12 +311,6 @@ const Login = () => {
             </>
           )}
         </Typography>
-
-        {error && (
-          <Typography color="error" mb={2} textAlign="center">
-            {error}
-          </Typography>
-        )}
 
         {!isVerifyingFace ? (
           <form onSubmit={handleLogin} style={{ margin: 'auto', width: '85%' }}>
@@ -361,7 +373,6 @@ const Login = () => {
 
             {userType === "user" && (
               <Box mt={2} textAlign="center">
-               
                 <Button
                   variant={faceImage ? "contained" : "outlined"}
                   color={faceImage ? "success" : "secondary"}
@@ -373,7 +384,7 @@ const Login = () => {
                 >
                   {faceImage
                     ? "Rosto capturado"
-                    : "Iniciar Reconhecimento Facial"}
+                    : "Reconhecimento Facial"}
                   {isLoading && <CircularProgress size={24} sx={{ ml: 1 }} />}
                 </Button>
               </Box>
@@ -517,18 +528,10 @@ const Login = () => {
           open={snackbarOpen}
           autoHideDuration={6000}
           onClose={() => setSnackbarOpen(false)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
           <Alert
             onClose={() => setSnackbarOpen(false)}
-            severity={
-              snackbarMessage.includes("sucesso")
-                ? "success"
-                : snackbarMessage.includes("Erro")
-                ? "error"
-                : "warning"
-            }
-            sx={{ width: "100%" }}
+            severity={snackbarSeverity}
           >
             {snackbarMessage}
           </Alert>

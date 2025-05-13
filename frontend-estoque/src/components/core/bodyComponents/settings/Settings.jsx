@@ -1,59 +1,58 @@
-import React, { Component } from "react";
-import { Switch, FormControlLabel, Typography, Box } from "@mui/material";
+import { useState, useEffect } from "react";
+import {
+  Switch,
+  FormControlLabel,
+  Typography,
+  Box,
+  Paper,
+  useMediaQuery,
+  useTheme
+} from "@mui/material";
 
-export default class Settings extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      facialRecognition: JSON.parse(localStorage.getItem("facialRecognition")) ?? true,
-      // darkMode: JSON.parse(localStorage.getItem("darkMode")) ?? false,
-    };
-  }
+const Settings = ({ onToggleTheme }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  handleToggle = (setting) => {
-    this.setState(
-      (prevState) => ({ [setting]: !prevState[setting] }),
-      () => {
-        localStorage.setItem(setting, JSON.stringify(this.state[setting]));
+  const [facialRecognition, setFacialRecognition] = useState(
+    JSON.parse(localStorage.getItem("facialRecognition")) ?? true
+  );
 
-        // if (setting === "darkMode" && this.props.onToggleTheme) {
-        //   this.props.onToggleTheme(this.state.darkMode);
-        // }
-      }
-    );
-  };
+  useEffect(() => {
+    localStorage.setItem("facialRecognition", JSON.stringify(facialRecognition));
+  }, [facialRecognition]);
 
-  render() {
-    const { facialRecognition } = this.state;
-
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Configurações
-        </Typography>
+  return (
+    <Box
+      sx={{
+        width: isMobile ? "100vw" : "80vw",
+        minHeight: "100vh",
+        p: isMobile ? 4 : 2,
+        boxSizing: "border-box",
+      }}
+    >
+      <Paper
+        elevation={4}
+        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: '95%' }}
+      >
+        <Box sx={{ p: 3 }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold" }} gutterBottom>
+            Configurações
+          </Typography>
+        </Box>
 
         <FormControlLabel
           control={
             <Switch
               checked={facialRecognition}
-              onChange={() => this.handleToggle("facialRecognition")}
+              onChange={() => setFacialRecognition((prev) => !prev)}
               color="primary"
             />
           }
           label={`Reconhecimento Facial: ${facialRecognition ? "Ativado" : "Desativado"}`}
         />
+      </Paper>
+    </Box>
+  );
+};
 
-        {/* <FormControlLabel
-          control={
-            <Switch
-              checked={darkMode}
-              onChange={() => this.handleToggle("darkMode")}
-              color="primary"
-            />
-          }
-          label={`Tema Escuro: ${darkMode ? "Ativado" : "Desativado"}`}
-        /> */}
-      </Box>
-    );
-  }
-}
+export default Settings;

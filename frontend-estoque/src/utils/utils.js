@@ -1,6 +1,4 @@
 import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 
 export const fileExporters = {
   exportToExcel: (title, filename, rows) => {
@@ -9,18 +7,6 @@ export const fileExporters = {
     XLSX.utils.book_append_sheet(workbook, worksheet, title);
     XLSX.writeFile(workbook, filename);
   }, 
-  exportToPDF: (filename, rows) => {
-    const doc = new jsPDF();
-    const tableColumn = ["ID", "Categoria"];
-    const tableRows = rows.map((row) => [row.id, row.name]);
-    
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
-    });
-    
-    doc.save(filename);
-  }
 }
 
 export const isTokenExpired = (token) => {

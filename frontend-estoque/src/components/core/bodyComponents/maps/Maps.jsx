@@ -3,14 +3,14 @@ import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, FeatureGroup
 import { EditControl } from 'react-leaflet-draw';
 import { Dialog, Button, Box, TextField, AppBar, Toolbar, Typography, Container, Grid, Tooltip, Avatar, Chip, Divider, CircularProgress, Alert, InputAdornment, useMediaQuery, useTheme } from '@mui/material';
 import {
-  FilterList as FilterListIcon,          
-  LocationSearching as LocationSearchingIcon,   
-  Visibility as VisibilityIcon,          
-  VisibilityOff as VisibilityOffIcon,       
-  Polyline as PolylineIcon,            
-  ShowChart as ShowChartIcon,           
-  Clear as ClearIcon,               
-  Restore as RestoreIcon,             
+  FilterList as FilterListIcon,
+  LocationSearching as LocationSearchingIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+  Polyline as PolylineIcon,
+  ShowChart as ShowChartIcon,
+  Clear as ClearIcon,
+  Restore as RestoreIcon,
 } from '@mui/icons-material';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -198,12 +198,6 @@ const MapComponent = () => {
     setPolygons((prevPolygons) => [...prevPolygons, newPolygon]);
   };
 
-  const handleLineCreate = (e) => {
-    const { layer } = e;
-    const newLine = layer.getLatLngs();
-    setLines((prevLines) => [...prevLines, newLine]);
-  };
-
   const searchLocation = async () => {
     const location = prompt('Digite o endereço:');
     if (!location) return;
@@ -232,19 +226,6 @@ const MapComponent = () => {
     setMarkers(defaultMarkers);
   };
 
-  const calculateDistance = () => {
-    if (selectedMarkers.length === 2) {
-      const [marker1, marker2] = selectedMarkers;
-      const latLng1 = L.latLng(marker1.lat, marker1.lng);
-      const latLng2 = L.latLng(marker2.lat, marker2.lng);
-      const distance = latLng1.distanceTo(latLng2) / 1000;
-      alert(`A distância entre os dois marcadores é de ${distance.toFixed(2)} km.`);
-
-      setDistanceLine([marker1, marker2]);
-      setSelectedMarkers([]);
-    }
-  };
-
   const handleMarkerClick = (marker) => {
     setSelectedMarkers((prev) => {
       if (prev.includes(marker)) {
@@ -256,35 +237,6 @@ const MapComponent = () => {
         return prev;
       }
     });
-  };
-
-  const handleExport = () => {
-    const sessionData = {
-      markers,
-      polygons,
-      lines,
-    };
-    const blob = new Blob([JSON.stringify(sessionData)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'session.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImport = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const data = JSON.parse(event.target.result);
-      setMarkers(data.markers || []);
-      setPolygons(data.polygons || []);
-      setLines(data.lines || []);
-    };
-    reader.readAsText(file);
   };
 
   const MapZoomToShapes = () => {
@@ -304,37 +256,14 @@ const MapComponent = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const handleCancelGeocoding = () => {
+    setLoadingSuppliers(false);
+    setGeocodingProgress(0);
+  };
+
   const renderSupplierPopup = (supplier) => {
     return (
       <Box sx={{ minWidth: 250 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Avatar
-            src={supplier.logo || 'https://cdn-icons-png.flaticon.com/512/2909/2909526.png'}
-            sx={{ width: 56, height: 56, mr: 2 }}
-          />
-          <Box>
-            <Typography variant="h6" fontWeight="bold">{supplier.name}</Typography>
-            <Typography variant="body2" color="text.secondary">{supplier.category}</Typography>
-          </Box>
-        </Box>
-
-        <Divider sx={{ my: 1 }} />
-
-        <Box sx={{ mb: 1, gap: 2 }}>
-          <TextField
-            label="Anotações"
-            value={supplier?.note ? supplier.note : ""}
-            onChange={(e) => handleNoteChange(index, e.target.value)}
-            variant="outlined"
-            fullWidth
-          />
-          <Button sx={{ mt: 3 }} variant="outlined" color="error" onClick={() => deleteMarker(index)}>
-            Deletar
-          </Button>
-        </Box>
-
-        <Divider sx={{ my: 1 }} />
-
         <Box sx={{ mb: 1 }}>
           <Typography variant="body2"><strong>Endereço:</strong> {supplier.fullAddress || supplier.address}</Typography>
           {supplier.zipCode && <Typography variant="body2"><strong>CEP:</strong> {supplier.zipCode}</Typography>}
@@ -379,7 +308,7 @@ const MapComponent = () => {
       borderRadius: 1,
       mx: 'auto',
     }}>
-      <AppBar position="static" sx={{ boxShadow: 2 }}>
+      <AppBar position="static" sx={{ borderRadius: 1, boxShadow: 2, backgroundColor: '#00796b' }}>
         <Toolbar>
           <Typography variant="h6">Mapa de Fornecedores e Marcadores</Typography>
         </Toolbar>
@@ -390,32 +319,48 @@ const MapComponent = () => {
           open={loadingSuppliers}
           PaperProps={{
             sx: {
-              p: 4,
-              backgroundColor: 'transparent',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)', 
               boxShadow: 'none',
-              backgroundImage: 'none',
-            }
+              backdropFilter: 'blur(3px)',
+              backgroundColor: "#f5f5f5"
+            },
           }}
         >
-          <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-          }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              p: 4,
+              borderRadius: 2,
+              backgroundColor: "#f5f5f5",
+              minWidth: 300,
+            }}
+          >
             <CircularProgress
               variant="determinate"
               value={geocodingProgress}
               size={60}
               thickness={4}
-              sx={{ mb: 3, color: 'primary.secondary' }}
+              sx={{ mb: 3, color: 'primary.main' }}
             />
-            <Typography variant="h6" gutterBottom sx={{ color: 'common.white' }}>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }} gutterBottom>
               Carregando fornecedores...
             </Typography>
-            <Typography sx={{ color: 'common.white' }}>
+            <Typography gutterBottom>
               {geocodingProgress}% completo
             </Typography>
+
+            <Button
+              onClick={handleCancelGeocoding}
+              variant="outlined"
+              color="error"
+              size="small"
+              sx={{ mt: 2 }}
+            >
+              Cancelar
+            </Button>
           </Box>
         </Dialog>
       )}
@@ -426,7 +371,7 @@ const MapComponent = () => {
         </Alert>
       )}
 
-      <Box sx={{ my: 2 }}>
+      <Box sx={{ my: 2, mt: 4 }}>
         <Grid container spacing={2} alignItems="center">
           {/* Filtro */}
           <Grid item xs={12} sm={6} md={4}>
@@ -445,20 +390,6 @@ const MapComponent = () => {
                 ),
               }}
             />
-          </Grid>
-
-          {/* Buscar Localização */}
-          <Grid item xs={12} sm={6} md={4}>
-            <Tooltip title="Buscar Localização">
-              <Button
-                variant="contained"
-                fullWidth
-                onClick={searchLocation}
-                startIcon={<LocationSearchingIcon />}
-              >
-                Buscar Localização
-              </Button>
-            </Tooltip>
           </Grid>
         </Grid>
       </Box>

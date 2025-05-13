@@ -10,7 +10,7 @@ import {
   TextField,
 } from "@mui/material";
 import { Edit as EditIcon, Refresh as RefreshIcon } from "@mui/icons-material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { fileExporters } from "../../../../utils/utils";
 import Swal from "sweetalert2";
 import api from "../../../../api";
@@ -162,8 +162,7 @@ const UserList = () => {
         fetchUsers();
       } catch (error) {
         setSnackbarMessage(
-          `Erro ao alterar a senha: ${
-            error.response?.data?.message || error.message
+          `Erro ao alterar a senha: ${error.response?.data?.message || error.message
           }`
         );
         setSnackbarSeverity("error");
@@ -255,13 +254,6 @@ const UserList = () => {
         >
           Exportar Excel
         </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => fileExporters.exportToPDF("usuarios.pdf", rows)}
-        >
-          Exportar PDF
-        </Button>
       </div>
       <div
         style={{
@@ -273,7 +265,8 @@ const UserList = () => {
           overflow: "hidden",
         }}
       >
-        <DataGrid rows={rows} columns={columns} />
+        <DataGrid localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rows={rows} columns={columns} />
       </div>
 
       <Dialog open={open} onClose={handleClose}>

@@ -1,7 +1,7 @@
-import NavBarComponent from "./NavBarComponent";
 import { Box, Grid } from "@mui/material";
-import SideBarComponent from "./SideBarComponent";
 import { Outlet, useLocation } from "react-router-dom";
+import NavBarComponent from "./NavBarComponent";
+import SideBarComponent from "./SideBarComponent";
 
 export default function RootComponent() {
   const location = useLocation();

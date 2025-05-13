@@ -13,7 +13,7 @@ import {
   Delete as DeleteIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { fileExporters } from "../../../../utils/utils";
 import api from "../../../../api";
 import Swal from "sweetalert2";
@@ -82,8 +82,7 @@ const Inventory = () => {
         setSnackbarSeverity("success");
       } catch (error) {
         setSnackbarMessage(
-          `Erro ao deletar o inventário: ${
-            error.response?.data?.message || error.response?.data?.error || error.message
+          `Erro ao deletar o inventário: ${error.response?.data?.message || error.response?.data?.error || error.message
           }`
         );
         setSnackbarSeverity("error");
@@ -224,13 +223,6 @@ const Inventory = () => {
         >
           Exportar Excel
         </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => fileExporters.exportToPDF("inventarios.pdf", rows)}
-        >
-          Exportar PDF
-        </Button>
       </div>
       <div
         style={{
@@ -242,7 +234,8 @@ const Inventory = () => {
           overflow: "hidden",
         }}
       >
-        <DataGrid rows={rows} columns={columns} />
+        <DataGrid localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rows={rows} columns={columns} />
       </div>
 
       <Dialog open={open} onClose={handleClose}>

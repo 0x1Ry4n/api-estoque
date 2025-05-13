@@ -15,7 +15,7 @@ import {
   Edit as EditIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { addDays, format } from "date-fns";
 import { fileExporters } from "../../../../utils/utils";
 import api from "../../../../api";
@@ -96,8 +96,7 @@ const ReceivementList = () => {
         fetchReceivements();
       } catch (error) {
         setSnackbarMessage(
-          `Erro ao deletar o recebimento: ${
-            error.response?.data?.message || error.message
+          `Erro ao deletar o recebimento: ${error.response?.data?.message || error.message
           }`
         );
         setSnackbarSeverity("error");
@@ -272,13 +271,6 @@ const ReceivementList = () => {
         >
           Exportar Excel
         </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => fileExporters.exportToPDF("recebimentos.pdf", rows)}
-        >
-          Exportar PDF
-        </Button>
       </div>
       <div
         style={{
@@ -290,7 +282,8 @@ const ReceivementList = () => {
           overflow: "hidden",
         }}
       >
-        <DataGrid rows={rows} columns={columns} />
+        <DataGrid localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rows={rows} columns={columns} />
       </div>
 
       <Dialog open={open} onClose={handleClose}>
@@ -312,29 +305,6 @@ const ReceivementList = () => {
             }
             sx={{ mb: 3 }}
           />
-
-          {/* <Select
-            labelId="status-label"
-            value={selectedReceivement?.status || ""}
-            onChange={(e) =>
-              setSelectedReceivement({
-                ...selectedReceivement,
-                status: e.target.value,
-              })
-            }
-            fullWidth
-            displayEmpty
-            notched
-          >
-            <MenuItem value="" disabled>
-              Selecione um status
-            </MenuItem>
-            {Object.entries(receivementStatusMap).map(([key, value]) => (
-              <MenuItem key={key} value={key}>
-                {value}
-              </MenuItem>
-            ))}
-          </Select> */}
 
           <TextField
             label="Quantidade"
@@ -398,8 +368,8 @@ const ReceivementList = () => {
             value={
               selectedReceivement?.receivingDate
                 ? new Date(selectedReceivement.receivingDate)
-                    .toISOString()
-                    .split("T")[0]
+                  .toISOString()
+                  .split("T")[0]
                 : ""
             }
             onChange={(e) =>

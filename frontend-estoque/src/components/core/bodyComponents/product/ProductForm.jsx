@@ -11,6 +11,7 @@ import {
   Alert,
   Dialog,
   DialogTitle,
+  Divider,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -18,12 +19,13 @@ import {
   Description as DescriptionIcon,
   DateRange as DateRangeIcon,
   AddShoppingCart as AddShoppingCartIcon,
-  AddCircleOutline,
+  AddCircleOutline as AddCircleOutlineIcon,
+  QrCode2Rounded as QRCodeIcon
 } from "@mui/icons-material";
 import { Autocomplete } from "@mui/material";
 import api from "./../../../../api";
 import { useForm, Controller } from "react-hook-form";
-import QrScanner from 'react-qr-scanner'; 
+import QrScanner from 'react-qr-scanner';
 
 const ProductForm = ({ onProductAdded }) => {
   const {
@@ -78,7 +80,7 @@ const ProductForm = ({ onProductAdded }) => {
 
   const handleScan = (data) => {
     if (data) {
-      reset({ productCode: data.text }); 
+      reset({ productCode: data.text });
       setOpenModal(false);
     }
   };
@@ -107,7 +109,7 @@ const ProductForm = ({ onProductAdded }) => {
     } catch (error) {
       setSnackbarMessage(
         "Erro ao cadastrar produto: " +
-          (error.response?.data?.message || "Erro desconhecido.")
+        (error.response?.data?.message || "Erro desconhecido.")
       );
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
@@ -118,7 +120,7 @@ const ProductForm = ({ onProductAdded }) => {
     <Box>
       <Paper
         elevation={4}
-        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: "95%"}}
+        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: "95%" }}
       >
         <Typography
           variant="h5"
@@ -237,7 +239,7 @@ const ProductForm = ({ onProductAdded }) => {
                     label="Código do Produto"
                     fullWidth
                     variant="outlined"
-                    error={!!errors.productCode} 
+                    error={!!errors.productCode}
                     helperText={errors.productCode ? errors.productCode.message : ''}
                     InputLabelProps={{
                       shrink: true,
@@ -245,7 +247,9 @@ const ProductForm = ({ onProductAdded }) => {
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <Button onClick={openCameraModal}>Escanear QRCode</Button>
+                          <Button onClick={openCameraModal}>
+                            <QRCodeIcon sx={{ ml: 5 }} /> 
+                          </Button>
                         </InputAdornment>
                       ),
                     }}
@@ -348,21 +352,22 @@ const ProductForm = ({ onProductAdded }) => {
             color="primary"
             sx={{ mt: 4, display: "flex", alignItems: "center" }}
           >
-            <AddCircleOutline sx={{ mr: 1 }} />
+            <AddCircleOutlineIcon sx={{ mr: 1 }} />
             Cadastrar Produto
           </Button>
         </Box>
       </Paper>
 
       <Dialog open={openModal} onClose={closeCameraModal}>
-        <DialogTitle>Escanear QR Code</DialogTitle>
-        <Box sx={{ padding: 2, textAlign: 'center' }}>
+        <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>Escanear QR Code</DialogTitle>
+        <Divider />
+        <Box sx={{ padding: 4, textAlign: 'center' }}>
           {isScanning && (
             <QrScanner
               delay={300}
               onError={handleError}
               onScan={handleScan}
-              style={{ width: '100%' }}
+              style={{ width: '100%', borderRadius: 6 }}
             />
           )}
           <Button onClick={closeCameraModal} variant="outlined" sx={{ mt: 2 }}>

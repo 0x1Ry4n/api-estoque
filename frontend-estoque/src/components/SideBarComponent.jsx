@@ -63,7 +63,7 @@ export default function SideBarComponent({ isSidebarOpen, toggleSidebar }) {
   };
 
   const SidebarContent = (
-    <List sx={{ ml: 2, pt: isMobile ? 12 : 8 }}>
+    <List sx={{ ml: 1, pt: isMobile ? 12 : 8 }}>
       {filteredSideBarComponent.map((comp, index) => (
         <ListItem disablePadding key={index}>
           <Box width="100%">

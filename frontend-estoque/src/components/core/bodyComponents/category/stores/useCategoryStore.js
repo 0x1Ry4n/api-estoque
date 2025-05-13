@@ -11,7 +11,6 @@ export const useCategoryStore = create((set, get) => ({
       get().showSnackbar("Erro ao carregar categorias.", "error");
     }
   },
-
   snackbar: {
     open: false,
     message: "",
@@ -21,7 +20,6 @@ export const useCategoryStore = create((set, get) => ({
     set({ snackbar: { open: true, message, severity } }),
   closeSnackbar: () =>
     set((state) => ({ snackbar: { ...state.snackbar, open: false } })),
-
   open: false,
   isEditing: false,
   selectedCategory: null,
@@ -85,7 +83,7 @@ export const useCategoryStore = create((set, get) => ({
     } catch (error) {
       showSnackbar(
         `Erro ao deletar a categoria: ${
-          error.response?.data?.error || error.message
+          error.response?.data?.message || error.message
         }`,
         "error"
       );

@@ -24,7 +24,7 @@ import {
 } from "@mui/icons-material";
 import { fileExporters } from "../../../../utils/utils";
 import InputMask from "react-input-mask";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import api from "../../../../api";
 
@@ -89,8 +89,7 @@ const Suppliers = () => {
         setSnackbarSeverity("success");
       } catch (error) {
         setSnackbarMessage(
-          `Erro ao deletar o fornecedor: ${
-            error.response?.data?.message || error.response?.data?.error || error.message
+          `Erro ao deletar o fornecedor: ${error.response?.data?.message || error.response?.data?.error || error.message
           }`
         );
         setSnackbarSeverity("error");
@@ -127,8 +126,7 @@ const Suppliers = () => {
       setSnackbarSeverity("success");
     } catch (error) {
       setSnackbarMessage(
-        `Erro ao salvar fornecedor: ${
-          error.response?.data?.error || error.message
+        `Erro ao salvar fornecedor: ${error.response?.data?.error || error.message
         }`
       );
       setSnackbarSeverity("error");
@@ -219,13 +217,6 @@ const Suppliers = () => {
         >
           Exportar Excel
         </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => fileExporters.exportToPDF("fornecedores.pdf", rows)}
-        >
-          Exportar PDF
-        </Button>
       </div>
       <div
         style={{
@@ -237,7 +228,8 @@ const Suppliers = () => {
           overflow: "hidden",
         }}
       >
-        <DataGrid rows={rows} columns={columns} />
+        <DataGrid localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rows={rows} columns={columns} />
       </div>
 
       <Dialog open={open} onClose={handleClose}>

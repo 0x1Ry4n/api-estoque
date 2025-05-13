@@ -8,12 +8,6 @@ import ptBrLocale from '@fullcalendar/core/locales/pt-br';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import {
-  PictureAsPdf as PictureAsPdfIcon,
-  Description as DescriptionIcon,
-  Download as DownloadIcon
-} from '@mui/icons-material';
-
-import {
   Box,
   Paper,
   Typography,
@@ -30,6 +24,11 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
+import {
+  PictureAsPdf as PictureAsPdfIcon,
+  Description as DescriptionIcon,
+  Download as DownloadIcon
+} from '@mui/icons-material';
 import { format } from 'date-fns';
 import { saveAs } from 'file-saver';
 
@@ -285,7 +284,6 @@ const CalendarWithNotes = () => {
       width: isMobile ? '100vw' : '80vw',
       minHeight: '100vh',
       p: isMobile ? 4 : 6,
-      backgroundColor: "#f5f5f5",
       boxSizing: 'border-box',
       borderRadius: 1,
       mx: 'auto',
@@ -296,8 +294,8 @@ const CalendarWithNotes = () => {
         fontWeight: 600,
       },
     }}>
-      <Paper elevation={4} sx={{ padding: 3, borderRadius: 2 }}>
-        <Typography variant="h5" sx={{ mt: 2, mb: 3, fontWeight: 'bold' }}>
+      <Paper elevation={4} sx={{ padding: 10, borderRadius: 2 }}>
+        <Typography variant="h5" sx={{ mt: 2, mb: 3, fontWeight: 'bolder' }}>
           Calendário de Notas
         </Typography>
 
@@ -328,7 +326,14 @@ const CalendarWithNotes = () => {
           />
         </div>
 
-        <Grid container spacing={2} sx={{ mt: 3 }}>
+        <Grid
+          container
+          spacing={2}
+          direction="row"
+          alignItems="center"
+          justifyContent="center"
+          sx={{ mt: 3 }}
+        >
           <Grid item>
             <Button
               variant="contained"
@@ -336,6 +341,15 @@ const CalendarWithNotes = () => {
               onClick={exportEventsToCSV}
               startIcon={<DownloadIcon />}
               disabled={Object.keys(notes).length === 0}
+              sx={{
+                width: 220,
+                boxShadow: 2,
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: 4,
+                },
+              }}
             >
               Exportar CSV
             </Button>
@@ -348,8 +362,17 @@ const CalendarWithNotes = () => {
               onClick={exportNotesToPDF}
               startIcon={<DescriptionIcon />}
               disabled={Object.keys(notes).length === 0}
+              sx={{
+                width: 220,
+                boxShadow: 2,
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: 4,
+                },
+              }}
             >
-              Exportar Notas PDF
+              Exportar PDF
             </Button>
           </Grid>
 
@@ -359,11 +382,21 @@ const CalendarWithNotes = () => {
               color="primary"
               onClick={exportCalendarToPDF}
               startIcon={<PictureAsPdfIcon />}
+              sx={{
+                width: 220,
+                boxShadow: 2,
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: 4,
+                },
+              }}
             >
-              Exportar Calendário PDF
+              Exportar Pág.
             </Button>
           </Grid>
         </Grid>
+
 
         <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box

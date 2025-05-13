@@ -53,14 +53,13 @@ const UserProfile = () => {
     <Box sx={{
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center',
-      width: isMobile ? '100vw' : '80vw',
+      width: isMobile ? '100vw' : '40vw',
       minHeight: '100vh',
       p: isMobile ? 4 : 2,
       boxSizing: 'border-box',
-      mx: 'auto',
+      mx: 'auto'
     }}>
-      <Paper elevation={6} sx={{ p: 10, width: '100%', maxWidth: 500, borderRadius: 2 }}>
+      <Paper elevation={6} sx={{ p: 10, width: '100%', backgroundColor: "#f5f5f5", maxWidth: 500, borderRadius: 2 }}>
         <Grid container spacing={4}>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
             <Avatar sx={{ width: 100, height: 100, bgcolor: '#00796b' }}>

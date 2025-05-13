@@ -14,7 +14,7 @@ import {
   Edit as EditIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import { fileExporters } from "../../../../utils/utils";
 import { useCategoryStore } from "./stores/useCategoryStore";
@@ -95,17 +95,14 @@ const Categories = () => {
         >
           Exportar Excel
         </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => fileExporters.exportToPDF("categorias.pdf", rows)}
-        >
-          Exportar PDF
-        </Button>
       </div>
 
       <div style={{ height: 400, width: "100%", backgroundColor: "white", borderRadius: "8px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", overflow: "hidden" }}>
-        <DataGrid rows={rows} columns={columns} />
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+        />
       </div>
 
       <Dialog open={open} onClose={closeModal}>
