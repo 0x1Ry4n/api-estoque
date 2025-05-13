@@ -10,8 +10,8 @@ import {
   Alert,
 } from '@mui/material';
 import { AddCircleOutline, CategoryOutlined } from '@mui/icons-material';
-import api from './../../../../api'; 
 import { useForm, Controller } from 'react-hook-form';
+import api from './../../../../api'; 
 
 const CategoryForm = ({ onCategoryAdded }) => {
   const { control, handleSubmit, reset, formState: { errors } } = useForm();

@@ -21,7 +21,6 @@ const CategoryManagement = () => {
       minHeight: '100vh',
       p: isMobile ? 4 : 2,
       boxSizing: 'border-box',
-      mx: 'auto',
     }}>
       <Box sx={{}}>
         <Typography

@@ -55,7 +55,6 @@ const QRCodeGenerator = () => {
       p: isMobile ? 4 : 2,
       boxSizing: 'border-box',
     }}>
-      {/* Interface principal */}
       <Paper elevation={4} sx={{ p: 6, borderRadius: 2, maxWidth: 1000, mx: 'auto' }} className="no-print">
         <Typography variant="h5" fontWeight="bold" textAlign="center" mb={4}>
           Gerador de QR Codes
