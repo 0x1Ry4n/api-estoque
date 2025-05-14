@@ -27,15 +27,28 @@ const Inventory = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [isEditing, setIsEditing] = useState(false);
   const [products, setProducts] = useState([]);
+  const [pagination, setPagination] = useState({
+    page: 0,
+    pageSize: 20,
+    totalElements: 0,
+    totalPages: 0
+  })
 
   useEffect(() => {
-    fetchInventory();
+    fetchInventory(pagination.page, pagination.pageSize);
   }, []);
 
-  const fetchInventory = async () => {
+  const fetchInventory = async (page, pageSize) => {
     try {
-      const response = await api.get("/products/inventory");
-      setRows(response.data.content);
+      const res = await api.get(`/products/inventory?page=${page}&size=${pageSize}`);
+      setRows(res.data.content);
+      setPagination({
+        page: res.data.number,
+        pageSize: res.data.size,
+        totalElements: res.data.totalElements,
+        totalPages: res.data.totalPages
+      })
+
       await fetchProducts();
     } catch (error) {
       console.error("Erro ao buscar inventário: ", error);
@@ -234,8 +247,23 @@ const Inventory = () => {
           overflow: "hidden",
         }}
       >
-        <DataGrid localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
-          rows={rows} columns={columns} />
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rowCount={pagination.totalElements}
+          paginationMode="server"
+          paginationModel={{
+            page: pagination.page,
+            pageSize: pagination.pageSize,
+          }}
+          onPaginationModelChange={({ page, pageSize }) => {
+            const newPagination = { ...pagination, page, pageSize };
+            setPagination(newPagination);
+            fetchInventory(page, pageSize);
+          }}
+          pageSizeOptions={[20, 50, 100]}
+        />
       </div>
 
       <Dialog open={open} onClose={handleClose}>
@@ -325,6 +353,7 @@ const Inventory = () => {
         <Alert
           onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
+          sx={{ width: "100%" }}
         >
           {snackbarMessage}
         </Alert>

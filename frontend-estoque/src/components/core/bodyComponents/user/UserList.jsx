@@ -38,8 +38,8 @@ const UserList = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await api.get("/auth/users");
-      const formattedUsers = response.data.map((user) => ({
+      const res = await api.get(`/auth/users`);
+      const formattedUsers = res.data.map((user) => ({
         ...user,
         role: user.role === "ADMIN" ? "Administrador" : "Usuário Comum",
         status: user.status === "ACTIVE" ? "Ativo" : "Inativo",
@@ -265,8 +265,11 @@ const UserList = () => {
           overflow: "hidden",
         }}
       >
-        <DataGrid localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
-          rows={rows} columns={columns} />
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+        />
       </div>
 
       <Dialog open={open} onClose={handleClose}>
@@ -323,6 +326,7 @@ const UserList = () => {
         <Alert
           onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
+          sx={{ width: "100%" }}
         >
           {snackbarMessage}
         </Alert>

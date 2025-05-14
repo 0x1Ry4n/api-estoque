@@ -25,9 +25,9 @@ import {
   VisibilityOff,
 } from "@mui/icons-material";
 import { useForm, Controller } from "react-hook-form";
-import * as faceapi from "face-api.js";
 import Webcam from "react-webcam";
 import api from "../../../../api";
+import * as faceapi from "@vladmandic/face-api";
 
 const CreateUser = ({ onUserAdded }) => {
   const {
@@ -180,20 +180,26 @@ const CreateUser = ({ onUserAdded }) => {
         faceImage: userFaceImage,
       });
 
+      if (response.status === 400) {
+        setSnackbarSeverity("error");
+        setSnackbarMessage(response?.data?.message);
+        setSnackbarOpen(true);
+      }
+
       if (response.status === 201) {
         if (typeof onUserAdded === "function") {
           onUserAdded(response.data);
         }
 
         setSnackbarSeverity("success");
-        setSnackbarMessage("Usuário criado com sucesso!");
+        setSnackbarMessage(response?.data?.message);
         setSnackbarOpen(true);
         reset();
         setUserFaceImage(null);
       }
     } catch (error) {
       const errorMessage =
-        error.response?.data?.error || "Erro ao criar usuário. Tente novamente.";
+        error.response?.data?.message || "Erro ao criar usuário. Tente novamente.";
       setSnackbarSeverity("error");
       setSnackbarMessage(errorMessage);
       setSnackbarOpen(true);
@@ -399,12 +405,13 @@ const CreateUser = ({ onUserAdded }) => {
                                 maxHeight: "300px",
                                 borderRadius: 8,
                                 marginBottom: 16,
+                                transform: "scaleX(-1)",
                               }}
                             />
                           </Box>
                           <br />
                           <Button
-                            variant="contained"
+                            variant="outlined"
                             onClick={startCamera}
                             startIcon={<Refresh />}
                             sx={{ mt: 2 }}
@@ -419,12 +426,12 @@ const CreateUser = ({ onUserAdded }) => {
                               ref={webcamRef}
                               audio={false}
                               screenshotFormat="image/jpeg"
-                              width={640}
-                              height={480}
+                              width={window.innerWidth < 600 ? 320 : 640}
+                              height={window.innerWidth < 600 ? 240 : 480}
                               videoConstraints={{
                                 facingMode: "user",
-                                width: 640,
-                                height: 480,
+                                width: { ideal: window.innerWidth < 600 ? 320 : 640 },
+                                height: { ideal: window.innerWidth < 600 ? 240 : 480 }
                               }}
                               style={{
                                 display: "block",
@@ -432,6 +439,8 @@ const CreateUser = ({ onUserAdded }) => {
                                 margin: "0 auto",
                                 transform: "scaleX(-1)",
                                 maxWidth: "100%",
+                                width: "100%",
+                                height: "auto"
                               }}
                             />
                             <canvas
@@ -448,7 +457,7 @@ const CreateUser = ({ onUserAdded }) => {
                             />
                           </Box>
 
-                          <Box mt={3}>
+                          <Box>
                             {faceDetection ? (
                               <Box>
                                 <Typography variant="body1" color="text.secondary">
@@ -460,7 +469,7 @@ const CreateUser = ({ onUserAdded }) => {
                                   variant="contained"
                                   onClick={captureFace}
                                   startIcon={<CameraAlt />}
-                                  sx={{ mt: 2, py: 1.5, width: "100%", maxWidth: 300 }}
+                                  sx={{ mt: 2, py: 1.5, width: "90%", maxWidth: 300 }}
                                   disabled={isLoading}
                                 >
                                   Capturar Foto
@@ -506,7 +515,6 @@ const CreateUser = ({ onUserAdded }) => {
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}

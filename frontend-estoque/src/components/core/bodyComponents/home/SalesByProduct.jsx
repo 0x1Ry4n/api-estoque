@@ -1,94 +1,172 @@
 import ApexCharts from "react-apexcharts";
-import { Box, useMediaQuery, useTheme } from "@mui/material";
+import { Box, useMediaQuery, useTheme, Typography } from "@mui/material";
 
 export default function SalesByProduct({ receivements }) {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const isMediumScreen = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
-  const productCountMap = {};
-  receivements.forEach(r => {
-    const productId = r.productId;
-    if (productCountMap[productId]) {
-      productCountMap[productId].count += 1;
-    } else {
-      productCountMap[productId] = {
-        count: 1,
-        inventoryCode: r.inventoryCode,
+  const inventoryData = receivements.reduce((acc, item) => {
+    const { inventoryCode, productId, quantity } = item;
+    const key = `${inventoryCode} - ${productId}`;
+
+    if (!acc[key]) {
+      acc[key] = {
+        entries: 0,
+        totalQuantity: 0,
+        inventoryCode,
+        productId
       };
     }
-  });
 
-  const labels = Object.values(productCountMap).map(
-    r => `${r.inventoryCode} - ${r.count} entradas`
+    acc[key].entries += 1;
+    acc[key].totalQuantity += quantity || 1;
+
+    return acc;
+  }, {});
+
+  const sortedData = Object.values(inventoryData).sort((a, b) => b.totalQuantity - a.totalQuantity);
+
+  const displayData = sortedData.slice(0, 10);
+
+  const series = [{
+    name: 'Dados',
+    data: displayData.map(item => item.totalQuantity)
+  }];
+
+  const categories = displayData.map(item =>
+    `${item.inventoryCode} - ${item.productId}`
   );
-  const series = Object.values(productCountMap).map(r => r.count);
 
-  const donutOption = {
+  const options = {
     chart: {
-      type: 'pie',
+      type: 'bar',
       height: 'auto',
-    },
-    labels: labels,
-    legend: {
-      position: isSmallScreen ? "bottom" : "right",
-      fontSize: isSmallScreen ? "12px" : "14px",
-      itemMargin: {
-        horizontal: 8,
-        vertical: 4
+      toolbar: {
+        show: true,
+        tools: {
+          download: true,
+          selection: false,
+          zoom: false,
+          pan: false,
+          reset: true
+        }
       },
-      formatter: function (seriesName, opts) {
-        return isSmallScreen ?
-          seriesName.split(' - ')[0] + '...' :
-          seriesName;
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 800
+      }
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        horizontal: isSmallScreen,
+        columnWidth: '60%',
+        dataLabels: {
+          position: 'top'
+        }
+      }
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: (val) => val.toLocaleString(),
+      style: {
+        fontSize: '11px',
+        colors: [theme.palette.text.primary]
+      },
+      offsetY: isSmallScreen ? 0 : -20
+    },
+    colors: [theme.palette.primary.main],
+    xaxis: {
+      categories,
+      labels: {
+        style: {
+          fontSize: isSmallScreen ? '10px' : '12px',
+          colors: theme.palette.text.secondary
+        },
+        formatter: function(value) {
+          return !isSmallScreen 
+            ? `${value.substring(0, 16)}...` 
+            : value.length > 10 
+              ? `${value.substring(0, 10)}...` 
+              : value;
+        }
+      },
+      axisBorder: {
+        show: true,
+        color: theme.palette.divider
+      },
+      axisTicks: {
+        show: true,
+        color: theme.palette.divider
+      }
+    },
+    yaxis: {
+      title: {
+        text: 'Quantidade',
+        style: {
+          fontSize: '12px',
+          color: theme.palette.text.secondary
+        }
+      },
+      labels: {
+        style: {
+          colors: theme.palette.text.secondary
+        }
+      }
+    },
+    tooltip: {
+      shared: true,
+      intersect: false,
+      y: {
+        formatter: function (value, { seriesIndex, dataPointIndex }) {
+          const item = displayData[dataPointIndex];
+          return [
+            `<div style="font-weight:600">${item.inventoryCode} - ${item.productId}</div>`,
+            `<div>Quantidade Total: <strong>${value.toLocaleString()}</strong></div>`,
+            `<div>Entradas: <strong>${item.entries}</strong></div>`
+          ].join('');
+        }
+      },
+      style: {
+        fontSize: '14px'
       }
     },
     title: {
-      text: "Inventários com mais entradas",
+      text: "Top 10 Itens de Inventário por Quantidade",
       align: 'center',
       style: {
-        fontSize: isSmallScreen ? "14px" : "16px",
+        fontSize: isSmallScreen ? "16px" : "18px",
         fontWeight: 'bold',
         color: theme.palette.text.primary
+      }
+    },
+    subtitle: {
+      text: "Ordenado pela quantidade total recebida",
+      align: 'center',
+      style: {
+        fontSize: isSmallScreen ? "12px" : "14px",
+        color: theme.palette.text.secondary
       }
     },
     responsive: [{
       breakpoint: theme.breakpoints.values.sm,
       options: {
-        chart: {
-          width: '100%'
+        plotOptions: {
+          bar: {
+            horizontal: true,
+            columnWidth: '40%'
+          }
         },
-        legend: {
-          position: 'bottom',
-          horizontalAlign: 'center'
-        }
-      }
-    }],
-    plotOptions: {
-      pie: {
-        donut: {
-          size: isSmallScreen ? '50%' : '65%',
-          labels: {
-            show: !isSmallScreen,
-            total: {
-              show: !isSmallScreen,
-              label: 'Total',
-              color: theme.palette.text.primary
-            }
+        dataLabels: {
+          enabled: true,
+          formatter: (val) => val.toLocaleString(),
+          style: {
+            fontSize: '10px'
           }
         }
       }
-    },
-    dataLabels: {
-      enabled: !isSmallScreen,
-      style: {
-        fontSize: isSmallScreen ? '10px' : '12px',
-        colors: [theme.palette.background.paper]
-      },
-      dropShadow: {
-        enabled: false
-      }
-    }
+    }]
   };
 
   return (
@@ -97,18 +175,22 @@ export default function SalesByProduct({ receivements }) {
         margin: { xs: 1, sm: 3 },
         bgcolor: "background.paper",
         borderRadius: 2,
-        padding: { xs: 1, sm: 3 },
+        padding: { xs: 4, sm: 6 },
         height: "100%",
         boxShadow: theme.shadows[1]
       }}
     >
       <ApexCharts
-        options={donutOption}
+        options={options}
         series={series}
-        type="pie"
-        height={isSmallScreen ? 400 : isMediumScreen ? 450 : 500}
+        type="bar"
+        height="100%"
         width="100%"
       />
+
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, textAlign: 'right' }}>
+        Dados atualizados em {new Date().toLocaleDateString('pt-BR')}
+      </Typography>
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -23,6 +23,8 @@ const Categories = () => {
   const {
     rows,
     fetchCategories,
+    pagination,
+    setPagination,
     snackbar,
     showSnackbar,
     closeSnackbar,
@@ -36,9 +38,9 @@ const Categories = () => {
     deleteCategory,
   } = useCategoryStore();
 
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+   useEffect(() => {
+      fetchCategories(pagination.page, pagination.pageSize);
+    }, []);
 
   const handleDelete = async (ids) => {
     const confirmDelete = await Swal.fire({
@@ -56,7 +58,7 @@ const Categories = () => {
   };
 
   const handleRefresh = () => {
-    fetchCategories();
+    fetchCategories(pagination.page, pagination.pageSize);
     showSnackbar("Lista de categorias atualizada!", "info");
   };
 
@@ -102,6 +104,18 @@ const Categories = () => {
           rows={rows}
           columns={columns}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rowCount={pagination.totalElements}
+          paginationMode="server"
+          paginationModel={{
+            page: pagination.page,
+            pageSize: pagination.pageSize,
+          }}
+          onPaginationModelChange={({ page, pageSize }) => {
+            const newPagination = { ...pagination, page, pageSize };
+            setPagination(newPagination);
+            fetchCategories(page, pageSize);
+          }}
+          pageSizeOptions={[20, 50, 100]}
         />
       </div>
 
@@ -129,7 +143,11 @@ const Categories = () => {
         autoHideDuration={6000}
         onClose={closeSnackbar}
       >
-        <Alert onClose={closeSnackbar} severity={snackbar.severity}>
+        <Alert
+          onClose={closeSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

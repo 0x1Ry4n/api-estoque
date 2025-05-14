@@ -16,7 +16,7 @@ import {
   Visibility as VisibilityIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid, ptBR  } from "@mui/x-data-grid";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { Controller, useForm } from "react-hook-form";
 import { addDays, format } from "date-fns";
 import { fileExporters } from "../../../../utils/utils";
@@ -41,6 +41,12 @@ const Products = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [isEditing, setIsEditing] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 0,
+    pageSize: 20,
+    totalElements: 0,
+    totalPages: 0
+  })
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -55,13 +61,19 @@ const Products = () => {
 
     fetchCategories();
     fetchSuppliers();
-    fetchProducts();
+    fetchProducts(pagination.page, pagination.pageSize);
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (page, pageSize) => {
     try {
-      const response = await api.get("/products");
-      setRows(response.data.content);
+      const res = await api.get(`/products?page=${page}&size=${pageSize}`);
+      setRows(res.data.content);
+      setPagination({
+        page: res.data.number,
+        pageSize: res.data.size,
+        totalElements: res.data.totalElements,
+        totalPages: res.data.totalPages
+      })
     } catch (error) {
       console.error("Erro ao buscar produtos: ", error);
       setSnackbarMessage("Erro ao carregar produtos.");
@@ -157,7 +169,7 @@ const Products = () => {
   };
 
   const handleRefresh = () => {
-    fetchProducts();
+    fetchProducts(pagination.page, pagination.pageSize);
     setSnackbarMessage("Lista de produtos atualizada!");
     setSnackbarSeverity("info");
     setSnackbarOpen(true);
@@ -302,7 +314,22 @@ const Products = () => {
           overflow: "hidden",
         }}
       >
-        <DataGrid rows={rows} columns={columns} localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rowCount={pagination.totalElements}
+          paginationMode="server"
+          paginationModel={{
+            page: pagination.page,
+            pageSize: pagination.pageSize,
+          }}
+          onPaginationModelChange={({ page, pageSize }) => {
+            const newPagination = { ...pagination, page, pageSize };
+            setPagination(newPagination);
+            fetchProducts(page, pageSize);
+          }}
+          pageSizeOptions={[20, 50, 100]}
         />
       </div>
 
@@ -534,6 +561,7 @@ const Products = () => {
         <Alert
           onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
+          sx={{ width: "100%" }}
         >
           {snackbarMessage}
         </Alert>

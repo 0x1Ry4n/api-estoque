@@ -29,7 +29,7 @@ import LoginIcon from "@mui/icons-material/Login";
 import { useAuth } from "../../../context/AuthContext";
 import Webcam from "react-webcam";
 import api from "../../../api";
-import * as faceapi from "face-api.js";
+import * as faceapi from "@vladmandic/face-api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -163,12 +163,13 @@ const Login = () => {
     }
 
     try {
-      const isAuthenticated = await login(email, password);
-      if (isAuthenticated) {
+      const { success, token } = await login(email, password);
+
+      if (success) {
         navigate("/home");
       } else {
         setSnackbarSeverity("error");
-        setSnackbarMessage("Credenciais inválidas. Verifique seu e-mail e senha.");
+        setSnackbarMessage(token);
         setSnackbarOpen(true);
       }
     } catch (err) {
@@ -290,7 +291,7 @@ const Login = () => {
           <Button
             startIcon={<ArrowBack />}
             onClick={() => setIsVerifyingFace(false)}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, color: 'black' }}
           >
             Voltar
           </Button>
@@ -300,7 +301,6 @@ const Login = () => {
           variant="h5"
           mb={3}
           textAlign="center"
-          color="#00796b"
           fontWeight="bold"
         >
           {isVerifyingFace ? (
@@ -416,9 +416,11 @@ const Login = () => {
                     src={faceImage}
                     alt="Face capturada"
                     style={{
-                      width: '85%',
+                      maxWidth: "100%",
+                      maxHeight: "300px",
                       borderRadius: 8,
-                      marginBottom: 4,
+                      marginBottom: 16,
+                      transform: "scaleX(-1)",
                     }}
                   />
                 </Box>
@@ -434,7 +436,7 @@ const Login = () => {
                     startIcon={<Face />}
                     color="success"
                     disabled={isLoading}
-                    sx={{ flexGrow: 1, maxWidth: 200 }}
+                    sx={{ py: 1.5 }}
                   >
                     Verificar
                     {isLoading && <CircularProgress size={16} sx={{ ml: 1 }} />}
@@ -444,9 +446,9 @@ const Login = () => {
                     onClick={() => setFaceImage(null)}
                     startIcon={<CameraAlt />}
                     disabled={isLoading}
-                    sx={{ flexGrow: 1, maxWidth: 150 }}
+                    sx={{ py: 1.5 }}
                   >
-                    Capturar Novamente
+                    Capturar
                   </Button>
                 </Box>
               </Box>
@@ -457,12 +459,12 @@ const Login = () => {
                     ref={webcamRef}
                     audio={false}
                     screenshotFormat="image/jpeg"
-                    width={isMobile ? 320 : 640}
-                    height={isMobile ? 240 : 480}
+                    width={window.innerWidth < 600 ? 320 : 640}
+                    height={window.innerWidth < 600 ? 240 : 480}
                     videoConstraints={{
                       facingMode: "user",
-                      width: isMobile ? 320 : 640,
-                      height: isMobile ? 240 : 480,
+                      width: { ideal: window.innerWidth < 600 ? 320 : 640 },
+                      height: { ideal: window.innerWidth < 600 ? 240 : 480 }
                     }}
                     style={{
                       display: "block",
@@ -470,6 +472,8 @@ const Login = () => {
                       margin: "0 auto",
                       transform: "scaleX(-1)",
                       maxWidth: "100%",
+                      width: "100%",
+                      height: "auto"
                     }}
                   />
                   <canvas
@@ -501,7 +505,7 @@ const Login = () => {
                         sx={{ mt: 2, py: 1.5, width: "100%", maxWidth: 300 }}
                         disabled={isLoading}
                       >
-                        Capturar Foto
+                        Capturar
                         {isLoading && (
                           <CircularProgress size={24} sx={{ ml: 1 }} />
                         )}
@@ -532,6 +536,7 @@ const Login = () => {
           <Alert
             onClose={() => setSnackbarOpen(false)}
             severity={snackbarSeverity}
+            sx={{ width: "100%" }}
           >
             {snackbarMessage}
           </Alert>

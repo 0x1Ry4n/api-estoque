@@ -28,6 +28,12 @@ const ExitList = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [isEditing, setIsEditing] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 0,
+    pageSize: 20,
+    totalElements: 0,
+    totalPages: 0
+  })
 
   const exitStatusMap = {
     PENDING: "Pendente",
@@ -37,13 +43,19 @@ const ExitList = () => {
   };
 
   useEffect(() => {
-    fetchExits();
+    fetchExits(pagination.page, pagination.pageSize);
   }, []);
 
-  const fetchExits = async () => {
+  const fetchExits = async (page, pageSize) => {
     try {
-      const response = await api.get("/exits");
-      setRows(response.data.content);
+      const res = await api.get(`/exits?page=${page}&size=${pageSize}`);
+      setRows(res.data.content);
+      setPagination({
+        page: res.data.number,
+        pageSize: res.data.size,
+        totalElements: res.data.totalElements,
+        totalPages: res.data.totalPages
+      })
     } catch (error) {
       console.error("Erro ao buscar as saídas: ", error);
       setSnackbarMessage("Erro ao carregar as saídas.");
@@ -151,7 +163,7 @@ const ExitList = () => {
   };
 
   const handleRefresh = () => {
-    fetchExits();
+    fetchExits(pagination.page, pagination.pageSize);
     setSnackbarMessage("Lista de Saídas atualizada!");
     setSnackbarSeverity("info");
     setSnackbarOpen(true);
@@ -254,8 +266,23 @@ const ExitList = () => {
           overflow: "hidden",
         }}
       >
-        <DataGrid localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
-          rows={rows} columns={columns} />
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rowCount={pagination.totalElements}
+          paginationMode="server"
+          paginationModel={{
+            page: pagination.page,
+            pageSize: pagination.pageSize,
+          }}
+          onPaginationModelChange={({ page, pageSize }) => {
+            const newPagination = { ...pagination, page, pageSize };
+            setPagination(newPagination);
+            fetchExits(page, pageSize);
+          }}
+          pageSizeOptions={[20, 50, 100]}
+        />
       </div>
 
       <Dialog open={open} onClose={handleClose}>
@@ -318,6 +345,7 @@ const ExitList = () => {
         <Alert
           onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
+          sx={{ width: "100%" }}
         >
           {snackbarMessage}
         </Alert>
