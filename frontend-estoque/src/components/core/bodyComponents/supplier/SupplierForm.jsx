@@ -24,7 +24,7 @@ import api from "./../../../../api";
 import { useForm, Controller } from "react-hook-form";
 
 const SupplierForm = ({ onSupplierAdded }) => {
-  
+
   const {
     control,
     handleSubmit,
@@ -38,18 +38,19 @@ const SupplierForm = ({ onSupplierAdded }) => {
   const onSubmit = async (data) => {
     try {
       const response = await api.post("/supplier", data);
+      
       if (response.status === 201) {
         onSupplierAdded?.(response.data);
         setSnackbarMessage("Fornecedor cadastrado com sucesso!");
         reset();
-      } else {
-        setSnackbarMessage(
-          "Erro ao cadastrar fornecedor: " + response.data.message
-        );
-      }
+      } 
+
       setSnackbarOpen(true);
     } catch (error) {
-      setSnackbarMessage("Erro ao cadastrar fornecedor");
+      setSnackbarMessage(`
+        Erro ao cadastrar fornecedor: ${error.response?.data?.message || error.response?.data?.error || error.message}
+      `);
+      
       setSnackbarOpen(true);
     }
   };

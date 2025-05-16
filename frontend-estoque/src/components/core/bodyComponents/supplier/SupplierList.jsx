@@ -101,8 +101,7 @@ const Suppliers = () => {
         setSnackbarSeverity("success");
       } catch (error) {
         setSnackbarMessage(
-          `Erro ao deletar o fornecedor: ${error.response?.data?.message || error.response?.data?.error || error.message
-          }`
+          `Erro ao deletar o fornecedor: ${error.response?.data?.message || error.response?.data?.error || error.message}`
         );
         setSnackbarSeverity("error");
       } finally {
@@ -138,8 +137,7 @@ const Suppliers = () => {
       setSnackbarSeverity("success");
     } catch (error) {
       setSnackbarMessage(
-        `Erro ao salvar fornecedor: ${error.response?.data?.error || error.message
-        }`
+        `Erro ao salvar o fornecedor: ${error.response?.data?.message || error.response?.data?.error || error.message}`
       );
       setSnackbarSeverity("error");
     } finally {

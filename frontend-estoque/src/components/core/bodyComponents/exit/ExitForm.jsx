@@ -77,7 +77,7 @@ const ExitForm = ({ onExitAdded }) => {
     } catch (error) {
       setSnackbarMessage(
         "Erro ao cadastrar a saída: " +
-        (error.response?.data?.message || "Erro desconhecido.")
+        (error.response?.data?.message || error.response?.data?.error || error.message)
       );
       setSnackbarSeverity("error");
       setSnackbarOpen(true);

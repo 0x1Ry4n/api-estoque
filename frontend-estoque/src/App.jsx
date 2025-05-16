@@ -10,7 +10,6 @@ import {
   Navigate,
 } from "react-router-dom";
 import Home from "./components/core/bodyComponents/home/Home";
-import Report from "./components/core/bodyComponents/report/Report";
 import Settings from "./components/core/bodyComponents/settings/Settings";
 import Login from "./components/auth/login/Login";
 import PrivateRoute from './components/auth/privateRoute';
@@ -63,7 +62,6 @@ function App() {
           <Route path="/receivements" element={<ReceivementManagement />} />
           <Route path="/exits" element={<ExitManagement />} />
           <Route path="/customers" element={<CustomerManagement />} />
-          <Route path="/reports" element={<Report />} />
           <Route path="/qrcode-generator" element={<QRCodeGenerator />} />
           <Route path="/settings" element={<PrivateRoute onlyAdmin={true}> 
             <Settings onToggleTheme={handleToggleTheme} /> 

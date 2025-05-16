@@ -120,7 +120,7 @@ const ExitList = () => {
       fetchExits();
     } catch (error) {
       setSnackbarMessage(
-        `Erro ao salvar a Saída: ${error.response.data.message}`
+        `Erro ao salvar a saída: ${error.response?.data?.message || error.response?.data?.error || error.message}`
       );
       setSnackbarSeverity("error");
     } finally {

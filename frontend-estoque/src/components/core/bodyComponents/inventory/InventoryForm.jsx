@@ -43,7 +43,7 @@ const InventoryForm = ({ onInventoryAdded }) => {
         const response = await api.get('/products');
         setProducts(Array.isArray(response.data.content) ? response.data.content : []);
       } catch (error) {
-        setSnackbarMessage('Erro ao carregar produtos: ' + (error.response?.data?.message || 'Erro desconhecido.'));
+        setSnackbarMessage('Erro ao carregar produtos: ' + (error.response?.data?.message || error.response?.data?.error || error.message));
         setSnackbarSeverity('error');
         setSnackbarOpen(true);
       }
@@ -70,7 +70,7 @@ const InventoryForm = ({ onInventoryAdded }) => {
         reset();
       }
     } catch (error) {
-      setSnackbarMessage('Erro ao cadastrar inventário: ' + (error.response?.data?.message || 'Erro desconhecido.'));
+      setSnackbarMessage('Erro ao cadastrar inventário: ' + (error.response?.data?.message || error.response?.data?.error || error.message));
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
     }

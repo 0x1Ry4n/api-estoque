@@ -80,8 +80,7 @@ export const useCategoryStore = create((set, get) => ({
       fetchCategories(pagination.page, pagination.pageSize);
     } catch (error) {
       showSnackbar(
-        `Erro ao salvar a categoria: ${error.response?.data?.error || error.message
-        }`,
+        `Erro ao salvar a categoria: ${error.response?.data?.error || error.response?.data?.error || error.message}`,
         "error"
       );
     } finally {
@@ -99,8 +98,7 @@ export const useCategoryStore = create((set, get) => ({
       fetchCategories(pagination.page, pagination.pageSize);
     } catch (error) {
       showSnackbar(
-        `Erro ao deletar a categoria: ${error.response?.data?.error || error.message
-        }`,
+        `Erro ao deletar a categoria: ${error.response?.data?.message || error.response?.data?.error || error.message}`,
         "error"
       );
     }

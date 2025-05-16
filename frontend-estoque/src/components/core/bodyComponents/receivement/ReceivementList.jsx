@@ -108,8 +108,7 @@ const ReceivementList = () => {
         fetchReceivements();
       } catch (error) {
         setSnackbarMessage(
-          `Erro ao deletar o recebimento: ${error.response?.data?.message || error.message
-          }`
+          `Erro ao deletar o recebimento: ${error.response?.data?.message || error.response?.data?.error || error.message}`
         );
         setSnackbarSeverity("error");
       } finally {
@@ -144,7 +143,9 @@ const ReceivementList = () => {
       setSnackbarSeverity("success");
       fetchReceivements();
     } catch (error) {
-      setSnackbarMessage("Erro ao salvar o recebimento.");
+      setSnackbarMessage(`
+        Erro ao salvar o recebimento: ${error.response?.data?.message || error.response?.data?.error || error.message}
+      `);
       setSnackbarSeverity("error");
     } finally {
       handleClose();
@@ -175,7 +176,7 @@ const ReceivementList = () => {
         setSnackbarSeverity("success");
         fetchReceivements();
       } catch (error) {
-        setSnackbarMessage("Erro ao atualizar o status.");
+        setSnackbarMessage(`Erro ao atualizar o status: ${error.response?.data?.message || error.response?.data?.error || error.message}`);
         setSnackbarSeverity("error");
       } finally {
         setSnackbarOpen(true);

@@ -199,7 +199,7 @@ const CreateUser = ({ onUserAdded }) => {
       }
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || "Erro ao criar usuário. Tente novamente.";
+        error.response?.data?.message || error.response?.data?.error || error.message;
       setSnackbarSeverity("error");
       setSnackbarMessage(errorMessage);
       setSnackbarOpen(true);

@@ -95,8 +95,7 @@ const Inventory = () => {
         setSnackbarSeverity("success");
       } catch (error) {
         setSnackbarMessage(
-          `Erro ao deletar o inventário: ${error.response?.data?.message || error.response?.data?.error || error.message
-          }`
+          `Erro ao deletar o inventário: ${error.response?.data?.message || error.response?.data?.error || error.message}`
         );
         setSnackbarSeverity("error");
       } finally {
@@ -128,7 +127,7 @@ const Inventory = () => {
       }
       setSnackbarSeverity("success");
     } catch (error) {
-      setSnackbarMessage("Erro ao salvar item de inventário.");
+      setSnackbarMessage(`Erro ao salvar o inventário: ${error.response?.data?.message || error.response?.data?.error || error.message}`);
       setSnackbarSeverity("error");
     } finally {
       handleClose();

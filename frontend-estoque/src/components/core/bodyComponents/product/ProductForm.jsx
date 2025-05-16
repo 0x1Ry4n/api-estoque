@@ -107,10 +107,9 @@ const ProductForm = ({ onProductAdded }) => {
         reset();
       }
     } catch (error) {
-      setSnackbarMessage(
-        "Erro ao cadastrar produto: " +
-        (error.response?.data?.message || "Erro desconhecido.")
-      );
+      setSnackbarMessage(`
+        Erro ao cadastrar produto: ${error.response?.data?.message || error.response?.data?.error || error.message}
+      `);
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }

@@ -91,7 +91,7 @@ const UserList = () => {
       setSnackbarSeverity("success");
     } catch (error) {
       setSnackbarMessage(
-        `Erro ao atualizar o usuário: ${error.response?.data?.message}`
+        `Erro ao salvar o usuário: ${error.response?.data?.message || error.response?.data?.error || error.message}`
       );
       setSnackbarSeverity("error");
     } finally {
@@ -124,7 +124,7 @@ const UserList = () => {
         fetchUsers();
       } catch (error) {
         setSnackbarMessage(
-          `Erro ao atualizar o status: ${error.response?.data?.message}`
+          `Erro ao atualizar o status: ${error.response?.data?.message || error.response?.data?.error || error.message}`
         );
         setSnackbarSeverity("error");
       } finally {
@@ -162,8 +162,7 @@ const UserList = () => {
         fetchUsers();
       } catch (error) {
         setSnackbarMessage(
-          `Erro ao alterar a senha: ${error.response?.data?.message || error.message
-          }`
+          `Erro ao alterar a senha: ${error.response?.data?.message || error.response?.data?.error || error.message}`
         );
         setSnackbarSeverity("error");
       } finally {

@@ -78,6 +78,16 @@ public class ProductService {
             product.setProductCode(data.productCode());
         }
 
+        if (!data.supplierIds().isEmpty()) {
+            Set<Supplier> suppliers = data.supplierIds().stream()
+                    .map(supplierId -> supplierRepository.findById(supplierId)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                    "Fornecedor não encontrado com ID: " + supplierId)))
+                    .collect(Collectors.toSet());
+
+            product.setSuppliers(suppliers);
+        }
+
         if (data.name() != null) {
             product.setName(data.name());
         }
@@ -93,7 +103,7 @@ public class ProductService {
         if (data.expirationDate() != null) {
             product.setExpirationDate(data.expirationDate());
         }
-        
+
         Product updatedProduct = productRepository.save(product);
         return new ProductResponseDTO(updatedProduct);
     }
@@ -107,7 +117,7 @@ public class ProductService {
     public ProductDetailedResponseDTO getById(String id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
-        
+
         return new ProductDetailedResponseDTO(product);
     }
 
@@ -125,7 +135,8 @@ public class ProductService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
 
         if (inventoryRepository.findByProductId(id).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O produto possui inventários associados e não pode ser excluído!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "O produto possui inventários associados e não pode ser excluído!");
         }
 
         this.productRepository.deleteById(id);
@@ -133,23 +144,27 @@ public class ProductService {
         return null;
     }
 
-    // ---- Inventory controller ---- 
+    // ---- Inventory controller ----
 
     public InventoryResponseDTO createInventory(String productId, InventoryRequestDTO data) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi possível encontrar o produto. Insira um produto válido!"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Não foi possível encontrar o produto. Insira um produto válido!"));
+
+        if (inventoryRepository.existsByInventoryCode(data.inventoryCode())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Não foi possível criar o inventário. Já existe um inventário com este código.");
+        }
 
         Inventory inventory = new Inventory(
-            product,
-            data.discount(),
-            data.inventoryCode() 
-        );
+                product,
+                data.discount(),
+                data.inventoryCode());
 
         Inventory savedInventory = inventoryRepository.save(inventory);
 
         return new InventoryResponseDTO(savedInventory);
     }
-
 
     public Page<InventoryResponseDTO> getAllInventories(Pageable pageable) {
         Page<InventoryResponseDTO> productPage = inventoryRepository.findAll(pageable)
@@ -160,33 +175,38 @@ public class ProductService {
 
     public List<InventoryResponseDTO> getInventoryById(String id) {
         List<Inventory> inventories = inventoryRepository.findAllByProductId(id);
-        
+
         if (inventories.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi possível encontrar nenhum inventário para o produto!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Não foi possível encontrar nenhum inventário para o produto!");
         }
-    
+
         List<InventoryResponseDTO> inventoryResponseDTO = inventories.stream()
-                .map(InventoryResponseDTO::new) 
+                .map(InventoryResponseDTO::new)
                 .collect(Collectors.toList());
-    
+
         return inventoryResponseDTO;
     }
 
     public Void deleteInventory(String productId, String inventoryId) {
         productRepository.findById(productId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi possível encontrar o produto selecionado!"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Não foi possível encontrar o produto selecionado!"));
 
         Inventory inventory = inventoryRepository.findById(inventoryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi possível encontrar o inventário selecionado!"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Não foi possível encontrar o inventário selecionado!"));
 
         boolean hasReceivements = receivementRepository.existsByInventoryCode(inventory.getInventoryCode());
         if (hasReceivements) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O inventário possui recebimentos associados e não pode ser excluído!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "O inventário possui recebimentos associados e não pode ser excluído!");
         }
 
         boolean hasExits = exitRepository.existsByInventoryCode(inventory.getInventoryCode());
         if (hasExits) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O inventário possui saídas associadas e não pode ser excluído!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "O inventário possui saídas associadas e não pode ser excluído!");
         }
 
         inventoryRepository.deleteById(inventoryId);

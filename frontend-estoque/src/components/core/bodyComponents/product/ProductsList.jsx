@@ -124,8 +124,7 @@ const Products = () => {
       } catch (error) {
         console.log(error);
         setSnackbarMessage(
-          `Erro ao deletar o produto: ${error.response?.data?.message || error.response?.data?.error || error.message
-          }`
+          `Erro ao deletar o produto: ${error.response?.data?.message || error.response?.data?.error || error.message}`
         );
         setSnackbarSeverity("error");
       } finally {
@@ -158,8 +157,7 @@ const Products = () => {
       setSnackbarSeverity("success");
     } catch (error) {
       setSnackbarMessage(
-        `Erro ao salvar o produto: ${error.response?.data?.error || error.message
-        }`
+        `Erro ao salvar o produto: ${error.response?.data?.message || error.response?.data?.error || error.message}`
       );
       setSnackbarSeverity("error");
     } finally {
@@ -530,7 +528,7 @@ const Products = () => {
                     <strong>ID do Fornecedor:</strong> {supplier.id}
                   </p>
                   <p>
-                    <strong>Nome:</strong> {supplier.name}
+                    <strong>Nome:</strong> {supplier.socialReason}
                   </p>
                   <p>
                     <strong>Email:</strong> {supplier.email}

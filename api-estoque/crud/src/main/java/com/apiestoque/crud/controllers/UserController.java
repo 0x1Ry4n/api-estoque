@@ -3,9 +3,11 @@ package com.apiestoque.crud.controllers;
 import com.apiestoque.crud.domain.user.dto.AuthenticationDTO;
 import com.apiestoque.crud.domain.user.dto.LoginResponseDTO;
 import com.apiestoque.crud.domain.user.dto.RegisterUserDTO;
+import com.apiestoque.crud.domain.user.dto.UpdatePasswordDTO;
 import com.apiestoque.crud.domain.user.dto.UserResponseDTO;
 import com.apiestoque.crud.domain.user.dto.UserStatusUpdateDTO;
 import com.apiestoque.crud.infra.response.ApiResponse;
+import com.apiestoque.crud.infra.response.ApiResult;
 import com.apiestoque.crud.services.UserService;
 
 import jakarta.validation.Valid;
@@ -68,14 +70,14 @@ public class UserController {
 
     @PostMapping("/register/admin")
     public ResponseEntity<ApiResponse> registerAdmin(@RequestBody RegisterUserDTO data) {
-        ApiResponse response = userService.registerAdmin(data);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        ApiResult response = userService.registerAdmin(data);
+        return ResponseEntity.status(response.getStatus()).body(response.getBody());
     }
 
     @PostMapping("/register/user")
     public ResponseEntity<ApiResponse> registerUser(@RequestBody RegisterUserDTO data) {
-        ApiResponse response = userService.registerUser(data);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        ApiResult response = userService.registerUser(data);
+        return ResponseEntity.status(response.getStatus()).body(response.getBody());
     }
 
     @PostMapping("/refresh-token")
@@ -109,9 +111,9 @@ public class UserController {
     @PatchMapping("/users/{id}/password")
     public ResponseEntity<UserResponseDTO> updatePassword(
         @PathVariable String id,
-        @RequestBody @Valid String password) {
+        @RequestBody @Valid UpdatePasswordDTO dto) {
     
-        UserResponseDTO updated = userService.updatePassword(id, password);
+        UserResponseDTO updated = userService.updatePassword(id, dto.password());
 
         return ResponseEntity.ok(updated);
     }
