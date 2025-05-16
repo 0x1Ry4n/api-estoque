@@ -98,17 +98,17 @@ services:
     networks:
       - api_network
 
-  # frontend:
-  #   build:
-  #     context: ./frontend-estoque
-  #     dockerfile: Dockerfile
-  #   container_name: frontend-estoque
-  #   ports:
-  #     - "5173:5173"
-  #   depends_on:
-  #     - app-spring
-  #   networks:
-  #     - api_network
+  frontend:
+    build:
+      context: ./frontend-estoque
+      dockerfile: Dockerfile
+    container_name: frontend-estoque
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app-spring
+    networks:
+      - api_network
 
 volumes:
   redis_data:

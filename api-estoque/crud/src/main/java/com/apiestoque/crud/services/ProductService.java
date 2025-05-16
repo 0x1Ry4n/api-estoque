@@ -56,6 +56,11 @@ public class ProductService {
                                 "Fornecedor não encontrado com ID: " + supplierId)))
                 .collect(Collectors.toSet());
 
+        if (productRepository.existsByProductCode(data.productCode())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Produto com esse código já existe.");
+        }
+
         Product newProduct = new Product(
                 data.name(),
                 data.description(),
@@ -75,6 +80,11 @@ public class ProductService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
 
         if (data.productCode() != null) {
+            if (productRepository.existsByProductCode(data.productCode())) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Produto com esse código já existe.");
+            }
+
             product.setProductCode(data.productCode());
         }
 
@@ -149,11 +159,11 @@ public class ProductService {
     public InventoryResponseDTO createInventory(String productId, InventoryRequestDTO data) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Não foi possível encontrar o produto. Insira um produto válido!"));
+                        "Produto não encontrado"));
 
         if (inventoryRepository.existsByInventoryCode(data.inventoryCode())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Não foi possível criar o inventário. Já existe um inventário com este código.");
+                    "Inventário com esse código já existe.");
         }
 
         Inventory inventory = new Inventory(

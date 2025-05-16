@@ -5,6 +5,7 @@ import com.apiestoque.crud.domain.product.Product;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, String> {
+    boolean existsByProductCode(String productCode);
     List<Product> findByCategoryId(String categoryId);
     List<Product> findByName(String name);
     List<Product> findBySuppliersId(String supplierId);

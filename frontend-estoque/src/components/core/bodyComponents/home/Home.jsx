@@ -5,7 +5,7 @@ import UilTruck from "@iconscout/react-unicons/icons/uil-truck";
 import UilCancel from "@iconscout/react-unicons/icons/uil-cancel";
 import InfoCard from "../../subComponents/InfoCard";
 import TotalSales from "./TotalSales";
-import TopSellingProduct from "./TopSellingProduct";
+import TopSellingProducts from "./TopSellingProduct";
 import api from "../../../../api";
 import SalesByProduct from "./SalesByProduct";
 import { Box, Grid, useMediaQuery, useTheme, Typography } from "@mui/material";
@@ -35,7 +35,6 @@ const Home = () => {
 
       response = await api.get("/receivements");
       const receivements = response.data?.content || [];
-
       setState({
         exits,
         receivements,
@@ -137,7 +136,7 @@ const Home = () => {
 
           <Grid container spacing={isMobile ? 1 : 2} sx={{ mt: 2, mx: { xs: 0, sm: 0 }}}>
             <Grid item xs={12}>
-              <TopSellingProduct exits={exits} isMobile={isMobile} />
+              <TopSellingProducts receivements={receivements} exits={exits} isMobile={isMobile} />
             </Grid>
           </Grid>
         </>

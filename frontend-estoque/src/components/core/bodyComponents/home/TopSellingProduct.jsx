@@ -9,21 +9,29 @@ import {
   TableRow,
   Typography,
   useMediaQuery,
-  useTheme
+  useTheme,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel
 } from "@mui/material";
+import { useState } from "react";
 
-export default function TopSellingProducts({ exits }) {
+export default function TopSellingProducts({ receivements, exits }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const productMap = {};
+  const [filter, setFilter] = useState("exits");
 
-  exits.forEach(exit => {
-    const { productId, productName, unitPrice, totalPrice, quantity } = exit;
+  const receivementsMap = {};
+  const exitsMap = {};
+
+  receivements.forEach(receivement => {
+    const { productId, productName, unitPrice, totalPrice, quantity } = receivement;
 
     if (productId && productName && unitPrice !== undefined && quantity !== undefined) {
-      if (!productMap[productId]) {
-        productMap[productId] = {
+      if (!receivementsMap[productId]) {
+        receivementsMap[productId] = {
           name: productName,
           price: unitPrice,
           quantity: 0,
@@ -31,12 +39,38 @@ export default function TopSellingProducts({ exits }) {
         };
       }
 
-      productMap[productId].quantity += quantity;
-      productMap[productId].amount += totalPrice;
+      receivementsMap[productId].quantity += quantity;
+      receivementsMap[productId].amount += totalPrice;
     }
   });
 
-  const topProducts = Object.values(productMap);
+  exits.forEach(exit => {
+    const { productId, productName, unitPrice, totalPrice, quantity } = exit;
+
+    if (productId && productName && unitPrice !== undefined && quantity !== undefined) {
+      if (!exitsMap[productId]) {
+        exitsMap[productId] = {
+          name: productName,
+          price: unitPrice,
+          quantity: 0,
+          amount: 0,
+        };
+      }
+
+      exitsMap[productId].quantity += quantity;
+      exitsMap[productId].amount += totalPrice;
+    }
+  });
+
+  const topReceivements = Object.values(receivementsMap)
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 10);
+
+  const topExits = Object.values(exitsMap)
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 10);
+
+  const dataToShow = filter === "receivements" ? topReceivements : topExits;
 
   return (
     <Box
@@ -49,7 +83,7 @@ export default function TopSellingProducts({ exits }) {
         overflowX: "auto"
       }}
     >
-      <Box sx={{}}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>
         <Typography
           variant={isMobile ? "h5" : "h4"}
           sx={{
@@ -59,16 +93,30 @@ export default function TopSellingProducts({ exits }) {
               sm: '1.5rem',
               md: '1.5rem'
             },
-            mb: { xs: 2, sm: 3, md: 4 },
-            ml: { xs: 4, sm: 4, md: 5 },
+            mb: { xs: 2, sm: 3 },
+            ml: { xs: 1, sm: 4 },
             mt: { xs: 2, sm: 6, md: 10 },
             lineHeight: 1.2,
           }}
         >
-          Produtos com mais Saídas
+          {filter === "receivements" ? "Produtos com mais Recebimentos" : "Produtos com mais Saídas"}
         </Typography>
-        <Divider />
+
+        <FormControl size="small" sx={{ minWidth: 180, mt: { xs: 1, sm: 6 }, mr: { xs: 1, sm: 4 } }}>
+          <InputLabel>Tipo</InputLabel>
+          <Select
+            value={filter}
+            label="Tipo"
+            onChange={(e) => setFilter(e.target.value)}
+          >
+            <MenuItem value="exits">Saídas</MenuItem>
+            <MenuItem value="receivements">Recebimentos</MenuItem>
+          </Select>
+        </FormControl>
       </Box>
+
+      <Divider sx={{ my: 2 }} />
+
       <TableContainer>
         <Table size={isMobile ? "small" : "medium"}>
           <TableHead>
@@ -80,7 +128,7 @@ export default function TopSellingProducts({ exits }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {topProducts.map((product, id) => (
+            {dataToShow.map((product, id) => (
               <TableRow key={id}>
                 <TableCell sx={{ whiteSpace: "nowrap" }}>{product.name}</TableCell>
                 <TableCell sx={{ whiteSpace: "nowrap" }}>
