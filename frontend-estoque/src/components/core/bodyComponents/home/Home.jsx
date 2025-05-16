@@ -112,7 +112,7 @@ const Home = () => {
       >
         {cardComponent.map((card, index) => (
           <Grid item xs={12} sm={6} md={4} key={index}>
-            <InfoCard card={card} isMobile={isMobile} />
+            <InfoCard card={card} />
           </Grid>
         ))}
       </Grid>
@@ -125,18 +125,18 @@ const Home = () => {
         <>
           <Grid container spacing={isMobile ? 1 : 2} sx={{ mt: 2, mx: { xs: 0, sm: 0 } }}>
             <Grid item xs={12} md={8}>
-              <TotalSales receivements={receivements} exits={exits} isMobile={isMobile} />
+              <TotalSales receivements={receivements} exits={exits} />
             </Grid>
             <Grid item xs={12} md={4} sx={{ mt: 2 }}>
               {receivements.length > 0 && (
-                <SalesByProduct receivements={receivements} isMobile={isMobile} />
+                <SalesByProduct receivements={receivements} />
               )}
             </Grid>
           </Grid>
 
           <Grid container spacing={isMobile ? 1 : 2} sx={{ mt: 2, mx: { xs: 0, sm: 0 }}}>
             <Grid item xs={12}>
-              <TopSellingProducts receivements={receivements} exits={exits} isMobile={isMobile} />
+              <TopSellingProducts receivements={receivements} exits={exits}  />
             </Grid>
           </Grid>
         </>

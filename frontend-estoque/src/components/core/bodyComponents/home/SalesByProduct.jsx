@@ -3,7 +3,7 @@ import { Box, useMediaQuery, useTheme, Typography } from "@mui/material";
 
 export default function SalesByProduct({ receivements }) {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const inventoryData = receivements.reduce((acc, item) => {
     const { inventoryCode, productId, quantity } = item;
@@ -60,7 +60,7 @@ export default function SalesByProduct({ receivements }) {
     plotOptions: {
       bar: {
         borderRadius: 4,
-        horizontal: isSmallScreen,
+        horizontal: isMobile,
         columnWidth: '60%',
         dataLabels: {
           position: 'top'
@@ -74,18 +74,18 @@ export default function SalesByProduct({ receivements }) {
         fontSize: '11px',
         colors: [theme.palette.text.primary]
       },
-      offsetY: isSmallScreen ? 0 : -20
+      offsetY: isMobile ? 0 : -20
     },
     colors: [theme.palette.primary.main],
     xaxis: {
       categories,
       labels: {
         style: {
-          fontSize: isSmallScreen ? '10px' : '12px',
+          fontSize: isMobile ? '10px' : '12px',
           colors: theme.palette.text.secondary
         },
         formatter: function(value) {
-          return !isSmallScreen 
+          return !isMobile 
             ? `${value.substring(0, 16)}...` 
             : value.length > 10 
               ? `${value.substring(0, 10)}...` 
@@ -136,7 +136,7 @@ export default function SalesByProduct({ receivements }) {
       text: "Top 10 Itens de Inventário por Quantidade",
       align: 'center',
       style: {
-        fontSize: isSmallScreen ? "16px" : "18px",
+        fontSize: isMobile ? "16px" : "18px",
         fontWeight: 'bold',
         color: theme.palette.text.primary
       }
@@ -145,7 +145,7 @@ export default function SalesByProduct({ receivements }) {
       text: "Ordenado pela quantidade total recebida",
       align: 'center',
       style: {
-        fontSize: isSmallScreen ? "12px" : "14px",
+        fontSize: isMobile ? "12px" : "14px",
         color: theme.palette.text.secondary
       }
     },

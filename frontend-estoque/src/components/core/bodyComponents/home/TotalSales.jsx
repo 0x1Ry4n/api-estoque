@@ -36,7 +36,7 @@ function formatWeekLabel(key) {
 
 export default function SalesAnalysis({ receivements, exits }) {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [viewMode, setViewMode] = useState('both');
   const [dataType, setDataType] = useState('both');
@@ -207,7 +207,7 @@ export default function SalesAnalysis({ receivements, exits }) {
     xaxis: {
       categories,
       labels: {
-        rotate: isSmallScreen ? -45 : 0,
+        rotate: isMobile ? -45 : 0,
         style: {
           fontSize: '12px',
           colors: theme.palette.text.secondary
@@ -332,16 +332,16 @@ export default function SalesAnalysis({ receivements, exits }) {
     }}>
       <Box sx={{
         display: 'flex',
-        flexDirection: isSmallScreen ? 'column' : 'row',
+        flexDirection: isMobile ? 'column' : 'row',
         justifyContent: 'space-between',
-        alignItems: isSmallScreen ? 'flex-start' : 'center',
+        alignItems: isMobile ? 'flex-start' : 'center',
         mb: 3,
         gap: 2
       }}>
         <Stack
-          direction={isSmallScreen ? 'column' : 'row'}
+          direction={isMobile ? 'column' : 'row'}
           spacing={2}
-          sx={{ width: isSmallScreen ? '100%' : 'auto' }}
+          sx={{ width: isMobile ? '100%' : 'auto' }}
         >
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Período</InputLabel>
@@ -357,7 +357,7 @@ export default function SalesAnalysis({ receivements, exits }) {
             </Select>
           </FormControl>
 
-          {!isSmallScreen ? (
+          {!isMobile ? (
             <Box sx={{ display: 'flex', gap: 2 }}>
               <ToggleButtonGroup
                 value={viewMode}
