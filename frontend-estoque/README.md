@@ -12,6 +12,10 @@ Este projeto é a interface web do sistema de Gestão de Produtos. Foi desenvolv
   - Usuários Administradores têm acesso a todas as telas e funcionalidades.
   - Usuários Operadores possuem acesso restrito baseado em suas permissões.
 
+- **Reconhecimento facial para usuários comuns**:
+  - Utilizo a face-api.js para detectar landmarks faciais em tempo real pela câmera, com os modelos sendo carregados diretamente da pasta public/models.
+
+
 - **Gestão de Entidades**:
   - **Usuários**: Gerenciamento de usuários (criação, edição e listagem).
   - **Produtos**: Registro e listagem de produtos.
@@ -30,7 +34,9 @@ Este projeto é a interface web do sistema de Gestão de Produtos. Foi desenvolv
 - **Context API**: Gerenciamento global de estado (autenticação, temas, etc.).
 - **Material-UI**: Biblioteca de componentes para design moderno.
 - **Formik + Yup**: Gerenciamento e validação de formulários.
-
+- **Qrcode.react'**:  Biblioteca para a geração de qrcodes.
+- **React-qr-scanner**: Biblioteca para a leitura de qrcodes.
+- **Faceapi.js**: Biblioteca para detecção de landmarks no processo de reconhecimento facial.
 ## Requisitos
 
 - **Node.js** (v16 ou superior).
