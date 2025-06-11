@@ -1,6 +1,6 @@
-# Projeto de Gestão de Produtos com Spring Boot, Docker e PostgreSQL
+# Projeto de Gestão de Produtos com Spring Boot, Docker e SQL Server
 
-Este projeto é uma aplicação backend desenvolvida em **Spring Boot**, utilizando **Docker** e **PostgreSQL**. O sistema é uma plataforma para gerenciar produtos, fornecedores, categorias e controle de estoque. Além disso, possui autenticação baseada em **JWT (JSON Web Token)** com **refresh tokens** e controle de acesso baseado em **RBAC (Role-Based Access Control)** e *reconhecimento facial*, implementado com o **Spring Security**. 
+Este projeto é uma aplicação backend desenvolvida em **Spring Boot**, utilizando **Docker** e **SQL Server**. O sistema é uma plataforma para gerenciar produtos, fornecedores, categorias e controle de estoque. Além disso, possui autenticação baseada em **JWT (JSON Web Token)** com **refresh tokens** e controle de acesso baseado em **RBAC (Role-Based Access Control)** e *reconhecimento facial*, implementado com o **Spring Security**. 
 
 
 ## Funcionalidades
@@ -30,14 +30,14 @@ A autenticação é feita utilizando **JWT (JSON Web Token)** e **refresh tokens
 - **Administrador**: Acesso total ao sistema, com permissões para criar, editar e deletar entidades.
 - **Operador**: Permissões restritas, geralmente para registrar entradas, saídas e visualizar informações.
 
-Durante o reconhecimento facial, a imagem capturada é enviada para o backend, onde um microserviço em Python com DeepFace realiza a comparação facial com as imagens cadastradas (armazenadas como blob no banco de dados PostgreSQL). O Redis entra como cache para otimizar o desempenho, e tudo roda em containers com Docker Compose.
+Durante o reconhecimento facial, a imagem capturada é enviada para o backend, onde um microserviço em Python com DeepFace realiza a comparação facial com as imagens cadastradas (armazenadas como blob no banco de dados SQL Server). O Redis entra como cache para otimizar o desempenho, e tudo roda em containers com Docker Compose.
 
 ## Tecnologias Utilizadas
 
 - **Spring Boot**: Framework Java para desenvolvimento de aplicações web.
 - **Spring Security**: Implementação de segurança, controle de autenticação e autorização.
 - **JWT**: JSON Web Token para autenticação baseada em tokens.
-- **PostgreSQL**: Banco de dados relacional utilizado para persistência de dados.
+- **SQL Server**: Banco de dados relacional utilizado para persistência de dados.
 - **Docker**: Para criação de contêineres e facilitar a execução e deploy do projeto.
 - **Deepface.py**: Modelo de aprendizado de máquina para reconhecimento facial.
 
@@ -46,7 +46,7 @@ Durante o reconhecimento facial, a imagem capturada é enviada para o backend, o
 - **JDK 21 ou superior**.
 - **Docker**.
 - **Docker Compose**.
-- **PostgreSQL**.
+- **SQL Server**.
 
 ## Como Rodar o Projeto
 
@@ -77,21 +77,23 @@ JWT_EXPIRATION=86400000
 
 ### 2. Configurar o Banco de Dados
 
-Este projeto utiliza o PostgreSQL para persistência de dados. A configuração do banco de dados está no arquivo application.properties ou application.yml.
+Este projeto utiliza o SQL Server para persistência de dados. A configuração do banco de dados está no arquivo application.properties ou application.yml.
 
-Exemplo de configuração do PostgreSQL:
+Exemplo de configuração do SQL Server:
 
 ```bash
-spring.datasource.url=jdbc:postgresql://localhost:5432/gestao_produtos
-spring.datasource.username=usuario
-spring.datasource.password=senha
-spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.url=${SPRING_DATASOURCE_URL:jdbc:sqlserver://sqlserver:1433;databaseName=estoque;encrypt=false;trustServerCertificate=true;socketTimeout=30000;loginTimeout=30}
+spring.datasource.username=${SPRING_DATASOURCE_USERNAME:sa}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:Admin123}
+spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
+spring.jpa.database-platform=org.hibernate.dialect.SQLServerDialect
 ```
 
 ### 3. Configurar Docker
 
-O projeto possui um arquivo docker-compose.yml para rodar o PostgreSQL e o Spring Boot dentro de contêineres Docker.
+O projeto possui um arquivo docker-compose.yml para rodar o SQL Server e o Spring Boot dentro de contêineres Docker.
 
 ```bash
 docker-compose up --build

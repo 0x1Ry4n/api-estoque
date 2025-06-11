@@ -1,6 +1,6 @@
-# Frontend para Gestão de Produtos
+# Frontend para Gestão de Estoque
 
-Este projeto é a interface web do sistema de Gestão de Produtos. Foi desenvolvido em **React.js**, oferecendo uma interface moderna e responsiva para gerenciar usuários, produtos, fornecedores, categorias e controle de inventário.
+Este projeto é a interface web do sistema de Gestão de Estoque. Foi desenvolvido em **React.js**, oferecendo uma interface moderna e responsiva para gerenciar usuários, produtos, fornecedores, categorias e controle de inventário.
 
 ## Funcionalidades
 
