@@ -1,4 +1,4 @@
-# Projeto de Gestão de Produtos com Spring Boot, Docker e SQL Server
+# Projeto de Gestão de Estoque com Spring Boot, Docker e SQL Server
 
 Este projeto é uma aplicação backend desenvolvida em **Spring Boot**, utilizando **Docker** e **SQL Server**. O sistema é uma plataforma para gerenciar produtos, fornecedores, categorias e controle de estoque. Além disso, possui autenticação baseada em **JWT (JSON Web Token)** com **refresh tokens** e controle de acesso baseado em **RBAC (Role-Based Access Control)** e *reconhecimento facial*, implementado com o **Spring Security**. 
 
