@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Grid, CircularProgress, Avatar, Button, useMediaQuery, useTheme } from '@mui/material';
-import { AccountCircle } from '@mui/icons-material';
+import { Box, Typography, Paper, Grid, CircularProgress, Button, useMediaQuery, useTheme } from '@mui/material';
 import api from './../../../../api';
+import UserAvatar from '../../subComponents/UserAvatar';
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -61,10 +61,8 @@ const UserProfile = () => {
     }}>
       <Paper elevation={6} sx={{ p: 10, width: '100%', maxWidth: 500, borderRadius: 2 }}>
         <Grid container spacing={4}>
-          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Avatar sx={{ width: 100, height: 100, bgcolor: '#00796b' }}>
-              <AccountCircle sx={{ fontSize: 100 }} />
-            </Avatar>
+          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <UserAvatar userId={user.id} />
           </Grid>
           <Grid item xs={12}>
             <Typography variant="h5" align="center" sx={{ fontWeight: 'bold', color: '#00796b' }}>

@@ -49,6 +49,9 @@ public class User implements UserDetails {
 
     private String password;
 
+    @Column(nullable = true)
+    private String imagePath;
+
     @Column(name = "face_image", nullable = true, columnDefinition = "VARBINARY(MAX)")
     private byte[] faceImage;
 

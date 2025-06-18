@@ -16,18 +16,22 @@ import com.apiestoque.crud.domain.user.dto.UserRole;
 import com.apiestoque.crud.domain.user.dto.UserStatus;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +45,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
@@ -266,6 +273,37 @@ public class UserService {
 
         return tokenService.generateToken(user);
     }
+
+    public void updateImage(String id, MultipartFile file) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Arquivo de imagem inválido.");
+        }
+
+        try {
+            String imagePath = fileStorageService.save(file, "usuarios");
+            user.setImagePath(imagePath);
+            userRepository.save(user);
+        } catch(IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem.", e);
+        }
+    }
+
+    public Resource getImage(String id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+        
+        try {
+            String fileName = Paths.get(user.getImagePath()).getFileName().toString();
+
+            return fileStorageService.load(fileName, "usuarios");
+        } catch(Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao obter a imagem.", e);
+        }
+    }
+
 
     public UserResponseDTO getLoggedUser(User user) {
         return new UserResponseDTO(

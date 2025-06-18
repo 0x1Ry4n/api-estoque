@@ -1,6 +1,8 @@
 package com.apiestoque.crud.domain.product.category;
 
 import com.apiestoque.crud.domain.product.Product;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 
 import org.springframework.data.annotation.CreatedBy;
@@ -32,6 +34,7 @@ public class Category {
     private String name;
 
     @OneToMany(mappedBy = "category")
+    @JsonManagedReference
     private List<Product> products;
 
     @CreatedBy

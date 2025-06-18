@@ -3,6 +3,8 @@ package com.apiestoque.crud.domain.product;
 import com.apiestoque.crud.domain.inventory.Inventory;
 import com.apiestoque.crud.domain.product.category.Category;
 import com.apiestoque.crud.domain.supplier.Supplier;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -34,6 +36,9 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = true) 
+    private String imagePath;
+
     @Column(nullable = false, unique = true)
     private String productCode;
 
@@ -48,6 +53,7 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
+    @JsonBackReference
     private Category category;
 
     @ManyToMany

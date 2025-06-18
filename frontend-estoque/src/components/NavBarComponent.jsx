@@ -22,6 +22,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from '../api';
 import SideBarComponent from "./SideBarComponent";
+import UserAvatar from "./core/subComponents/UserAvatar";
 
 export default function NavBarComponent() {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -105,7 +106,7 @@ export default function NavBarComponent() {
                       aria-haspopup="true"
                     >
                       <Tooltip title="Perfil">
-                        <Avatar sx={{ width: 32, height: 32 }}>{user?.username?.charAt(0).toUpperCase()}</Avatar>
+                        <UserAvatar userId={user?.id} sx={{ width: 32, height: 32 }} showable={false} editable={false} />
                       </Tooltip>
                     </IconButton>
                     <Typography fontFamily={"Inter"}>{user?.email || "Carregando..."}</Typography>

@@ -13,12 +13,19 @@ import com.apiestoque.crud.services.UserService;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import org.springframework.core.io.Resource;
 
 import com.apiestoque.crud.domain.user.User;
 
@@ -88,6 +95,29 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new LoginResponseDTO("Falha ao renovar o token: " + e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/users/{id}/image")
+    public ResponseEntity<ApiResponse> updateImage(@PathVariable String id,  @RequestParam("file") MultipartFile file) {
+        userService.updateImage(id, file);
+
+        return ResponseEntity.ok(new ApiResponse("message", "Imagem atualizada com sucesso."));
+    }
+
+    @GetMapping("/users/{id}/image")
+    public ResponseEntity<Resource> getImage(@PathVariable String id) {
+        Resource image = userService.getImage(id);
+
+         try {   
+            String contentType = Files.probeContentType(image.getFile().toPath());
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + image.getFilename() + "\"")
+                    .header(HttpHeaders.CONTENT_TYPE, contentType != null ? contentType : "application/octet-stream")
+                    .body(image);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao determinar o tipo da imagem.");
         }
     }
 
