@@ -176,6 +176,40 @@ const Products = () => {
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
     {
+      field: "image",
+      headerName: "Imagem",
+      width: 100,
+      renderCell: (params) => {
+        const { id, name } = params.row;
+
+        const ImageCell = () => {
+          const [imageUrl, setImageUrl] = React.useState(null);
+
+          React.useEffect(() => {
+            if (id) {
+              api
+                .get(`/products/${id}/image`, { responseType: "blob" })
+                .then((res) => {
+                  const objectUrl = URL.createObjectURL(res.data);
+                  setImageUrl(objectUrl);
+                })
+                .catch();
+            }
+          }, [id]);
+
+          return imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={name}
+              style={{ width: 50, height: 50, objectFit: "cover", borderRadius: 4 }}
+            />
+          ) : null;
+        };
+
+        return <ImageCell />;
+      }
+    },
+    {
       field: "name",
       headerName: "Produto",
       width: 300,

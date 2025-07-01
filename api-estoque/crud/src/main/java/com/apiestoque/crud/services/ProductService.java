@@ -78,6 +78,14 @@ public class ProductService {
                 suppliers,
                 data.expirationDate());
 
+       
+        try {
+            String imagePath = fileStorageService.save(data.file(), "produtos");
+            newProduct.setImagePath(imagePath);
+        } catch(IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem.", e);
+        }
+
         Product savedProduct = this.productRepository.save(newProduct);
 
         return new ProductResponseDTO(savedProduct);

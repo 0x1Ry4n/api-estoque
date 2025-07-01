@@ -12,6 +12,8 @@ import {
   Dialog,
   DialogTitle,
   Divider,
+  Avatar,
+  IconButton
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -20,7 +22,8 @@ import {
   DateRange as DateRangeIcon,
   AddShoppingCart as AddShoppingCartIcon,
   AddCircleOutline as AddCircleOutlineIcon,
-  QrCode2Rounded as QRCodeIcon
+  QrCode2Rounded as QRCodeIcon,
+  PhotoCamera
 } from "@mui/icons-material";
 import { Autocomplete } from "@mui/material";
 import api from "./../../../../api";
@@ -42,6 +45,16 @@ const ProductForm = ({ onProductAdded }) => {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [isScanning, setIsScanning] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -87,29 +100,43 @@ const ProductForm = ({ onProductAdded }) => {
 
   const onSubmit = async (data) => {
     try {
-      const productData = {
+      const formData = new FormData();
+
+      Object.entries({
         ...data,
         unitPrice: parseFloat(data.unitPrice),
-      };
+      }).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((val, idx) => {
+            formData.append(`${key}[${idx}]`, val);
+          });
+        } else {
+          formData.append(key, value ?? "");
+        }
+      });
 
-      const response = await api.post("/products", productData);
+      if (image) {
+        formData.append("file", image);
+      }
+
+      const response = await api.post("/products", formData);
+
       if (response.status === 201) {
         setSnackbarMessage("Produto cadastrado com sucesso!");
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
-
-        if (typeof onProductAdded === "function") {
-          onProductAdded(response.data.content);
-        } else {
-          console.error("onProductAdded is not a function");
-        }
-
+        onProductAdded?.(response.data.content);
         reset();
+        setImage(null);
+        setImagePreview(null);
       }
     } catch (error) {
-      setSnackbarMessage(`
-        Erro ao cadastrar produto: ${error.response?.data?.message || error.response?.data?.error || error.message}
-      `);
+      setSnackbarMessage(
+        `Erro ao cadastrar produto: ${error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message
+        }`
+      );
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }
@@ -247,7 +274,7 @@ const ProductForm = ({ onProductAdded }) => {
                       endAdornment: (
                         <InputAdornment position="end">
                           <Button onClick={openCameraModal}>
-                            <QRCodeIcon sx={{ ml: 5 }} /> 
+                            <QRCodeIcon sx={{ ml: 5 }} />
                           </Button>
                         </InputAdornment>
                       ),
@@ -343,6 +370,30 @@ const ProductForm = ({ onProductAdded }) => {
                   />
                 )}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
+                Imagem do Produto
+              </Typography>
+              <Box display="flex" alignItems="center" gap={2}>
+                <Avatar
+                  src={imagePreview}
+                  alt="Preview"
+                  sx={{ width: 80, height: 80, border: "2px solid #ccc" }}
+                />
+                <label htmlFor="upload-image">
+                  <input
+                    accept="image/*"
+                    id="upload-image"
+                    type="file"
+                    hidden
+                    onChange={handleImageChange}
+                  />
+                  <IconButton color="primary" component="span">
+                    <PhotoCamera />
+                  </IconButton>
+                </label>
+              </Box>
             </Grid>
           </Grid>
           <Button

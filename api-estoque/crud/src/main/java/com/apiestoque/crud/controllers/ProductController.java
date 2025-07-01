@@ -35,7 +35,7 @@ public class ProductController implements CrudController<String, ProductRequestD
 
     @Override
     @PostMapping
-    public ResponseEntity<ProductResponseDTO> create(@RequestBody @Validated ProductRequestDTO data) {
+    public ResponseEntity<ProductResponseDTO> create(@RequestPart @Validated ProductRequestDTO data) {
         ProductResponseDTO response = productService.create(data);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
