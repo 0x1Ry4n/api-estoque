@@ -73,8 +73,17 @@ public class ProductController implements CrudController<String, ProductRequestD
 
     @Override
     @GetMapping
-    public ResponseEntity<Page<ProductResponseDTO>> getAll(Pageable pageable) {
-        return ResponseEntity.ok(productService.getAll(pageable));
+    public ResponseEntity<?> getAll(
+        Pageable pageable, 
+        @RequestParam(defaultValue = "true") boolean paged) {
+
+        if (paged) {
+            Page<ProductResponseDTO> page = productService.getAll(pageable);
+            return ResponseEntity.ok(page);
+        } else {
+            List<ProductResponseDTO> list = productService.getAll();
+            return ResponseEntity.ok(list);
+        }
     }
 
     @Override

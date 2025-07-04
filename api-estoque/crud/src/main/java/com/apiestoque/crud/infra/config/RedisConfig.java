@@ -1,4 +1,4 @@
-package com.apiestoque.crud.infra;
+package com.apiestoque.crud.infra.config;
 
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;

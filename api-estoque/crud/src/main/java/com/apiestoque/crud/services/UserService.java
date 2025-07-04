@@ -58,30 +58,67 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public LoginResponseDTO authenticateUser(AuthenticationDTO data) {
-        var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
-
-        var auth = this.authenticationManager.authenticate(usernamePassword);
-
-        User user = (User) auth.getPrincipal();
-
-        if (user.getStatus() == UserStatus.INACTIVE) {
-            throw new RuntimeException("Esta conta de usuário foi desativada.");
+    public ApiResult registerAdmin(RegisterUserDTO data) {
+        if (userRepository.findByUsername("admin") == null) {
+            return new ApiResult(new ApiResponse("message", "O Usuário master não existe."), HttpStatus.BAD_REQUEST);
         }
 
-        if (user.getFaceImage() != null && user.getRole() == UserRole.USER) {
-            String key = "face_validation:" + user.getEmail();
-            String validation = redisTemplate.opsForValue().get(key);
+        if (data.role() == null || !data.role().equals(UserRole.ADMIN)) {
+            return new ApiResult(
+                    new ApiResponse("message", "A regra de administrador é necessária para acessar esse endpoint."),
+                    HttpStatus.BAD_REQUEST);
+        }
 
-            if (validation == null || !validation.equals("valid")) {
-                throw new RuntimeException("Verificação facial necessária.");
+        if (this.userRepository.findByUsername(data.username()) != null) {
+            return new ApiResult(new ApiResponse("message", "O Username inserido já existe."), HttpStatus.BAD_REQUEST);
+        }
+
+        if (this.userRepository.findByEmail(data.email()) != null) {
+            return new ApiResult(new ApiResponse("message", "O Email inserido já existe."), HttpStatus.BAD_REQUEST);
+        }
+
+        String encryptedPassword = passwordEncoder.encode(data.password());
+        User newUser = new User(data.username(), data.email(), encryptedPassword, data.status(), data.role(), null);
+
+        this.userRepository.save(newUser);
+
+        return new ApiResult(new ApiResponse("message", "Usuário admin registrado com sucesso."), HttpStatus.CREATED);
+    }
+
+    public ApiResult registerUser(RegisterUserDTO data) {
+        if (userRepository.findByUsername("admin") == null) {
+            return new ApiResult(new ApiResponse("message", "O Usuário master não existe."), HttpStatus.BAD_REQUEST);
+        }
+
+        if (data.role() == null || !data.role().equals(UserRole.USER)) {
+            return new ApiResult(
+                    new ApiResponse("message", "A regra de administrador é necessária para acessar esse endpoint."),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        if (this.userRepository.findByUsername(data.username()) != null) {
+            return new ApiResult(new ApiResponse("message", "O Username inserido já existe."), HttpStatus.BAD_REQUEST);
+        }
+
+        if (this.userRepository.findByEmail(data.email()) != null) {
+            return new ApiResult(new ApiResponse("message", "O Email inserido já existe."), HttpStatus.BAD_REQUEST);
+        }
+
+        String encryptedPassword = passwordEncoder.encode(data.password());
+        User newUser = new User(data.username(), data.email(), encryptedPassword, data.status(), data.role(), null);
+
+        if (data.faceImage() != null && !data.faceImage().isEmpty()) {
+            String base64Data = data.faceImage();
+            if (base64Data.startsWith("data:image")) {
+                base64Data = base64Data.split(",")[1];
             }
-
-            redisTemplate.delete(key);
+            byte[] imageBytes = Base64.getDecoder().decode(base64Data);
+            newUser.setFaceImage(imageBytes);
         }
 
-        var token = tokenService.generateToken(user);
-        return new LoginResponseDTO(token);
+        this.userRepository.save(newUser);
+
+        return new ApiResult(new ApiResponse("message", "Usuário registrado com sucesso."), HttpStatus.CREATED);
     }
 
     @Transactional
@@ -113,6 +150,32 @@ public class UserService {
         userRepository.save(user);
 
         return new UserResponseDTO(user);
+    }
+
+    public LoginResponseDTO authenticateUser(AuthenticationDTO data) {
+        var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
+
+        var auth = this.authenticationManager.authenticate(usernamePassword);
+
+        User user = (User) auth.getPrincipal();
+
+        if (user.getStatus() == UserStatus.INACTIVE) {
+            throw new RuntimeException("Esta conta de usuário foi desativada.");
+        }
+
+        if (user.getFaceImage() != null && user.getRole() == UserRole.USER) {
+            String key = "face_validation:" + user.getEmail();
+            String validation = redisTemplate.opsForValue().get(key);
+
+            if (validation == null || !validation.equals("valid")) {
+                throw new RuntimeException("Verificação facial necessária.");
+            }
+
+            redisTemplate.delete(key);
+        }
+
+        var token = tokenService.generateToken(user);
+        return new LoginResponseDTO(token);
     }
 
     public Map<String, Object> verifyFace(String capturedImage, String email) throws Exception {
@@ -195,69 +258,6 @@ public class UserService {
         }
 
         return result;
-    }
-
-    public ApiResult registerAdmin(RegisterUserDTO data) {
-        if (userRepository.findByUsername("admin") == null) {
-            return new ApiResult(new ApiResponse("message", "O Usuário master não existe."), HttpStatus.BAD_REQUEST);
-        }
-
-        if (data.role() == null || !data.role().equals(UserRole.ADMIN)) {
-            return new ApiResult(
-                    new ApiResponse("message", "A regra de administrador é necessária para acessar esse endpoint."),
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        if (this.userRepository.findByUsername(data.username()) != null) {
-            return new ApiResult(new ApiResponse("message", "O Username inserido já existe."), HttpStatus.BAD_REQUEST);
-        }
-
-        if (this.userRepository.findByEmail(data.email()) != null) {
-            return new ApiResult(new ApiResponse("message", "O Email inserido já existe."), HttpStatus.BAD_REQUEST);
-        }
-
-        String encryptedPassword = passwordEncoder.encode(data.password());
-        User newUser = new User(data.username(), data.email(), encryptedPassword, data.status(), data.role(), null);
-
-        this.userRepository.save(newUser);
-
-        return new ApiResult(new ApiResponse("message", "Usuário admin registrado com sucesso."), HttpStatus.CREATED);
-    }
-
-    public ApiResult registerUser(RegisterUserDTO data) {
-        if (userRepository.findByUsername("admin") == null) {
-            return new ApiResult(new ApiResponse("message", "O Usuário master não existe."), HttpStatus.BAD_REQUEST);
-        }
-
-        if (data.role() == null || !data.role().equals(UserRole.USER)) {
-            return new ApiResult(
-                    new ApiResponse("message", "A regra de administrador é necessária para acessar esse endpoint."),
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        if (this.userRepository.findByUsername(data.username()) != null) {
-            return new ApiResult(new ApiResponse("message", "O Username inserido já existe."), HttpStatus.BAD_REQUEST);
-        }
-
-        if (this.userRepository.findByEmail(data.email()) != null) {
-            return new ApiResult(new ApiResponse("message", "O Email inserido já existe."), HttpStatus.BAD_REQUEST);
-        }
-
-        String encryptedPassword = passwordEncoder.encode(data.password());
-        User newUser = new User(data.username(), data.email(), encryptedPassword, data.status(), data.role(), null);
-
-        if (data.faceImage() != null && !data.faceImage().isEmpty()) {
-            String base64Data = data.faceImage();
-            if (base64Data.startsWith("data:image")) {
-                base64Data = base64Data.split(",")[1];
-            }
-            byte[] imageBytes = Base64.getDecoder().decode(base64Data);
-            newUser.setFaceImage(imageBytes);
-        }
-
-        this.userRepository.save(newUser);
-
-        return new ApiResult(new ApiResponse("message", "Usuário registrado com sucesso."), HttpStatus.CREATED);
     }
 
     public String refreshToken(String refreshToken) {

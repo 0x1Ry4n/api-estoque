@@ -170,6 +170,13 @@ public class ProductService {
         return productPage;
     }
 
+    public List<ProductResponseDTO> getAll() {
+        return productRepository.findAll()
+                .stream()
+                .map(ProductResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
     public ProductDetailedResponseDTO getById(String id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));

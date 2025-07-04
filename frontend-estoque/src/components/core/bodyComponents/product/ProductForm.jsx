@@ -58,7 +58,7 @@ const ProductForm = ({ onProductAdded }) => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const response = await api.get("/category");
+      const response = await api.get("/category?paged=false");
       setCategories(response.data.content);
     };
 

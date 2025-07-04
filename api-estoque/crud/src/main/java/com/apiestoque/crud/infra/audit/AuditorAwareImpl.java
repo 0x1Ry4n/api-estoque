@@ -1,4 +1,4 @@
-package com.apiestoque.crud.infra.security;
+package com.apiestoque.crud.infra.audit;
 
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;

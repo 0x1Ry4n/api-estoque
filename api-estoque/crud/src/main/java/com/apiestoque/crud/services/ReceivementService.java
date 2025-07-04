@@ -18,6 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import jakarta.transaction.Transactional;
 
 @Service
@@ -82,6 +85,13 @@ public class ReceivementService {
     public Page<ReceivementResponseDTO> getAll(Pageable pageable) {
         return receivementRepository.findAll(pageable).map(ReceivementResponseDTO::new);
     }
+
+    public List<ReceivementResponseDTO> getAll() {
+        return receivementRepository.findAll().
+                stream().
+                map(ReceivementResponseDTO::new).
+                collect(Collectors.toList());
+    } 
 
     @Transactional
     public ReceivementResponseDTO update(String id, ReceivementRequestDTO data) {
