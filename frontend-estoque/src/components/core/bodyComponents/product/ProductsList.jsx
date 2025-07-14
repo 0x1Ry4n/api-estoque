@@ -9,12 +9,18 @@ import {
   Snackbar,
   Alert,
   Autocomplete,
+  IconButton,
+  Avatar,
+  Typography,
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   Visibility as VisibilityIcon,
   Refresh as RefreshIcon,
+  Badge,
+  PhotoCamera,
+  Category,
 } from "@mui/icons-material";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { Controller, useForm } from "react-hook-form";
@@ -41,6 +47,7 @@ const Products = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [isEditing, setIsEditing] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
   const [pagination, setPagination] = useState({
     page: 0,
     pageSize: 20,
@@ -50,13 +57,13 @@ const Products = () => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const response = await api.get("/category");
-      setCategories(response.data.content);
+      const response = await api.get("/category?paged=false");
+      setCategories(response.data);
     };
 
     const fetchSuppliers = async () => {
-      const response = await api.get("/supplier");
-      setSuppliers(response.data.content);
+      const response = await api.get("/supplier?paged=false");
+      setSuppliers(response.data);
     };
 
     fetchCategories();
@@ -79,6 +86,14 @@ const Products = () => {
       setSnackbarMessage("Erro ao carregar produtos.");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -370,6 +385,45 @@ const Products = () => {
           {isEditing ? "Editar Produto" : "Adicionar Produto"}
         </DialogTitle>
         <DialogContent>
+          <Badge
+            overlap="circular"
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            badgeContent={
+              <label htmlFor="upload-image">
+                <input
+                  accept="image/*"
+                  id="upload-image"
+                  type="file"
+                  hidden
+                  onChange={handleImageChange}
+                />
+                <IconButton
+                  component="span"
+                  sx={{
+                    backgroundColor: 'white',
+                    boxShadow: 2,
+                    '&:hover': { backgroundColor: '#eee' },
+                  }}
+                >
+                  <PhotoCamera />
+                </IconButton>
+              </label>
+            }
+          >
+            <Avatar
+              src={imagePreview}
+              alt="Preview"
+              sx={{
+                width: 110,
+                height: 110,
+                boxShadow: 3,
+                border: '2px solid #ccc',
+                backgroundColor: '#f0f0f0',
+              }}
+            >
+              {!imagePreview && <Category fontSize="large" sx={{ color: '#888' }} />}
+            </Avatar>
+          </Badge>
           <TextField
             label="Nome do Produto"
             fullWidth
@@ -390,7 +444,7 @@ const Products = () => {
                 options={suppliers || []}
                 getOptionLabel={(option) => option.socialReason || ""}
                 value={suppliers?.filter((sup) =>
-                  selectedProduct?.supplierIds?.includes(sup.id)
+                  (selectedProduct?.supplierIds || []).includes(sup.id)
                 )}
                 onChange={(_, value) => {
                   const ids = value.map((v) => v.id);
@@ -407,29 +461,36 @@ const Products = () => {
           <Controller
             name="category"
             control={control}
-            render={({ field }) => (
-              <Autocomplete
-                options={categories || []}
-                getOptionLabel={(option) => option.name || ""}
-                value={
-                  categories?.find(
-                    (cat) => cat.id === selectedProduct?.categoryId
-                  ) || null
-                }
-                onChange={(_, value) => {
-                  field.onChange(value ? value.id : "");
-                  setSelectedProduct({
-                    ...selectedProduct,
-                    categoryId: value?.id,
-                  });
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} label="Categoria" />
-                )}
-              />
-            )}
-            sx={{ mb: 3 }}
+            render={({ field }) => {
+              const safeCategories = Array.isArray(categories) ? categories : [];
+
+              const selectedCategory =
+                safeCategories.find(
+                  (cat) => cat.id === selectedProduct?.categoryId
+                ) || null;
+
+              return (
+                <Autocomplete
+                  options={safeCategories}
+                  getOptionLabel={(option) => option.name || ""}
+                  value={selectedCategory}
+                  onChange={(_, newValue) => {
+                    const categoryId = newValue?.id || null;
+                    field.onChange(categoryId);
+                    setSelectedProduct((prev) => ({
+                      ...prev,
+                      categoryId,
+                    }));
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Categoria" />
+                  )}
+                  sx={{ mb: 3 }}
+                />
+              );
+            }}
           />
+
           <TextField
             label="Descrição"
             fullWidth

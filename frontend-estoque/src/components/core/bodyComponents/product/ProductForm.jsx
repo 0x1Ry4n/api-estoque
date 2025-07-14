@@ -13,7 +13,8 @@ import {
   DialogTitle,
   Divider,
   Avatar,
-  IconButton
+  IconButton,
+  Badge
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -23,7 +24,8 @@ import {
   AddShoppingCart as AddShoppingCartIcon,
   AddCircleOutline as AddCircleOutlineIcon,
   QrCode2Rounded as QRCodeIcon,
-  PhotoCamera
+  PhotoCamera,
+  Category
 } from "@mui/icons-material";
 import { Autocomplete } from "@mui/material";
 import api from "./../../../../api";
@@ -59,12 +61,12 @@ const ProductForm = ({ onProductAdded }) => {
   useEffect(() => {
     const fetchCategories = async () => {
       const response = await api.get("/category?paged=false");
-      setCategories(response.data.content);
+      setCategories(response.data);
     };
 
     const fetchSuppliers = async () => {
-      const response = await api.get("/supplier");
-      setSuppliers(response.data.content);
+      const response = await api.get("/supplier?paged=false");
+      setSuppliers(response.data);
     };
 
     fetchCategories();
@@ -107,8 +109,8 @@ const ProductForm = ({ onProductAdded }) => {
         unitPrice: parseFloat(data.unitPrice),
       }).forEach(([key, value]) => {
         if (Array.isArray(value)) {
-          value.forEach((val, idx) => {
-            formData.append(`${key}[${idx}]`, val);
+          value.forEach((val) => {
+            formData.append(key, val);
           });
         } else {
           formData.append(key, value ?? "");
@@ -162,6 +164,55 @@ const ProductForm = ({ onProductAdded }) => {
         </Typography>
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <Box display="flex" flexDirection="column" alignItems="center" gap={2} sx={{ mt: 2 }}>
+                <Badge
+                  overlap="circular"
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  badgeContent={
+                    <label htmlFor="upload-image">
+                      <input
+                        accept="image/*"
+                        id="upload-image"
+                        type="file"
+                        hidden
+                        onChange={handleImageChange}
+                      />
+                      <IconButton
+                        component="span"
+                        sx={{
+                          backgroundColor: 'white',
+                          boxShadow: 2,
+                          '&:hover': { backgroundColor: '#eee' },
+                        }}
+                      >
+                        <PhotoCamera />
+                      </IconButton>
+                    </label>
+                  }
+                >
+                  <Avatar
+                    src={imagePreview}
+                    alt="Preview"
+                    sx={{
+                      width: 110,
+                      height: 110,
+                      boxShadow: 3,
+                      border: '2px solid #ccc',
+                      backgroundColor: '#f0f0f0',
+                    }}
+                  >
+                    {!imagePreview && <Category fontSize="large" sx={{ color: '#888' }} />}
+                  </Avatar>
+
+                </Badge>
+
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  Clique no ícone para alterar a imagem
+                </Typography>
+              </Box>
+            </Grid>
+
             <Grid item md={6} xs={12}>
               <Controller
                 name="name"
@@ -370,30 +421,6 @@ const ProductForm = ({ onProductAdded }) => {
                   />
                 )}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
-                Imagem do Produto
-              </Typography>
-              <Box display="flex" alignItems="center" gap={2}>
-                <Avatar
-                  src={imagePreview}
-                  alt="Preview"
-                  sx={{ width: 80, height: 80, border: "2px solid #ccc" }}
-                />
-                <label htmlFor="upload-image">
-                  <input
-                    accept="image/*"
-                    id="upload-image"
-                    type="file"
-                    hidden
-                    onChange={handleImageChange}
-                  />
-                  <IconButton color="primary" component="span">
-                    <PhotoCamera />
-                  </IconButton>
-                </label>
-              </Box>
             </Grid>
           </Grid>
           <Button

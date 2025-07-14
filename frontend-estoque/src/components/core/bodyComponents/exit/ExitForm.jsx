@@ -36,8 +36,8 @@ const ExitForm = ({ onExitAdded }) => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const response = await api.get("/products");
-      setProducts(response.data.content);
+      const response = await api.get("/products?paged=false");
+      setProducts(response.data);
     };
 
     fetchProducts();

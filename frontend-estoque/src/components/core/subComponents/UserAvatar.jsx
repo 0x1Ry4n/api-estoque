@@ -1,9 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
 import { Avatar, Box, Button, Dialog, DialogContent, IconButton } from '@mui/material';
-import { Close as CloseIcon, Edit as EditIcon, Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
+import { Close as CloseIcon, Edit as EditIcon, Add as AddIcon, Remove as RemoveIcon, PhotoCamera } from '@mui/icons-material';
 import api from './../../../api';
+import { useAuth } from '../../../context/AuthContext';
 
 const UserAvatar = ({ userId, showable = true, editable = true, sx = {} }) => {
+  const { user } = useAuth();
+
   const [imageUrl, setImageUrl] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [zoom, setZoom] = useState(1);
@@ -66,7 +69,7 @@ const UserAvatar = ({ userId, showable = true, editable = true, sx = {} }) => {
   const zoomOut = () => {
     setZoom((z) => {
       const newZoom = Math.max(z - 0.2, 1);
-      if (newZoom === 1) setTranslate({ x: 0, y: 0 }); 
+      if (newZoom === 1) setTranslate({ x: 0, y: 0 });
       return newZoom;
     });
   };
@@ -163,10 +166,18 @@ const UserAvatar = ({ userId, showable = true, editable = true, sx = {} }) => {
       <Box sx={{ position: 'relative', display: 'inline-block', cursor: 'pointer' }}>
         <Avatar
           src={imageUrl}
-          sx={{ width: 120, height: 120, border: '3px solid #00796b', ...sx }}
+          sx={{
+            width: 110, 
+            height: 110, 
+            boxShadow: 3,
+            border: '2px solid #ccc',
+            color: '#808080',
+            backgroundColor: '#f0f0f0', 
+            ...sx
+          }}
           onClick={handleAvatarClick}
         >
-          Usuário
+            {user?.username ? user.username.charAt(0).toUpperCase() : '?'}
         </Avatar>
 
         {editable && (
@@ -195,7 +206,7 @@ const UserAvatar = ({ userId, showable = true, editable = true, sx = {} }) => {
                   '&:hover': { bgcolor: '#004d40' },
                 }}
               >
-                <EditIcon fontSize="small" />
+                <PhotoCamera fontSize="medium" />
               </Button>
             </label>
           </>
@@ -211,7 +222,7 @@ const UserAvatar = ({ userId, showable = true, editable = true, sx = {} }) => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              overflow: 'hidden', 
+              overflow: 'hidden',
             }}
             onMouseMove={onMouseMove}
             onMouseUp={onMouseUp}

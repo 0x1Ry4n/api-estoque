@@ -16,6 +16,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -34,8 +35,8 @@ public class ProductController implements CrudController<String, ProductRequestD
     private ProductService productService;
 
     @Override
-    @PostMapping
-    public ResponseEntity<ProductResponseDTO> create(@RequestPart @Validated ProductRequestDTO data) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductResponseDTO> create(@ModelAttribute @Validated ProductRequestDTO data) {
         ProductResponseDTO response = productService.create(data);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

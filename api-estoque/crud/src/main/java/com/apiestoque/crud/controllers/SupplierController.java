@@ -40,8 +40,14 @@ public class SupplierController implements CrudController<String, SupplierReques
     @Override
     @GetMapping
     public ResponseEntity<?> getAll(Pageable pageable, @RequestParam(defaultValue = "true") boolean paged) {
-        var response = supplierService.getAll(pageable);
-        return ResponseEntity.ok(response);
+        
+        if (paged) {
+            Page<SupplierResponseDTO> page = supplierService.getAll(pageable);
+            return ResponseEntity.ok(page);
+        } else {
+            List<SupplierResponseDTO> list = supplierService.getAll();
+            return ResponseEntity.ok(list);
+        }
     }
 
     @Override

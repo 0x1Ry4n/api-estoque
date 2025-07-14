@@ -47,13 +47,13 @@ const ReceivementList = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const response = await api.get("/products");
-      setProducts(response.data.content);
+      const response = await api.get("/products?paged=false");
+      setProducts(response.data);
     };
 
     const fetchSuppliers = async () => {
-      const response = await api.get("/supplier");
-      setSuppliers(response.data.content);
+      const response = await api.get("/supplier?paged=false");
+      setSuppliers(response.data);
     };
 
     fetchProducts();

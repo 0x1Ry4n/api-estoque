@@ -95,15 +95,6 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
 
-        if (data.productCode() != null) {
-            if (productRepository.existsByProductCode(data.productCode())) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Produto com esse código já existe.");
-            }
-
-            product.setProductCode(data.productCode());
-        }
-
         if (!data.supplierIds().isEmpty()) {
             Set<Supplier> suppliers = data.supplierIds().stream()
                     .map(supplierId -> supplierRepository.findById(supplierId)

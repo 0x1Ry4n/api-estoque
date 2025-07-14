@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Settings as SettingsIcon } from "@mui/icons-material";
 import {
   Switch,
   FormControlLabel,
@@ -6,16 +7,19 @@ import {
   Box,
   Paper,
   useMediaQuery,
-  useTheme
+  useTheme,
+  Divider,
+  Stack,
 } from "@mui/material";
 
 const Settings = ({ onToggleTheme }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [facialRecognition, setFacialRecognition] = useState(
-    JSON.parse(localStorage.getItem("facialRecognition")) ?? true
-  );
+  const [facialRecognition, setFacialRecognition] = useState(() => {
+    const saved = localStorage.getItem("facialRecognition");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
 
   useEffect(() => {
     localStorage.setItem("facialRecognition", JSON.stringify(facialRecognition));
@@ -24,32 +28,51 @@ const Settings = ({ onToggleTheme }) => {
   return (
     <Box
       sx={{
-        width: isMobile ? "100vw" : "80vw",
+        width: "90%",
         minHeight: "100vh",
-        p: isMobile ? 4 : 2,
-        boxSizing: "border-box",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "flex-start",
+        px: 2,
+        py: 4,
       }}
     >
       <Paper
-        elevation={4}
-        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: '95%' }}
+        elevation={6}
+        sx={{
+          width: "100%",
+          maxWidth: 750,
+          p: isMobile ? 4 : 5,
+          borderRadius: 2,
+          backgroundColor: "#fafafa",
+        }}
       >
-        <Box sx={{ p: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }} gutterBottom>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2 }}>
+          <SettingsIcon sx={{ color: "#00796b", mr: 1 }} />
+          <Typography variant="h5" fontWeight="bold">
             Configurações
           </Typography>
         </Box>
 
-        <FormControlLabel
-          control={
-            <Switch
-              checked={facialRecognition}
-              onChange={() => setFacialRecognition((prev) => !prev)}
-              color="primary"
-            />
-          }
-          label={`Reconhecimento Facial: ${facialRecognition ? "Ativado" : "Desativado"}`}
-        />
+        <Divider sx={{ mb: 3 }} />
+
+        <Stack spacing={2}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={facialRecognition}
+                onChange={() => setFacialRecognition((prev) => !prev)}
+                color="primary"
+              />
+            }
+            label={
+              <Typography>
+                Reconhecimento Facial:{" "}
+                <strong>{facialRecognition ? "Ativado" : "Desativado"}</strong>
+              </Typography>
+            }
+          />
+        </Stack>
       </Paper>
     </Box>
   );

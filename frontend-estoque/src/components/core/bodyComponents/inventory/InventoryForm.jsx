@@ -40,8 +40,8 @@ const InventoryForm = ({ onInventoryAdded }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/products');
-        setProducts(Array.isArray(response.data.content) ? response.data.content : []);
+        const response = await api.get('/products?paged=false');
+        setProducts(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         setSnackbarMessage('Erro ao carregar produtos: ' + (error.response?.data?.message || error.response?.data?.error || error.message));
         setSnackbarSeverity('error');

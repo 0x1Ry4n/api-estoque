@@ -60,8 +60,8 @@ const Inventory = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await api.get("/products");
-      setProducts(response.data.content);
+      const response = await api.get("/products?paged=false");
+      setProducts(response.data);
     } catch (error) {
       console.error("Erro ao buscar produtos: ", error);
       setSnackbarMessage("Erro ao carregar produtos.");
