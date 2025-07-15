@@ -131,10 +131,8 @@ const Categories = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeModal}>Cancelar</Button>
-          <Button onClick={saveCategory}>
-            {isEditing ? "Confirmar" : "Adicionar"}
-          </Button>
+          <Button onClick={closeModal} color="secondary">Cancelar</Button>
+          <Button onClick={saveCategory} color="primary">Confirmar</Button>
         </DialogActions>
       </Dialog>
 

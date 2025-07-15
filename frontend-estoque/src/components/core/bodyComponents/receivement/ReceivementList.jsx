@@ -9,6 +9,7 @@ import {
   Snackbar,
   Alert,
   Autocomplete,
+  Box
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -18,8 +19,8 @@ import {
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { addDays, format } from "date-fns";
 import { fileExporters } from "../../../../utils/utils";
-import api from "../../../../api";
 import Swal from "sweetalert2";
+import api from "../../../../api";
 
 const ReceivementList = () => {
   const [open, setOpen] = useState(false);
@@ -314,109 +315,120 @@ const ReceivementList = () => {
         />
       </div>
 
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            width: '700px',
+            maxWidth: '90vw',
+          },
+        }}
+        open={open}
+        onClose={handleClose}
+      >
         <DialogTitle>
           {isEditing ? "Editar Recebimento" : "Adicionar Recebimento"}
         </DialogTitle>
         <DialogContent>
-          <TextField
-            label="Descrição"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={selectedReceivement?.description || ""}
-            onChange={(e) =>
-              setSelectedReceivement({
-                ...selectedReceivement,
-                name: e.target.value,
-              })
-            }
-            sx={{ mb: 3 }}
-          />
+          <Box display="flex" flexDirection="column" gap={4} sx={{ mt: 2 }}>
+            <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
+              <TextField
+                label="Descrição"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={selectedReceivement?.description || ""}
+                onChange={(e) =>
+                  setSelectedReceivement({
+                    ...selectedReceivement,
+                    name: e.target.value,
+                  })
+                }
+              />
 
-          <TextField
-            label="Quantidade"
-            type="number"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={selectedReceivement?.quantity || ""}
-            onChange={(e) =>
-              setSelectedReceivement({
-                ...selectedReceivement,
-                quantity: e.target.value,
-              })
-            }
-            sx={{ mb: 3 }}
-          />
+              <TextField
+                label="Quantidade"
+                type="number"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={selectedReceivement?.quantity || ""}
+                onChange={(e) =>
+                  setSelectedReceivement({
+                    ...selectedReceivement,
+                    quantity: e.target.value,
+                  })
+                }
+                sx={{ mb: 3 }}
+              />
 
-          <Autocomplete
-            options={products || []}
-            getOptionLabel={(option) => option.name || ""}
-            value={
-              products?.find(
-                (prod) => prod.id === selectedReceivement?.productId
-              ) || null
-            }
-            onChange={(_, value) => {
-              setSelectedReceivement({
-                ...selectedReceivement,
-                productId: value?.id,
-              });
-            }}
-            renderInput={(params) => <TextField {...params} label="Produto" />}
-            sx={{ mb: 3 }}
-          />
+              <Autocomplete
+                options={products || []}
+                fullWidth
+                getOptionLabel={(option) => option.name || ""}
+                value={
+                  products?.find(
+                    (prod) => prod.id === selectedReceivement?.productId
+                  ) || null
+                }
+                onChange={(_, value) => {
+                  setSelectedReceivement({
+                    ...selectedReceivement,
+                    productId: value?.id,
+                  });
+                }}
+                renderInput={(params) => <TextField {...params} label="Produto" />}
+                sx={{ mb: 3 }}
+              />
 
-          <Autocomplete
-            options={suppliers || []}
-            getOptionLabel={(option) => option.socialReason || ""}
-            value={
-              suppliers?.find(
-                (sup) => sup.id === selectedReceivement?.supplierId
-              ) || null
-            }
-            onChange={(_, value) => {
-              setSelectedReceivement({
-                ...selectedReceivement,
-                supplierId: value?.id,
-              });
-            }}
-            renderInput={(params) => (
-              <TextField {...params} label="Fornecedor" />
-            )}
-            sx={{ mb: 3 }}
-          />
-          <TextField
-            label="Data de Recebimento"
-            type="date"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={
-              selectedReceivement?.receivingDate
-                ? new Date(selectedReceivement.receivingDate)
-                  .toISOString()
-                  .split("T")[0]
-                : ""
-            }
-            onChange={(e) =>
-              setSelectedReceivement({
-                ...selectedReceivement,
-                receivingDate: e.target.value,
-              })
-            }
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{ mb: 3 }}
-          />
+              <Autocomplete
+                options={suppliers || []}
+                fullWidth
+                getOptionLabel={(option) => option.socialReason || ""}
+                value={
+                  suppliers?.find(
+                    (sup) => sup.id === selectedReceivement?.supplierId
+                  ) || null
+                }
+                onChange={(_, value) => {
+                  setSelectedReceivement({
+                    ...selectedReceivement,
+                    supplierId: value?.id,
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} label="Fornecedor" />
+                )}
+              />
+              <TextField
+                label="Data de Recebimento"
+                type="date"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={
+                  selectedReceivement?.receivingDate
+                    ? new Date(selectedReceivement.receivingDate)
+                      .toISOString()
+                      .split("T")[0]
+                    : ""
+                }
+                onChange={(e) =>
+                  setSelectedReceivement({
+                    ...selectedReceivement,
+                    receivingDate: e.target.value,
+                  })
+                }
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </Box>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancelar</Button>
-          <Button onClick={handleSave}>
-            {isEditing ? "Confirmar" : "Adicionar"}
-          </Button>
+          <Button onClick={handleClose} color="secondary">Cancelar</Button>
+          <Button onClick={handleSave} color="primary">Confirmar</Button>
         </DialogActions>
       </Dialog>
 

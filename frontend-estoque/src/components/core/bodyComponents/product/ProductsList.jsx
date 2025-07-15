@@ -11,16 +11,17 @@ import {
   Autocomplete,
   IconButton,
   Avatar,
-  Typography,
+  Badge,
+  Box,
+  Typography
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   Visibility as VisibilityIcon,
   Refresh as RefreshIcon,
-  Badge,
-  PhotoCamera,
-  Category,
+  PhotoCamera as PhotoCameraIcon,
+  Category as CategoryIcon,
 } from "@mui/icons-material";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { Controller, useForm } from "react-hook-form";
@@ -47,7 +48,8 @@ const Products = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [isEditing, setIsEditing] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imagePreviewEdit, setImagePreviewEdit] = useState(null);
+  const [imageEdit, setImageEdit] = useState(null);
   const [pagination, setPagination] = useState({
     page: 0,
     pageSize: 20,
@@ -92,15 +94,28 @@ const Products = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
+      setImageEdit(file);
+      setImagePreviewEdit(URL.createObjectURL(file));
     }
   };
 
-  const handleClickOpen = (product) => {
+  const handleClickOpen = async (product) => {
     setSelectedProduct(product);
     setOpen(true);
     setIsEditing(true);
+
+    try {
+      const res = await api.get(`/products/${product.id}/image`, {
+        responseType: "blob",
+      });
+      const objectUrl = URL.createObjectURL(res.data);
+      setImagePreviewEdit(objectUrl);
+    } catch (err) {
+      setSnackbarMessage('Erro ao carregar a imagem do produto');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      setImagePreviewEdit(null);
+    }
   };
 
   const handleClose = () => {
@@ -156,12 +171,22 @@ const Products = () => {
       };
 
       if (isEditing) {
+        if (imageEdit) {
+          const formData = new FormData();
+          formData.append("file", imageEdit);
+
+          await api.patch(`/products/${selectedProduct.id}/image`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+        }
+
         await api.patch(`/products/${selectedProduct.id}`, productToSave);
         setRows(
           rows.map((row) =>
             row.id === selectedProduct.id ? productToSave : row
           )
         );
+
         setSnackbarMessage("Produto atualizado com sucesso!");
       } else {
         const newProduct = { id: rows.length + 1, ...productToSave };
@@ -198,9 +223,9 @@ const Products = () => {
         const { id, name } = params.row;
 
         const ImageCell = () => {
-          const [imageUrl, setImageUrl] = React.useState(null);
+          const [imageUrl, setImageUrl] = useState(null);
 
-          React.useEffect(() => {
+          useEffect(() => {
             if (id) {
               api
                 .get(`/products/${id}/image`, { responseType: "blob" })
@@ -380,104 +405,115 @@ const Products = () => {
         />
       </div>
 
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            width: '700px',
+            maxWidth: '90vw',
+          },
+        }}
+        open={open}
+        onClose={handleClose}
+      >
         <DialogTitle>
           {isEditing ? "Editar Produto" : "Adicionar Produto"}
         </DialogTitle>
         <DialogContent>
-          <Badge
-            overlap="circular"
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            badgeContent={
-              <label htmlFor="upload-image">
-                <input
-                  accept="image/*"
-                  id="upload-image"
-                  type="file"
-                  hidden
-                  onChange={handleImageChange}
-                />
-                <IconButton
-                  component="span"
+          <Box display="flex" flexDirection="column" gap={4} sx={{ mt: 2 }}>
+            <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
+              <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                badgeContent={
+                  <label htmlFor="upload-image2">
+                    <input
+                      accept="image/*"
+                      id="upload-image2"
+                      type="file"
+                      hidden
+                      onChange={handleImageChange}
+                    />
+                    <IconButton
+                      component="span"
+                      sx={{
+                        backgroundColor: 'white',
+                        boxShadow: 2,
+                        '&:hover': { backgroundColor: '#eee' },
+                      }}
+                    >
+                      <PhotoCameraIcon />
+                    </IconButton>
+                  </label>
+                }
+              >
+                <Avatar
+                  src={imagePreviewEdit}
+                  alt="Preview"
                   sx={{
-                    backgroundColor: 'white',
-                    boxShadow: 2,
-                    '&:hover': { backgroundColor: '#eee' },
+                    width: 110,
+                    height: 110,
+                    boxShadow: 3,
+                    border: '2px solid #ccc',
+                    backgroundColor: '#f0f0f0',
                   }}
                 >
-                  <PhotoCamera />
-                </IconButton>
-              </label>
-            }
-          >
-            <Avatar
-              src={imagePreview}
-              alt="Preview"
-              sx={{
-                width: 110,
-                height: 110,
-                boxShadow: 3,
-                border: '2px solid #ccc',
-                backgroundColor: '#f0f0f0',
-              }}
-            >
-              {!imagePreview && <Category fontSize="large" sx={{ color: '#888' }} />}
-            </Avatar>
-          </Badge>
-          <TextField
-            label="Nome do Produto"
-            fullWidth
-            margin="normal"
-            value={selectedProduct?.name || ""}
-            onChange={(e) =>
-              setSelectedProduct({ ...selectedProduct, name: e.target.value })
-            }
-            InputProps={{ readOnly: true }}
-            sx={{ mb: 3 }}
-          />
-          <Controller
-            name="suppliers"
-            control={control}
-            render={({ field }) => (
-              <Autocomplete
-                multiple
-                options={suppliers || []}
-                getOptionLabel={(option) => option.socialReason || ""}
-                value={suppliers?.filter((sup) =>
-                  (selectedProduct?.supplierIds || []).includes(sup.id)
-                )}
-                onChange={(_, value) => {
-                  const ids = value.map((v) => v.id);
-                  field.onChange(ids);
-                  setSelectedProduct({ ...selectedProduct, supplierIds: ids });
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} label="Fornecedores" />
-                )}
-                sx={{ mb: 3 }}
-              />
-            )}
-          />
-          <Controller
-            name="category"
-            control={control}
-            render={({ field }) => {
-              const safeCategories = Array.isArray(categories) ? categories : [];
+                  {!imagePreviewEdit && <CategoryIcon fontSize="large" sx={{ color: '#888' }} />}
+                </Avatar>
+              </Badge>
 
-              const selectedCategory =
-                safeCategories.find(
-                  (cat) => cat.id === selectedProduct?.categoryId
-                ) || null;
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                Clique no ícone para alterar a imagem
+              </Typography>
+            </Box>
 
-              return (
+            <TextField
+              label="Nome do Produto"
+              fullWidth
+              value={selectedProduct?.name || ""}
+              onChange={(e) =>
+                setSelectedProduct({ ...selectedProduct, name: e.target.value })
+              }
+              InputProps={{ readOnly: true }}
+            />
+
+            <Controller
+              name="suppliers"
+              control={control}
+              render={({ field }) => (
                 <Autocomplete
-                  options={safeCategories}
+                  multiple
+                  options={suppliers || []}
+                  getOptionLabel={(option) => option.socialReason || ""}
+                  value={suppliers?.filter((sup) =>
+                    (selectedProduct?.supplierIds || []).includes(sup.id)
+                  )}
+                  onChange={(_, value) => {
+                    const ids = value.map((v) => v.id);
+                    field.onChange(ids);
+                    setSelectedProduct({ ...selectedProduct, supplierIds: ids });
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Fornecedores" />
+                  )}
+                />
+              )}
+            />
+
+            <Controller
+              name="category"
+              control={control}
+              render={({ field }) => (
+                <Autocomplete
+                  options={categories}
                   getOptionLabel={(option) => option.name || ""}
-                  value={selectedCategory}
-                  onChange={(_, newValue) => {
-                    const categoryId = newValue?.id || null;
-                    field.onChange(categoryId);
-                    setSelectedProduct((prev) => ({
+                  value={
+                    categories.find(cat => cat.id === (field.value ?? selectedProduct?.categoryId)) || null
+                  }
+                  onChange={(_, value) => {
+                    const categoryId = value?.id || null;
+                    field.onChange(categoryId)
+                    setSelectedProduct(prev => ({
                       ...prev,
                       categoryId,
                     }));
@@ -485,74 +521,70 @@ const Products = () => {
                   renderInput={(params) => (
                     <TextField {...params} label="Categoria" />
                   )}
-                  sx={{ mb: 3 }}
                 />
-              );
-            }}
-          />
+              )}
+            />
 
-          <TextField
-            label="Descrição"
-            fullWidth
-            margin="normal"
-            value={selectedProduct?.description || ""}
-            onChange={(e) =>
-              setSelectedProduct({
-                ...selectedProduct,
-                description: e.target.value,
-              })
-            }
-            sx={{ mb: 3 }}
-          />
-          <TextField
-            label="Preço Unitário"
-            fullWidth
-            type="number"
-            margin="normal"
-            value={selectedProduct?.unitPrice || ""}
-            onChange={(e) =>
-              setSelectedProduct({
-                ...selectedProduct,
-                unitPrice: parseFloat(e.target.value),
-              })
-            }
-            sx={{ mb: 3 }}
-          />
-          <TextField
-            label="Data de Expiração"
-            type="date"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={
-              selectedProduct?.expirationDate
-                ? selectedProduct.expirationDate.split("T")[0]
-                : ""
-            }
-            onChange={(e) =>
-              setSelectedProduct({
-                ...selectedProduct,
-                expirationDate: e.target.value,
-              })
-            }
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{ mb: 3 }}
-          />
+            <TextField
+              label="Descrição"
+              fullWidth
+              value={selectedProduct?.description || ""}
+              onChange={(e) =>
+                setSelectedProduct({
+                  ...selectedProduct,
+                  description: e.target.value,
+                })
+              }
+            />
+
+            <TextField
+              label="Preço Unitário"
+              fullWidth
+              type="number"
+              value={selectedProduct?.unitPrice || ""}
+              onChange={(e) =>
+                setSelectedProduct({
+                  ...selectedProduct,
+                  unitPrice: parseFloat(e.target.value),
+                })
+              }
+            />
+
+            <TextField
+              label="Data de Expiração"
+              type="date"
+              variant="outlined"
+              fullWidth
+              value={
+                selectedProduct?.expirationDate
+                  ? selectedProduct.expirationDate.split("T")[0]
+                  : ""
+              }
+              onChange={(e) =>
+                setSelectedProduct({
+                  ...selectedProduct,
+                  expirationDate: e.target.value,
+                })
+              }
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancelar</Button>
-          <Button onClick={handleSave}>Salvar</Button>
+          <Button onClick={handleClose} color="secondary">Cancelar</Button>
+          <Button onClick={handleSave} color="primary">Confirmar</Button>
         </DialogActions>
       </Dialog>
 
       <Dialog
         open={detailDialogOpen}
         onClose={() => setDetailDialogOpen(false)}
+        sx={{ p: 20 }}
       >
-        <DialogTitle>Detalhes do Produto</DialogTitle>
-        <DialogContent>
+        <DialogTitle textAlign="center">Detalhes do Produto</DialogTitle>
+        <DialogContent sx={{ p: 10 }}>
           {detailedProduct && (
             <div>
               <p>
@@ -612,9 +644,9 @@ const Products = () => {
                   <p>
                     <strong>Desconto:</strong> {item.discount} BRL
                   </p>
-                  <hr />
                 </div>
               ))}
+              <hr />
 
               <h3>Fornecedores</h3>
               {detailedProduct.suppliers.map((supplier) => (

@@ -10,6 +10,7 @@ import {
   Alert,
   MenuItem,
   InputAdornment,
+  Box
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -23,8 +24,8 @@ import {
   LocationOnOutlined,
 } from "@mui/icons-material";
 import { fileExporters } from "../../../../utils/utils";
-import InputMask from "react-input-mask";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
+import InputMask from "react-input-mask";
 import Swal from "sweetalert2";
 import api from "../../../../api";
 
@@ -257,44 +258,34 @@ const Suppliers = () => {
         />
       </div>
 
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            width: '700px',
+            maxWidth: '90vw',
+          },
+        }}
+        open={open}
+        onClose={handleClose}
+      >
         <DialogTitle>
           {isEditing ? "Editar Fornecedor" : "Adicionar Fornecedor"}
         </DialogTitle>
         <DialogContent>
-          <TextField
-            label="Razão Social"
-            fullWidth
-            margin="normal"
-            value={selectedSupplier?.socialReason || ""}
-            onChange={(e) =>
-              setSelectedSupplier({
-                ...selectedSupplier,
-                socialReason: e.target.value,
-              })
-            }
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <BusinessOutlined />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <InputMask
-            mask="99.999.999/9999-99"
-            value={selectedSupplier?.cnpj || ""}
-            onChange={(e) =>
-              setSelectedSupplier({ ...selectedSupplier, cnpj: e.target.value })
-            }
-          >
-            {() => (
+          <Box display="flex" flexDirection="column" gap={4} sx={{ mt: 2 }}>
+            <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
               <TextField
-                label="CNPJ"
+                label="Razão Social"
                 fullWidth
                 margin="normal"
+                value={selectedSupplier?.socialReason || ""}
+                onChange={(e) =>
+                  setSelectedSupplier({
+                    ...selectedSupplier,
+                    socialReason: e.target.value,
+                  })
+                }
                 required
                 InputProps={{
                   startAdornment: (
@@ -304,146 +295,166 @@ const Suppliers = () => {
                   ),
                 }}
               />
-            )}
-          </InputMask>
 
-          <TextField
-            label="E-mail"
-            fullWidth
-            margin="normal"
-            value={selectedSupplier?.email || ""}
-            onChange={(e) =>
-              setSelectedSupplier({
-                ...selectedSupplier,
-                email: e.target.value,
-              })
-            }
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <EmailOutlined />
-                </InputAdornment>
-              ),
-            }}
-          />
+              <InputMask
+                mask="99.999.999/9999-99"
+                value={selectedSupplier?.cnpj || ""}
+                onChange={(e) =>
+                  setSelectedSupplier({ ...selectedSupplier, cnpj: e.target.value })
+                }
+              >
+                {() => (
+                  <TextField
+                    label="CNPJ"
+                    fullWidth
+                    margin="normal"
+                    required
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <BusinessOutlined />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              </InputMask>
 
-          <InputMask
-            mask="(99) 99999-9999"
-            value={selectedSupplier?.phone || ""}
-            onChange={(e) =>
-              setSelectedSupplier({
-                ...selectedSupplier,
-                phone: e.target.value,
-              })
-            }
-          >
-            {() => (
               <TextField
-                label="Telefone"
+                label="E-mail"
                 fullWidth
                 margin="normal"
+                value={selectedSupplier?.email || ""}
+                onChange={(e) =>
+                  setSelectedSupplier({
+                    ...selectedSupplier,
+                    email: e.target.value,
+                  })
+                }
                 required
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PhoneOutlined />
+                      <EmailOutlined />
                     </InputAdornment>
                   ),
                 }}
               />
-            )}
-          </InputMask>
 
-          <TextField
-            label="Pessoa de Contato"
-            fullWidth
-            margin="normal"
-            value={selectedSupplier?.contactPerson || ""}
-            onChange={(e) =>
-              setSelectedSupplier({
-                ...selectedSupplier,
-                contactPerson: e.target.value,
-              })
-            }
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PersonOutline />
-                </InputAdornment>
-              ),
-            }}
-          />
+              <InputMask
+                mask="(99) 99999-9999"
+                value={selectedSupplier?.phone || ""}
+                onChange={(e) =>
+                  setSelectedSupplier({
+                    ...selectedSupplier,
+                    phone: e.target.value,
+                  })
+                }
+              >
+                {() => (
+                  <TextField
+                    label="Telefone"
+                    fullWidth
+                    margin="normal"
+                    required
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PhoneOutlined />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              </InputMask>
 
-          <InputMask
-            mask="99999-999"
-            value={selectedSupplier?.cep || ""}
-            onChange={(e) =>
-              setSelectedSupplier({ ...selectedSupplier, cep: e.target.value })
-            }
-          >
-            {() => (
               <TextField
-                label="CEP"
+                label="Pessoa de Contato"
                 fullWidth
                 margin="normal"
+                value={selectedSupplier?.contactPerson || ""}
+                onChange={(e) =>
+                  setSelectedSupplier({
+                    ...selectedSupplier,
+                    contactPerson: e.target.value,
+                  })
+                }
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LocationOnOutlined />
+                      <PersonOutline />
                     </InputAdornment>
                   ),
                 }}
               />
-            )}
-          </InputMask>
 
-          <TextField
-            label="Website"
-            fullWidth
-            margin="normal"
-            value={selectedSupplier?.website || ""}
-            onChange={(e) =>
-              setSelectedSupplier({
-                ...selectedSupplier,
-                website: e.target.value,
-              })
-            }
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <WebOutlined />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ mb: 6 }}
-          />
+              <InputMask
+                mask="99999-999"
+                value={selectedSupplier?.cep || ""}
+                onChange={(e) =>
+                  setSelectedSupplier({ ...selectedSupplier, cep: e.target.value })
+                }
+              >
+                {() => (
+                  <TextField
+                    label="CEP"
+                    fullWidth
+                    margin="normal"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LocationOnOutlined />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              </InputMask>
 
-          <TextField
-            select
-            fullWidth
-            label="Preferência de Comunicação"
-            value={selectedSupplier?.communicationPreference || ""}
-            onChange={(e) =>
-              setSelectedSupplier({
-                ...selectedSupplier,
-                communicationPreference: e.target.value,
-              })
-            }
-            variant="outlined"
-            required
-          >
-            <MenuItem value="EMAIL">Email</MenuItem>
-            <MenuItem value="PHONE">Telefone</MenuItem>
-          </TextField>
+              <TextField
+                label="Website"
+                fullWidth
+                margin="normal"
+                value={selectedSupplier?.website || ""}
+                onChange={(e) =>
+                  setSelectedSupplier({
+                    ...selectedSupplier,
+                    website: e.target.value,
+                  })
+                }
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <WebOutlined />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ mb: 6 }}
+              />
+
+              <TextField
+                select
+                fullWidth
+                label="Preferência de Comunicação"
+                value={selectedSupplier?.communicationPreference || ""}
+                onChange={(e) =>
+                  setSelectedSupplier({
+                    ...selectedSupplier,
+                    communicationPreference: e.target.value,
+                  })
+                }
+                variant="outlined"
+                required
+              >
+                <MenuItem value="EMAIL">Email</MenuItem>
+                <MenuItem value="PHONE">Telefone</MenuItem>
+              </TextField>
+            </Box>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary">
-            Cancelar
-          </Button>
-          <Button onClick={handleSave} color="primary">
-            {isEditing ? "Salvar Alterações" : "Adicionar Fornecedor"}
-          </Button>
+          <Button onClick={handleClose} color="secondary">Cancelar</Button>
+          <Button onClick={handleSave} color="primary">Confirmar</Button>
         </DialogActions>
       </Dialog>
 

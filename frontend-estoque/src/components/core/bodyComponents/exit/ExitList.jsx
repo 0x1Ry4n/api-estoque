@@ -8,6 +8,7 @@ import {
   TextField,
   Snackbar,
   Alert,
+  Box
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -17,8 +18,8 @@ import {
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { addDays, format } from "date-fns";
 import { fileExporters } from "../../../../utils/utils";
-import api from "../../../../api";
 import Swal from "sweetalert2";
+import api from "../../../../api";
 
 const ExitList = () => {
   const [open, setOpen] = useState(false);
@@ -290,50 +291,52 @@ const ExitList = () => {
           {isEditing ? "Editar Saída" : "Adicionar Saída"}
         </DialogTitle>
         <DialogContent>
-          <TextField
-            label="Quantidade"
-            type="number"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={selectedExit?.quantity || ""}
-            onChange={(e) =>
-              setSelectedExit({
-                ...selectedExit,
-                quantity: e.target.value,
-              })
-            }
-            sx={{ mb: 3 }}
-          />
+          <Box display="flex" flexDirection="column" gap={4} sx={{ mt: 2 }}>
+            <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
+              <TextField
+                label="Quantidade"
+                type="number"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={selectedExit?.quantity || ""}
+                onChange={(e) =>
+                  setSelectedExit({
+                    ...selectedExit,
+                    quantity: e.target.value,
+                  })
+                }
+                sx={{ mb: 3 }}
+              />
 
-          <TextField
-            label="Data de Saída"
-            type="date"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={
-              selectedExit?.exitDate
-                ? new Date(selectedExit.exitDate).toISOString().split("T")[0]
-                : ""
-            }
-            onChange={(e) =>
-              setSelectedExit({
-                ...selectedExit,
-                exitDate: e.target.value,
-              })
-            }
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{ mb: 3 }}
-          />
+              <TextField
+                label="Data de Saída"
+                type="date"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={
+                  selectedExit?.exitDate
+                    ? new Date(selectedExit.exitDate).toISOString().split("T")[0]
+                    : ""
+                }
+                onChange={(e) =>
+                  setSelectedExit({
+                    ...selectedExit,
+                    exitDate: e.target.value,
+                  })
+                }
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                sx={{ mb: 3 }}
+              />
+            </Box>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancelar</Button>
-          <Button onClick={handleSave}>
-            {isEditing ? "Confirmar" : "Adicionar"}
-          </Button>
+          <Button onClick={handleClose} color="secondary">Cancelar</Button>
+          <Button onClick={handleSave} color="primary">Confirmar</Button>
         </DialogActions>
       </Dialog>
 
@@ -350,7 +353,7 @@ const ExitList = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </div>
+    </div >
   );
 };
 
