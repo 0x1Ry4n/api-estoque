@@ -28,8 +28,8 @@ import {
 import LoginIcon from "@mui/icons-material/Login";
 import { useAuth } from "../../../context/AuthContext";
 import Webcam from "react-webcam";
-import api from "../../../api";
 import * as faceapi from "@vladmandic/face-api";
+import api from "../../../api";
 
 const Login = () => {
   const navigate = useNavigate();

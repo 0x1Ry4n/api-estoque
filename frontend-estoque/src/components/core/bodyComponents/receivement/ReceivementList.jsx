@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -19,25 +19,30 @@ import {
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { addDays, format } from "date-fns";
 import { fileExporters } from "../../../../utils/utils";
+import { useReceivementListStore } from "./stores/useReceivementListStore";
 import Swal from "sweetalert2";
-import api from "../../../../api";
 
 const ReceivementList = () => {
-  const [open, setOpen] = useState(false);
-  const [selectedReceivement, setSelectedReceivement] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-  const [rows, setRows] = useState([]);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [isEditing, setIsEditing] = useState(false);
-  const [pagination, setPagination] = useState({
-    page: 0,
-    pageSize: 20,
-    totalElements: 0,
-    totalPages: 0
-  })
+  const {
+    rows,
+    pagination,
+    products,
+    suppliers,
+    selectedReceivement,
+    snackbar,
+    isEditing,
+    setPagination,
+    showSnackbar,
+    closeSnackbar,
+    fetchReceivements,
+    fetchProductsAndSuppliers,
+    saveReceivement,
+    saveStatus,
+    deleteReceivement,
+    setSelectedReceivement,
+    setOpen,
+    setEditing
+  } = useReceivementListStore();
 
   const receivementStatusMap = {
     PENDING: "Pendente",
@@ -47,49 +52,20 @@ const ReceivementList = () => {
   };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const response = await api.get("/products?paged=false");
-      setProducts(response.data);
-    };
-
-    const fetchSuppliers = async () => {
-      const response = await api.get("/supplier?paged=false");
-      setSuppliers(response.data);
-    };
-
-    fetchProducts();
-    fetchSuppliers();
+    fetchProductsAndSuppliers();
     fetchReceivements(pagination.page, pagination.pageSize);
   }, []);
 
-  const fetchReceivements = async (page, pageSize) => {
-    try {
-      const res = await api.get(`/receivements?page=${page}&size=${pageSize}`);
-      setRows(res.data.content);
-      setPagination({
-        page: res.data.number,
-        pageSize: res.data.size,
-        totalElements: res.data.totalElements,
-        totalPages: res.data.totalPages
-      })
-    } catch (error) {
-      console.error("Erro ao buscar os recebimentos: ", error);
-      setSnackbarMessage("Erro ao carregar os recebimentos.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
-  };
-
-  const handleClickOpen = (category) => {
-    setSelectedReceivement(category);
+  const handleClickOpen = (receivement) => {
+    setSelectedReceivement(receivement);
     setOpen(true);
-    setIsEditing(true);
+    setEditing(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedReceivement(null);
-    setIsEditing(false);
+    setEditing(false);
   };
 
   const handleDelete = async (ids) => {
@@ -102,56 +78,13 @@ const ReceivementList = () => {
       cancelButtonText: "Cancelar",
     });
     if (confirmDelete.isConfirmed) {
-      try {
-        await api.delete(`/receivements/${ids[0]}`);
-        setSnackbarMessage("Recebimento deletado com sucesso!");
-        setSnackbarSeverity("success");
-        fetchReceivements();
-      } catch (error) {
-        setSnackbarMessage(
-          `Erro ao deletar o recebimento: ${error.response?.data?.message || error.response?.data?.error || error.message}`
-        );
-        setSnackbarSeverity("error");
-      } finally {
-        setSnackbarOpen(true);
-      }
+      await deleteReceivement(ids);
     }
   };
 
   const handleSave = async () => {
-    try {
-      if (isEditing) {
-        await api.patch(`/receivements/${selectedReceivement.id}`, {
-          description: selectedReceivement.description,
-          quantity: selectedReceivement.quantity,
-          supplierId: selectedReceivement.supplierId,
-          productId: selectedReceivement.productId,
-          status: selectedReceivement.status,
-          receivingDate: selectedReceivement.receivingDate,
-        });
-        setSnackbarMessage("Recebimento atualizado com sucesso!");
-      } else {
-        const newCategory = {
-          description: selectedReceivement.description,
-          quantity: selectedReceivement.quantity,
-          supplierId: selectedReceivement.supplierId,
-          productId: selectedReceivement.productId,
-          receivingDate: selectedReceivement.receivingDate,
-        };
-        await api.post("/receivements", newCategory);
-        setSnackbarMessage("Recebimento adicionado com sucesso!");
-      }
-      setSnackbarSeverity("success");
-      fetchReceivements();
-    } catch (error) {
-      setSnackbarMessage(`
-        Erro ao salvar o recebimento: ${error.response?.data?.message || error.response?.data?.error || error.message}
-      `);
-      setSnackbarSeverity("error");
-    } finally {
-      handleClose();
-      setSnackbarOpen(true);
-    }
+    await saveReceivement();
+    handleClose();
   };
 
   const handleStatusChange = async (id) => {
@@ -171,25 +104,13 @@ const ReceivementList = () => {
     });
 
     if (status) {
-      try {
-        await api.patch(`/receivements/${id}/status`, { status: status });
-        setSnackbarMessage("Status atualizado com sucesso!");
-        setSnackbarSeverity("success");
-        fetchReceivements();
-      } catch (error) {
-        setSnackbarMessage(`Erro ao atualizar o status: ${error.response?.data?.message || error.response?.data?.error || error.message}`);
-        setSnackbarSeverity("error");
-      } finally {
-        setSnackbarOpen(true);
-      }
+      await saveStatus(id, status);
     }
   };
 
   const handleRefresh = () => {
     fetchReceivements(pagination.page, pagination.pageSize);
-    setSnackbarMessage("Lista de recebimentos atualizada!");
-    setSnackbarSeverity("info");
-    setSnackbarOpen(true);
+    showSnackbar("Lista de recebimentos atualizada!", "info");
   };
 
   const columns = [
@@ -327,7 +248,7 @@ const ReceivementList = () => {
         onClose={handleClose}
       >
         <DialogTitle>
-          {isEditing ? "Editar Recebimento" : "Adicionar Recebimento"}
+          Editar Recebimento
         </DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={4} sx={{ mt: 2 }}>
@@ -341,7 +262,7 @@ const ReceivementList = () => {
                 onChange={(e) =>
                   setSelectedReceivement({
                     ...selectedReceivement,
-                    name: e.target.value,
+                    description: e.target.value,
                   })
                 }
               />
@@ -433,16 +354,16 @@ const ReceivementList = () => {
       </Dialog>
 
       <Snackbar
-        open={snackbarOpen}
+        open={snackbar.open}
         autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
+        onClose={closeSnackbar}
       >
         <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
+          onClose={closeSnackbar}
+          severity={snackbar.severity}
           sx={{ width: "100%" }}
         >
-          {snackbarMessage}
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </div>

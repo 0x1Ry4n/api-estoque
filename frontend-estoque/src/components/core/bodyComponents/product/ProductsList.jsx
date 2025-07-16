@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -27,6 +27,7 @@ import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { Controller, useForm } from "react-hook-form";
 import { addDays, format } from "date-fns";
 import { fileExporters } from "../../../../utils/utils";
+import { useProductListStore } from "./stores/useProductListStore";
 import Swal from "sweetalert2";
 import api from "../../../../api";
 
@@ -37,103 +38,51 @@ const Products = () => {
     reset,
     formState: { errors },
   } = useForm();
-  const [open, setOpen] = useState(false);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [detailedProduct, setDetailedProduct] = useState(null);
-  const [rows, setRows] = useState([]);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [isEditing, setIsEditing] = useState(false);
-  const [imagePreviewEdit, setImagePreviewEdit] = useState(null);
-  const [imageEdit, setImageEdit] = useState(null);
-  const [pagination, setPagination] = useState({
-    page: 0,
-    pageSize: 20,
-    totalElements: 0,
-    totalPages: 0
-  })
+
+  const {
+    rows,
+    pagination,
+    categories,
+    suppliers,
+    selectedProduct,
+    detailedProduct,
+    imagePreviewEdit,
+    open,
+    isEditing,
+    detailDialogOpen,
+    snackbar,
+    setPagination,
+    showSnackbar,
+    closeSnackbar,
+    setImageEdit,
+    fetchProducts,
+    fetchCategoriesAndSuppliers,
+    openModal,
+    closeModal,
+    openDetailDialog,
+    closeDetailDialog,
+    saveProduct,
+    deleteProduct
+  } = useProductListStore();
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const response = await api.get("/category?paged=false");
-      setCategories(response.data);
-    };
-
-    const fetchSuppliers = async () => {
-      const response = await api.get("/supplier?paged=false");
-      setSuppliers(response.data);
-    };
-
-    fetchCategories();
-    fetchSuppliers();
+    fetchCategoriesAndSuppliers();
     fetchProducts(pagination.page, pagination.pageSize);
   }, []);
-
-  const fetchProducts = async (page, pageSize) => {
-    try {
-      const res = await api.get(`/products?page=${page}&size=${pageSize}`);
-      setRows(res.data.content);
-      setPagination({
-        page: res.data.number,
-        pageSize: res.data.size,
-        totalElements: res.data.totalElements,
-        totalPages: res.data.totalPages
-      })
-    } catch (error) {
-      console.error("Erro ao buscar produtos: ", error);
-      setSnackbarMessage("Erro ao carregar produtos.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
-  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImageEdit(file);
-      setImagePreviewEdit(URL.createObjectURL(file));
     }
   };
 
-  const handleClickOpen = async (product) => {
-    setSelectedProduct(product);
-    setOpen(true);
-    setIsEditing(true);
-
-    try {
-      const res = await api.get(`/products/${product.id}/image`, {
-        responseType: "blob",
-      });
-      const objectUrl = URL.createObjectURL(res.data);
-      setImagePreviewEdit(objectUrl);
-    } catch (err) {
-      setSnackbarMessage('Erro ao carregar a imagem do produto');
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
-      setImagePreviewEdit(null);
-    }
+  const handleClickOpen = (product) => {
+    openModal(product);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedProduct(null);
-    setIsEditing(false);
-  };
-
-  const handleDetailOpen = async (id) => {
-    try {
-      const response = await api.get(`/products/${id}`);
-      setDetailedProduct(response.data);
-      setDetailDialogOpen(true);
-    } catch (error) {
-      setSnackbarMessage("Erro ao carregar detalhes do produto.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
+  const handleDetailOpen = (id) => {
+    openDetailDialog(id);
   };
 
   const handleDelete = async (ids) => {
@@ -145,72 +94,19 @@ const Products = () => {
       confirmButtonText: "Sim, deletar!",
       cancelButtonText: "Cancelar",
     });
+
     if (confirmDelete.isConfirmed) {
-      try {
-        await api.delete(`/products/${ids[0]}`);
-        setRows(rows.filter((row) => !ids.includes(row.id)));
-        setSnackbarMessage("Produto deletado com sucesso!");
-        setSnackbarSeverity("success");
-      } catch (error) {
-        console.log(error);
-        setSnackbarMessage(
-          `Erro ao deletar o produto: ${error.response?.data?.message || error.response?.data?.error || error.message}`
-        );
-        setSnackbarSeverity("error");
-      } finally {
-        setSnackbarOpen(true);
-      }
+      await deleteProduct(ids);
     }
   };
 
   const handleSave = async () => {
-    try {
-      const productToSave = {
-        ...selectedProduct,
-        price: selectedProduct.unitPrice,
-      };
-
-      if (isEditing) {
-        if (imageEdit) {
-          const formData = new FormData();
-          formData.append("file", imageEdit);
-
-          await api.patch(`/products/${selectedProduct.id}/image`, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
-        }
-
-        await api.patch(`/products/${selectedProduct.id}`, productToSave);
-        setRows(
-          rows.map((row) =>
-            row.id === selectedProduct.id ? productToSave : row
-          )
-        );
-
-        setSnackbarMessage("Produto atualizado com sucesso!");
-      } else {
-        const newProduct = { id: rows.length + 1, ...productToSave };
-        await api.post("/products", newProduct);
-        setRows([...rows, newProduct]);
-        setSnackbarMessage("Produto adicionado com sucesso!");
-      }
-      setSnackbarSeverity("success");
-    } catch (error) {
-      setSnackbarMessage(
-        `Erro ao salvar o produto: ${error.response?.data?.message || error.response?.data?.error || error.message}`
-      );
-      setSnackbarSeverity("error");
-    } finally {
-      handleClose();
-      setSnackbarOpen(true);
-    }
+    await saveProduct();
   };
 
   const handleRefresh = () => {
     fetchProducts(pagination.page, pagination.pageSize);
-    setSnackbarMessage("Lista de produtos atualizada!");
-    setSnackbarSeverity("info");
-    setSnackbarOpen(true);
+    showSnackbar("Lista de produtos atualizada!", "info");
   };
 
   const columns = [
@@ -414,10 +310,10 @@ const Products = () => {
           },
         }}
         open={open}
-        onClose={handleClose}
+        onClose={closeModal}
       >
         <DialogTitle>
-          {isEditing ? "Editar Produto" : "Adicionar Produto"}
+          Editar Produto 
         </DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={4} sx={{ mt: 2 }}>
@@ -472,7 +368,7 @@ const Products = () => {
               fullWidth
               value={selectedProduct?.name || ""}
               onChange={(e) =>
-                setSelectedProduct({ ...selectedProduct, name: e.target.value })
+                useProductListStore.setState({ selectedProduct: { ...selectedProduct, name: e.target.value } })
               }
               InputProps={{ readOnly: true }}
             />
@@ -486,12 +382,12 @@ const Products = () => {
                   options={suppliers || []}
                   getOptionLabel={(option) => option.socialReason || ""}
                   value={suppliers?.filter((sup) =>
-                    (selectedProduct?.supplierIds || []).includes(sup.id)
-                  )}
+                    (selectedProduct?.supplierIds || []).includes(sup.id))
+                  }
                   onChange={(_, value) => {
                     const ids = value.map((v) => v.id);
                     field.onChange(ids);
-                    setSelectedProduct({ ...selectedProduct, supplierIds: ids });
+                    useProductListStore.setState({ selectedProduct: { ...selectedProduct, supplierIds: ids } });
                   }}
                   renderInput={(params) => (
                     <TextField {...params} label="Fornecedores" />
@@ -513,10 +409,7 @@ const Products = () => {
                   onChange={(_, value) => {
                     const categoryId = value?.id || null;
                     field.onChange(categoryId)
-                    setSelectedProduct(prev => ({
-                      ...prev,
-                      categoryId,
-                    }));
+                    useProductListStore.setState({ selectedProduct: { ...selectedProduct, categoryId } });
                   }}
                   renderInput={(params) => (
                     <TextField {...params} label="Categoria" />
@@ -530,10 +423,7 @@ const Products = () => {
               fullWidth
               value={selectedProduct?.description || ""}
               onChange={(e) =>
-                setSelectedProduct({
-                  ...selectedProduct,
-                  description: e.target.value,
-                })
+                useProductListStore.setState({ selectedProduct: { ...selectedProduct, description: e.target.value } })
               }
             />
 
@@ -543,9 +433,11 @@ const Products = () => {
               type="number"
               value={selectedProduct?.unitPrice || ""}
               onChange={(e) =>
-                setSelectedProduct({
-                  ...selectedProduct,
-                  unitPrice: parseFloat(e.target.value),
+                useProductListStore.setState({
+                  selectedProduct: {
+                    ...selectedProduct,
+                    unitPrice: parseFloat(e.target.value)
+                  }
                 })
               }
             />
@@ -561,9 +453,11 @@ const Products = () => {
                   : ""
               }
               onChange={(e) =>
-                setSelectedProduct({
-                  ...selectedProduct,
-                  expirationDate: e.target.value,
+                useProductListStore.setState({
+                  selectedProduct: {
+                    ...selectedProduct,
+                    expirationDate: e.target.value
+                  }
                 })
               }
               InputLabelProps={{
@@ -573,14 +467,14 @@ const Products = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary">Cancelar</Button>
+          <Button onClick={closeModal} color="secondary">Cancelar</Button>
           <Button onClick={handleSave} color="primary">Confirmar</Button>
         </DialogActions>
       </Dialog>
 
       <Dialog
         open={detailDialogOpen}
-        onClose={() => setDetailDialogOpen(false)}
+        onClose={closeDetailDialog}
         sx={{ p: 20 }}
       >
         <DialogTitle textAlign="center">Detalhes do Produto</DialogTitle>
@@ -674,21 +568,21 @@ const Products = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDetailDialogOpen(false)}>Fechar</Button>
+          <Button onClick={closeDetailDialog}>Fechar</Button>
         </DialogActions>
       </Dialog>
 
       <Snackbar
-        open={snackbarOpen}
+        open={snackbar.open}
         autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
+        onClose={closeSnackbar}
       >
         <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
+          onClose={closeSnackbar}
+          severity={snackbar.severity}
           sx={{ width: "100%" }}
         >
-          {snackbarMessage}
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </div>
