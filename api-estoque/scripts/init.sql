@@ -7,6 +7,8 @@ GO
 USE estoque;
 GO
 
+-- Triggers
+
 IF NOT EXISTS (
     SELECT * FROM sys.triggers WHERE name = 'set_default_status_after_receiving_insert'
 )
@@ -45,6 +47,7 @@ BEGIN
 END;
 GO
 
+-- Procedures
 
 CREATE OR ALTER PROCEDURE UpdateReceivementStatus
     @id NVARCHAR(50),
@@ -134,6 +137,42 @@ BEGIN
 END;
 GO
 
+-- Views 
+
+CREATE VIEW v_produtos_fat AS  
+    SELECT  
+        MAX(p.id) AS id_produto,   
+        p.name AS nome_produto,  
+        MAX(e.name) AS nome_categoria,  
+        SUM(i.quantity) AS quantidade_estoque,  
+        MAX(p.unit_price) AS preco_unitario,  
+        SUM(i.quantity * (p.unit_price - i.discount)) AS valor_faturamento,  
+        ex.exit_date AS data_saida  
+    FROM exits ex  
+    INNER JOIN products p ON p.id = ex.product_id  
+    INNER JOIN inventory i ON i.product_id = ex.product_id  
+    INNER JOIN categories e ON e.id = p.category_id  
+    GROUP BY p.name, ex.exit_date;  
+GO 
+
+CREATE VIEW v_movimentacao_est AS  
+    SELECT  
+        p.id AS id_produto,  
+        p.name AS nome_produto,  
+        e.name AS nome_categoria,  
+        SUM(i.quantity) AS quantidade_estoque,  
+        MAX(p.unit_price) AS preco_unitario,  
+        SUM(i.quantity * (p.unit_price - i.discount)) AS valor_faturamento, 
+        AVG(DATEDIFF(DAY, rc.receiving_date, ex.exit_date)) AS media_dias_para_saida FROM exits ex  
+    INNER JOIN products p ON p.id = ex.product_id  
+    INNER JOIN inventory i ON i.product_id = p.id  
+    INNER JOIN categories e ON e.id = p.category_id  
+    INNER JOIN receivings rc ON rc.product_id = p.id  
+    GROUP BY p.id, p.name, e.name; 
+GO 
+
+-- Inserts 
+
 INSERT INTO [dbo].[categories] ([id], [created_at], [created_by], [last_modified_by], [name], [updated_at])
 VALUES 
 ('cat001', GETDATE(), 'admin', 'admin', 'Smartphones', NULL),
@@ -189,6 +228,9 @@ VALUES
 ('sup023', '23023000', '34567890000123', 'PHONE', 'Rodrigo Pires', GETDATE(), 'admin', 'rodrigo@apextech.com', 'admin', '11977776664', 'ApexTech Corp', 'ACTIVE', NULL, 'www.apextech.com.br'),
 ('sup024', '24024000', '45678901000124', 'SMS', 'Mariana Costa', GETDATE(), 'admin', 'mariana@vertex.com', NULL, '11966665553', 'Vertex Technologies', 'ACTIVE', GETDATE(), 'www.vertex.com'),
 ('sup025', '25025000', '56789012000125', 'ANY', 'Leonardo Moura', GETDATE(), 'admin', 'leonardo@zenith.com', 'admin', '11955554442', 'Zenith Electronics', 'ACTIVE', NULL, 'www.zenith.com.br');
+
+
+-- Os inserts de usuário são feitos pelo spring boot 
 
 -- INSERT INTO [dbo].[users] ([id], [created_at], [email], [face_image], [password], [role], [status], [updated_at], [username])
 -- VALUES 
@@ -446,14 +488,6 @@ VALUES
 ('inv027', 'rec014'),
 ('inv031', 'rec015');
 
-UPDATE i
-SET i.quantity = i.quantity + r.quantity,
-    i.receivement_quantity = i.receivement_quantity + r.quantity,
-    i.updated_at = GETDATE()
-FROM [dbo].[inventory] i
-INNER JOIN [dbo].[receivings] r ON i.product_id = r.product_id
-WHERE r.id IN ('rec001', 'rec002', 'rec003', 'rec005', 'rec006', 'rec007', 'rec009', 'rec010', 'rec011', 'rec013', 'rec014', 'rec015');
-
 INSERT INTO [dbo].[exits] ([id], [created_at], [created_by], [exit_date], [inventory_code], [last_modified_by], [quantity], [exit_status], [updated_at], [product_id])
 VALUES 
 ('exit001', GETDATE(), 'vendas', GETDATE(), 'INV-SMGS23-001', 'faturamento', 3, 'COMPLETED', GETDATE(), 'prod001'),
@@ -491,11 +525,3 @@ VALUES
 ('inv041', 'exit014'),
 ('inv046', 'exit015'),
 ('inv029', 'exit016');
-
-UPDATE i
-SET i.quantity = i.quantity - e.quantity,
-    i.exit_quantity = i.exit_quantity + e.quantity,
-    i.updated_at = GETDATE()
-FROM [dbo].[inventory] i
-INNER JOIN [dbo].[exits] e ON i.product_id = e.product_id
-WHERE e.id IN ('exit001', 'exit002', 'exit003', 'exit004', 'exit007', 'exit008', 'exit009', 'exit010', 'exit011', 'exit012', 'exit013', 'exit014', 'exit015', 'exit016');
