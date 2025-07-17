@@ -436,8 +436,10 @@ const ProductForm = ({ onProductAdded }) => {
       </Paper>
 
       <Dialog open={openModal} onClose={closeCameraModal}>
-        <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>Escanear QR Code</DialogTitle>
-        <Divider />
+        <DialogTitle sx={{ textAlign: "center", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
+          <QRCodeIcon />
+          Escanear QR Code
+        </DialogTitle>        <Divider />
         <Box sx={{ padding: 4, textAlign: 'center' }}>
           {isScanning && (
             <QrScanner

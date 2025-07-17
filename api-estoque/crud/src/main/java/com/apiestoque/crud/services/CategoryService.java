@@ -82,7 +82,7 @@ public class CategoryService {
 
     public ProductDetailedResponseDTO delete(String id) {
         categoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
 
         if (!productRepository.findByCategoryId(id).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

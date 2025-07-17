@@ -78,11 +78,10 @@ public class ProductService {
                 suppliers,
                 data.expirationDate());
 
-       
         try {
             String imagePath = fileStorageService.save(data.file(), "produtos");
             newProduct.setImagePath(imagePath);
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem.", e);
         }
 
@@ -107,6 +106,13 @@ public class ProductService {
 
         if (data.name() != null) {
             product.setName(data.name());
+        }
+
+        if (data.categoryId() != null) {
+            Category category = categoryRepository.findById(data.categoryId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
+
+            product.setCategory(category);
         }
 
         if (data.description() != null) {
@@ -146,10 +152,22 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
 
-        try {
-            String fileName = Paths.get(product.getImagePath()).getFileName().toString();
+        String imagePath = product.getImagePath();
+        if (imagePath == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "O produto não possui imagem.");
+        }
 
-            return fileStorageService.load(fileName, "produtos");
+        try {
+            String fileName = Paths.get(imagePath).getFileName().toString();
+            Resource resource = fileStorageService.load(fileName, "produtos");
+
+            if (resource == null || !resource.exists()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Imagem do produto não encontrada.");
+            }
+
+            return resource;
+        } catch (ResponseStatusException ex) {
+            throw ex;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao obter a imagem.", e);
         }
