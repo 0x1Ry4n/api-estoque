@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -11,21 +11,27 @@ import {
 } from "@mui/material";
 import { Edit as EditIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
-import { fileExporters } from "../../../../utils/utils";
 import Swal from "sweetalert2";
-import api from "../../../../api";
+import { fileExporters } from "../../../../utils/utils";
+import { useUserListStore } from "./stores/useUserListStore";
 
 const UserList = () => {
+  const {
+    rows,
+    snackbar,
+    fetchUsers,
+    saveUser,
+    saveStatus,
+    savePassword,
+    showSnackbar,
+    closeSnackbar,
+  } = useUserListStore();
+
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [rows, setRows] = useState([]);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   const userStatusMap = {
     ACTIVE: "Ativo",
@@ -36,32 +42,12 @@ const UserList = () => {
     fetchUsers();
   }, []);
 
-  const fetchUsers = async () => {
-    try {
-      const res = await api.get(`/auth/users`);
-      const formattedUsers = res.data.map((user) => ({
-        ...user,
-        role: user.role === "ADMIN" ? "Administrador" : "Usuário Comum",
-        status: user.status === "ACTIVE" ? "Ativo" : "Inativo",
-      }));
-
-      setRows(formattedUsers);
-    } catch (error) {
-      setSnackbarMessage(
-        `Erro ao carregar os usuários: ${error.response?.data?.message}`
-      );
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
-  };
-
   const handleClickOpen = (user) => {
     setSelectedUser(user);
     setUsername(user.username);
     setEmail(user.email);
-    setPassword(user.password);
-    setOpen(true);
     setIsEditing(true);
+    setOpen(true);
   };
 
   const handleClose = () => {
@@ -70,34 +56,13 @@ const UserList = () => {
     setIsEditing(false);
     setUsername("");
     setEmail("");
-    setPassword("");
   };
 
   const handleSave = async () => {
-    const updatedUserData = {
+    await saveUser(selectedUser.id, {
       username,
       email,
-      password,
-    };
-
-    try {
-      await api.put(`/auth/users/${selectedUser.id}`, updatedUserData);
-      setRows(
-        rows.map((row) =>
-          row.id === selectedUser.id ? { ...row, username, email } : row
-        )
-      );
-      setSnackbarMessage("Usuário atualizado com sucesso!");
-      setSnackbarSeverity("success");
-    } catch (error) {
-      setSnackbarMessage(
-        `Erro ao salvar o usuário: ${error.response?.data?.message || error.response?.data?.error || error.message}`
-      );
-      setSnackbarSeverity("error");
-    } finally {
-      setSnackbarOpen(true);
-      handleClose();
-    }
+    });
   };
 
   const handleStatusChange = async (id) => {
@@ -109,27 +74,11 @@ const UserList = () => {
       showCancelButton: true,
       confirmButtonText: "Editar",
       cancelButtonText: "Cancelar",
-      inputValidator: (value) => {
-        if (!value) {
-          return "Você precisa selecionar um status!";
-        }
-      },
+      inputValidator: (value) => (!value ? "Você precisa selecionar um status!" : undefined),
     });
 
     if (status) {
-      try {
-        await api.patch(`/auth/users/${id}/status`, { status: status });
-        setSnackbarMessage("Status atualizado com sucesso!");
-        setSnackbarSeverity("success");
-        fetchUsers();
-      } catch (error) {
-        setSnackbarMessage(
-          `Erro ao atualizar o status: ${error.response?.data?.message || error.response?.data?.error || error.message}`
-        );
-        setSnackbarSeverity("error");
-      } finally {
-        setSnackbarOpen(true);
-      }
+      await saveStatus(id, { status });
     }
   };
 
@@ -146,36 +95,17 @@ const UserList = () => {
       showCancelButton: true,
       confirmButtonText: "Salvar",
       cancelButtonText: "Cancelar",
-      inputValidator: (value) => {
-        if (!value) {
-          return "Você precisa digitar uma senha!";
-        }
-      },
+      inputValidator: (value) => (!value ? "Você precisa digitar uma senha!" : undefined),
     });
 
     if (password) {
-      try {
-        await api.patch(`/auth/users/${id}/password`, { password });
-
-        setSnackbarMessage("Senha alterada com sucesso!");
-        setSnackbarSeverity("success");
-        fetchUsers();
-      } catch (error) {
-        setSnackbarMessage(
-          `Erro ao alterar a senha: ${error.response?.data?.message || error.response?.data?.error || error.message}`
-        );
-        setSnackbarSeverity("error");
-      } finally {
-        setSnackbarOpen(true);
-      }
+      await savePassword(id, { password });
     }
   };
 
   const handleRefresh = () => {
     fetchUsers();
-    setSnackbarMessage("Lista de usuários atualizada!");
-    setSnackbarSeverity("info");
-    setSnackbarOpen(true);
+    showSnackbar("Lista de usuários atualizada!", "info");
   };
 
   const columns = [
@@ -188,10 +118,10 @@ const UserList = () => {
       field: "actions",
       headerName: "Ações",
       width: 200,
-      renderCell: (cellData) => (
+      renderCell: (params) => (
         <>
           <Button
-            onClick={() => handleStatusChange(cellData.row.id)}
+            onClick={() => handleStatusChange(params.row.id)}
             variant="outlined"
             size="small"
             color="primary"
@@ -200,7 +130,7 @@ const UserList = () => {
             Status
           </Button>
           <Button
-            onClick={() => handlePasswordChange(cellData.row.id)}
+            onClick={() => handlePasswordChange(params.row.id)}
             variant="outlined"
             size="small"
             color="primary"
@@ -208,7 +138,7 @@ const UserList = () => {
           >
             Senha
           </Button>
-          <Button onClick={() => handleClickOpen(cellData.row)}>
+          <Button onClick={() => handleClickOpen(params.row)}>
             <EditIcon />
           </Button>
         </>
@@ -217,43 +147,20 @@ const UserList = () => {
   ];
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        backgroundColor: "#f5f5f5",
-        borderRadius: "8px",
-        width: "95%",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "12px",
-          marginBottom: "16px",
-        }}
-      >
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={handleRefresh}
-        >
+    <div style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "8px", width: "95%" }}>
+      <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={handleRefresh}>
           Atualizar Lista
         </Button>
         <Button
           variant="contained"
           color="primary"
-          onClick={() =>
-            fileExporters.exportToExcel(
-              "Usuários",
-              "usuarios.xlsx",
-              rows
-            )
-          }
+          onClick={() => fileExporters.exportToExcel("Usuários", "usuarios.xlsx", rows)}
         >
           Exportar Excel
         </Button>
       </div>
+
       <div
         style={{
           height: 400,
@@ -261,7 +168,6 @@ const UserList = () => {
           backgroundColor: "white",
           borderRadius: "8px",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-          overflow: "hidden",
         }}
       >
         <DataGrid
@@ -272,9 +178,7 @@ const UserList = () => {
       </div>
 
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>
-          {isEditing ? "Editar Usuário" : "Adicionar Usuário"}
-        </DialogTitle>
+        <DialogTitle>Editar Usuário</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -295,39 +199,20 @@ const UserList = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-
-          {/* <TextField
-            margin="dense"
-            label="Senha"
-            type={showPassword ? "text" : "password"}
-            fullWidth
-            variant="outlined"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            InputProps={{
-              endAdornment: (
-                <Button onClick={() => setShowPassword(!showPassword)}>{showPassword ? <VisibilityOff /> : <Visibility />}</Button>
-              )
-            }}
-          /> */}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary">Cancelar</Button>
-          <Button onClick={handleSave} color="primary">Confirmar</Button>
+          <Button onClick={handleClose} color="secondary">
+            Cancelar
+          </Button>
+          <Button onClick={handleSave} color="primary">
+            Confirmar
+          </Button>
         </DialogActions>
       </Dialog>
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={closeSnackbar}>
+        <Alert onClose={closeSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </div>

@@ -13,7 +13,11 @@ import {
   Avatar,
   Badge,
   Box,
-  Typography
+  Grid,
+  Divider,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -22,6 +26,7 @@ import {
   Refresh as RefreshIcon,
   PhotoCamera as PhotoCameraIcon,
   Category as CategoryIcon,
+  Close as CloseIcon
 } from "@mui/icons-material";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { Controller, useForm } from "react-hook-form";
@@ -39,6 +44,9 @@ const Products = () => {
     formState: { errors },
   } = useForm();
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const {
     rows,
     pagination,
@@ -48,7 +56,6 @@ const Products = () => {
     detailedProduct,
     imagePreviewEdit,
     open,
-    isEditing,
     detailDialogOpen,
     snackbar,
     setPagination,
@@ -313,7 +320,7 @@ const Products = () => {
         onClose={closeModal}
       >
         <DialogTitle>
-          Editar Produto 
+          Editar Produto
         </DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={4} sx={{ mt: 2 }}>
@@ -475,101 +482,100 @@ const Products = () => {
       <Dialog
         open={detailDialogOpen}
         onClose={closeDetailDialog}
-        sx={{ p: 20 }}
+        fullWidth
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            p: isMobile ? 2 : 4,
+            borderRadius: 3,
+          },
+        }}
       >
-        <DialogTitle textAlign="center">Detalhes do Produto</DialogTitle>
-        <DialogContent sx={{ p: 10 }}>
-          {detailedProduct && (
-            <div>
-              <p>
-                <strong>ID:</strong> {detailedProduct.id}
-              </p>
-              <p>
-                <strong>Nome:</strong> {detailedProduct.name}
-              </p>
-              <p>
-                <strong>Descrição:</strong> {detailedProduct.description}
-              </p>
-              <p>
-                <strong>Quantidade:</strong> {detailedProduct.stockQuantity}
-              </p>
-              <p>
-                <strong>Preço unitário:</strong>{" "}
-                {detailedProduct.unitPrice.toFixed(2)} BRL
-              </p>
-              <p>
-                <strong>Valor Total:</strong>{" "}
-                {(
-                  detailedProduct.unitPrice * detailedProduct.stockQuantity
-                ).toFixed(2)}{" "}
-                BRL
-              </p>
-              <p>
-                <strong>Data de Expiração:</strong>{" "}
-                {detailedProduct.expirationDate}
-              </p>
-              <p>
-                <strong>Categoria:</strong> {detailedProduct.category?.name}
-              </p>
-              <hr />
-              <h3>Inventário</h3>
-              {detailedProduct.inventory.map((item) => (
-                <div key={item.id}>
-                  <p>
-                    <strong>ID do Item:</strong> {item.id}
-                  </p>
-                  <p>
-                    <strong>Localização:</strong> {item.location}
-                  </p>
-                  <p>
-                    <strong>Quantidade:</strong> {item.quantity}
-                  </p>
-                  <p>
-                    <strong>Quantidade (recebimento):</strong>{" "}
-                    {item.receivementQuantity}
-                  </p>
-                  <p>
-                    <strong>Quantidade (saída):</strong> {item.exitQuantity}
-                  </p>
-                  <p>
-                    <strong>Preço Unitário:</strong> {item.unitPrice.toFixed(2)}{" "}
-                    BRL
-                  </p>
-                  <p>
-                    <strong>Desconto:</strong> {item.discount} BRL
-                  </p>
-                </div>
-              ))}
-              <hr />
+        <DialogTitle>
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Typography variant="h5" margin="auto" fontWeight="bolder">
+              Detalhes do Produto
+            </Typography>
+            <IconButton onClick={closeDetailDialog}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
 
-              <h3>Fornecedores</h3>
-              {detailedProduct.suppliers.map((supplier) => (
-                <div key={supplier.id}>
-                  <p>
-                    <strong>ID do Fornecedor:</strong> {supplier.id}
-                  </p>
-                  <p>
-                    <strong>Nome:</strong> {supplier.socialReason}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {supplier.email}
-                  </p>
-                  <p>
-                    <strong>Telefone:</strong> {supplier.phone}
-                  </p>
-                  <p>
-                    <strong>Data de Criação:</strong>{" "}
-                    {new Date(supplier.createdAt).toLocaleString()}
-                  </p>
-                  <hr />
-                </div>
-              ))}
-            </div>
+        <DialogContent dividers>
+          {detailedProduct && (
+            <Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography><strong>ID:</strong> {detailedProduct.id}</Typography>
+                  <Typography><strong>Nome:</strong> {detailedProduct.name}</Typography>
+                  <Typography><strong>Descrição:</strong> {detailedProduct.description}</Typography>
+                  <Typography><strong>Quantidade:</strong> {detailedProduct.stockQuantity}</Typography>
+                  <Typography>
+                    <strong>Preço Unitário:</strong> {detailedProduct.unitPrice.toFixed(2)} BRL
+                  </Typography>
+                  <Typography>
+                    <strong>Valor Total:</strong>{" "}
+                    {(detailedProduct.unitPrice * detailedProduct.stockQuantity).toFixed(2)} BRL
+                  </Typography>
+                  <Typography><strong>Data de Expiração:</strong> {detailedProduct.expirationDate}</Typography>
+                  <Typography><strong>Categoria:</strong> {detailedProduct.category?.name}</Typography>
+                </Grid>
+              </Grid>
+
+              <Divider sx={{ my: 3 }} />
+
+              <Typography variant="h6">Inventário</Typography>
+              <Grid container spacing={2}>
+                {detailedProduct.inventory.map((item) => (
+                  <Grid item xs={12} sm={6} md={4} key={item.id}>
+                    <Box
+                      p={2}
+                      border="1px solid #ddd"
+                      borderRadius={2}
+                      boxShadow={1}
+                      sx={{ height: "100%" }}
+                    >
+                      <Typography><strong>ID:</strong> {item.id}</Typography>
+                      <Typography><strong>Localização:</strong> {item.location}</Typography>
+                      <Typography><strong>Quantidade:</strong> {item.quantity}</Typography>
+                      <Typography><strong>Recebimento:</strong> {item.receivementQuantity}</Typography>
+                      <Typography><strong>Saída:</strong> {item.exitQuantity}</Typography>
+                      <Typography><strong>Preço:</strong> {item.unitPrice.toFixed(2)} BRL</Typography>
+                      <Typography><strong>Desconto:</strong> {item.discount} BRL</Typography>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+
+              <Divider sx={{ my: 3 }} />
+
+              <Typography variant="h6">Fornecedores</Typography>
+              <Grid container spacing={2}>
+                {detailedProduct.suppliers.map((supplier) => (
+                  <Grid item xs={12} sm={6} md={4} key={supplier.id}>
+                    <Box
+                      p={2}
+                      border="1px solid #ddd"
+                      borderRadius={2}
+                      boxShadow={1}
+                      sx={{ height: "100%" }}
+                    >
+                      <Typography><strong>ID:</strong> {supplier.id}</Typography>
+                      <Typography><strong>Nome:</strong> {supplier.socialReason}</Typography>
+                      <Typography><strong>Email:</strong> {supplier.email}</Typography>
+                      <Typography><strong>Telefone:</strong> {supplier.phone}</Typography>
+                      <Typography>
+                        <strong>Data de Criação:</strong>{" "}
+                        {new Date(supplier.createdAt).toLocaleString()}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={closeDetailDialog}>Fechar</Button>
-        </DialogActions>
       </Dialog>
 
       <Snackbar

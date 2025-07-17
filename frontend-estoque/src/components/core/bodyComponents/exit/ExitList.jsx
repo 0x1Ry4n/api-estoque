@@ -60,7 +60,7 @@ const ExitList = () => {
       cancelButtonText: "Cancelar",
     });
     if (confirmDelete.isConfirmed) {
-        await deleteExit(ids);
+      await deleteExit(ids);
     }
   };
 
@@ -171,47 +171,54 @@ const ExitList = () => {
       </Box>
 
       <Dialog
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            width: '700px',
+            maxWidth: '90vw',
+          },
+        }}
         open={open}
         onClose={closeModal}
-        maxWidth="md"
-        PaperProps={{ sx: { width: "700px", maxWidth: "90vw" } }}
       >
         <DialogTitle>Editar Saída</DialogTitle>
         <DialogContent>
-          <Box display="flex" flexDirection="column" gap={2} mt={2}>
-            <TextField
-              label="Quantidade"
-              type="number"
-              fullWidth
-              value={selectedExit?.quantity || ""}
-              onChange={(e) =>
-                useExitListStore.setState({
-                  selectedExit: {
-                    ...selectedExit,
-                    quantity: e.target.value,
-                  },
-                })
-              }
-            />
-            <TextField
-              label="Data de Saída"
-              type="date"
-              fullWidth
-              value={
-                selectedExit?.exitDate
-                  ? new Date(selectedExit.exitDate).toISOString().split("T")[0]
-                  : ""
-              }
-              onChange={(e) =>
-                useExitListStore.setState({
-                  selectedExit: {
-                    ...selectedExit,
-                    exitDate: e.target.value,
-                  },
-                })
-              }
-              InputLabelProps={{ shrink: true }}
-            />
+          <Box display="flex" flexDirection="column" gap={4} sx={{ mt: 2 }}>
+            <Box display="flex" flexDirection="column" alignItems="center" gap={3}>
+              <TextField
+                label="Quantidade"
+                type="number"
+                fullWidth
+                value={selectedExit?.quantity || ""}
+                onChange={(e) =>
+                  useExitListStore.setState({
+                    selectedExit: {
+                      ...selectedExit,
+                      quantity: e.target.value,
+                    },
+                  })
+                }
+              />
+              <TextField
+                label="Data de Saída"
+                type="date"
+                fullWidth
+                value={
+                  selectedExit?.exitDate
+                    ? new Date(selectedExit.exitDate).toISOString().split("T")[0]
+                    : ""
+                }
+                onChange={(e) =>
+                  useExitListStore.setState({
+                    selectedExit: {
+                      ...selectedExit,
+                      exitDate: e.target.value,
+                    },
+                  })
+                }
+                InputLabelProps={{ shrink: true }}
+              />
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions>

@@ -13,7 +13,7 @@ export const useReceivementListStore = create((set, get) => ({
     suppliers: [],
     selectedReceivement: null,
     open: false,
-    isEditing: false,
+    isEditing: true,
     snackbar: {
         open: false,
         message: "",
@@ -81,33 +81,20 @@ export const useReceivementListStore = create((set, get) => ({
     saveReceivement: async () => {
         const {
             selectedReceivement,
-            isEditing,
             pagination: { page, pageSize },
         } = get();
 
-        if (!selectedReceivement) return;
-
         try {
-            if (isEditing) {
-                await api.patch(`/receivements/${selectedReceivement.id}`, {
-                    description: selectedReceivement.description,
-                    quantity: selectedReceivement.quantity,
-                    supplierId: selectedReceivement.supplierId,
-                    productId: selectedReceivement.productId,
-                    status: selectedReceivement.status,
-                    receivingDate: selectedReceivement.receivingDate,
-                });
-                get().showSnackbar("Recebimento atualizado com sucesso!");
-            } else {
-                await api.post("/receivements", {
-                    description: selectedReceivement.description,
-                    quantity: selectedReceivement.quantity,
-                    supplierId: selectedReceivement.supplierId,
-                    productId: selectedReceivement.productId,
-                    receivingDate: selectedReceivement.receivingDate,
-                });
-                get().showSnackbar("Recebimento criado com sucesso!");
-            }
+            await api.patch(`/receivements/${selectedReceivement.id}`, {
+                description: selectedReceivement.description,
+                quantity: selectedReceivement.quantity,
+                supplierId: selectedReceivement.supplierId,
+                productId: selectedReceivement.productId,
+                status: selectedReceivement.status,
+                receivingDate: selectedReceivement.receivingDate,
+            });
+            get().showSnackbar("Recebimento atualizado com sucesso!");
+        
             await get().fetchReceivements(page, pageSize);
         } catch (error) {
             get().showSnackbar(

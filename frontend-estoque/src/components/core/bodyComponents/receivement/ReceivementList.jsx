@@ -30,7 +30,6 @@ const ReceivementList = () => {
     suppliers,
     selectedReceivement,
     snackbar,
-    isEditing,
     setPagination,
     showSnackbar,
     closeSnackbar,
@@ -41,6 +40,7 @@ const ReceivementList = () => {
     deleteReceivement,
     setSelectedReceivement,
     setOpen,
+    open,
     setEditing
   } = useReceivementListStore();
 

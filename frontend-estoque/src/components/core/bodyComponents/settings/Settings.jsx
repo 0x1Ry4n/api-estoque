@@ -28,12 +28,12 @@ const Settings = ({ onToggleTheme }) => {
   return (
     <Box
       sx={{
-        width: "90%",
+        width: isMobile ? "100%" : "90%",
         minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "flex-start",
-        px: 2,
+        px: isMobile ? 8 : 2,
         py: 4,
       }}
     >
