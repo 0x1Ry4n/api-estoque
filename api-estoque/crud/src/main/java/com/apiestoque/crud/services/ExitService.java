@@ -9,6 +9,10 @@ import com.apiestoque.crud.domain.product.Product;
 import com.apiestoque.crud.repositories.ExitRepository;
 import com.apiestoque.crud.repositories.InventoryRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -120,6 +124,13 @@ public class ExitService {
 
     public Page<ExitResponseDTO> getAll(Pageable pageable) {
         return exitRepository.findAll(pageable).map(ExitResponseDTO::new);
+    }
+
+    public List<ExitResponseDTO> getAll() {
+        return exitRepository.findAll()
+                .stream()
+                .map(ExitResponseDTO::new)
+                .collect(Collectors.toList());
     }
 
     @Transactional

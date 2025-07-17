@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -9,17 +9,30 @@ import {
   Snackbar,
   Alert,
   Autocomplete,
+  IconButton,
+  Avatar,
+  Badge,
+  Box,
+  Grid,
+  Divider,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   Visibility as VisibilityIcon,
   Refresh as RefreshIcon,
+  PhotoCamera as PhotoCameraIcon,
+  Category as CategoryIcon,
+  Close as CloseIcon
 } from "@mui/icons-material";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { Controller, useForm } from "react-hook-form";
 import { addDays, format } from "date-fns";
 import { fileExporters } from "../../../../utils/utils";
+import { useProductListStore } from "./stores/useProductListStore";
 import Swal from "sweetalert2";
 import api from "../../../../api";
 
@@ -30,80 +43,53 @@ const Products = () => {
     reset,
     formState: { errors },
   } = useForm();
-  const [open, setOpen] = useState(false);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [detailedProduct, setDetailedProduct] = useState(null);
-  const [rows, setRows] = useState([]);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [isEditing, setIsEditing] = useState(false);
-  const [pagination, setPagination] = useState({
-    page: 0,
-    pageSize: 20,
-    totalElements: 0,
-    totalPages: 0
-  })
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const {
+    rows,
+    pagination,
+    categories,
+    suppliers,
+    selectedProduct,
+    detailedProduct,
+    imagePreviewEdit,
+    open,
+    detailDialogOpen,
+    snackbar,
+    setPagination,
+    showSnackbar,
+    closeSnackbar,
+    setImageEdit,
+    fetchProducts,
+    fetchCategoriesAndSuppliers,
+    openModal,
+    closeModal,
+    openDetailDialog,
+    closeDetailDialog,
+    saveProduct,
+    deleteProduct
+  } = useProductListStore();
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const response = await api.get("/category");
-      setCategories(response.data.content);
-    };
-
-    const fetchSuppliers = async () => {
-      const response = await api.get("/supplier");
-      setSuppliers(response.data.content);
-    };
-
-    fetchCategories();
-    fetchSuppliers();
+    fetchCategoriesAndSuppliers();
     fetchProducts(pagination.page, pagination.pageSize);
   }, []);
 
-  const fetchProducts = async (page, pageSize) => {
-    try {
-      const res = await api.get(`/products?page=${page}&size=${pageSize}`);
-      setRows(res.data.content);
-      setPagination({
-        page: res.data.number,
-        pageSize: res.data.size,
-        totalElements: res.data.totalElements,
-        totalPages: res.data.totalPages
-      })
-    } catch (error) {
-      console.error("Erro ao buscar produtos: ", error);
-      setSnackbarMessage("Erro ao carregar produtos.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageEdit(file);
     }
   };
 
   const handleClickOpen = (product) => {
-    setSelectedProduct(product);
-    setOpen(true);
-    setIsEditing(true);
+    openModal(product);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedProduct(null);
-    setIsEditing(false);
-  };
-
-  const handleDetailOpen = async (id) => {
-    try {
-      const response = await api.get(`/products/${id}`);
-      setDetailedProduct(response.data);
-      setDetailDialogOpen(true);
-    } catch (error) {
-      setSnackbarMessage("Erro ao carregar detalhes do produto.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
+  const handleDetailOpen = (id) => {
+    openDetailDialog(id);
   };
 
   const handleDelete = async (ids) => {
@@ -115,66 +101,57 @@ const Products = () => {
       confirmButtonText: "Sim, deletar!",
       cancelButtonText: "Cancelar",
     });
+
     if (confirmDelete.isConfirmed) {
-      try {
-        await api.delete(`/products/${ids[0]}`);
-        setRows(rows.filter((row) => !ids.includes(row.id)));
-        setSnackbarMessage("Produto deletado com sucesso!");
-        setSnackbarSeverity("success");
-      } catch (error) {
-        console.log(error);
-        setSnackbarMessage(
-          `Erro ao deletar o produto: ${error.response?.data?.message || error.response?.data?.error || error.message}`
-        );
-        setSnackbarSeverity("error");
-      } finally {
-        setSnackbarOpen(true);
-      }
+      await deleteProduct(ids);
     }
   };
 
   const handleSave = async () => {
-    try {
-      const productToSave = {
-        ...selectedProduct,
-        price: selectedProduct.unitPrice,
-      };
-
-      if (isEditing) {
-        await api.patch(`/products/${selectedProduct.id}`, productToSave);
-        setRows(
-          rows.map((row) =>
-            row.id === selectedProduct.id ? productToSave : row
-          )
-        );
-        setSnackbarMessage("Produto atualizado com sucesso!");
-      } else {
-        const newProduct = { id: rows.length + 1, ...productToSave };
-        await api.post("/products", newProduct);
-        setRows([...rows, newProduct]);
-        setSnackbarMessage("Produto adicionado com sucesso!");
-      }
-      setSnackbarSeverity("success");
-    } catch (error) {
-      setSnackbarMessage(
-        `Erro ao salvar o produto: ${error.response?.data?.message || error.response?.data?.error || error.message}`
-      );
-      setSnackbarSeverity("error");
-    } finally {
-      handleClose();
-      setSnackbarOpen(true);
-    }
+    await saveProduct();
   };
 
   const handleRefresh = () => {
     fetchProducts(pagination.page, pagination.pageSize);
-    setSnackbarMessage("Lista de produtos atualizada!");
-    setSnackbarSeverity("info");
-    setSnackbarOpen(true);
+    showSnackbar("Lista de produtos atualizada!", "info");
   };
 
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
+    {
+      field: "image",
+      headerName: "Imagem",
+      width: 100,
+      renderCell: (params) => {
+        const { id, name } = params.row;
+
+        const ImageCell = () => {
+          const [imageUrl, setImageUrl] = useState(null);
+
+          useEffect(() => {
+            if (id) {
+              api
+                .get(`/products/${id}/image`, { responseType: "blob" })
+                .then((res) => {
+                  const objectUrl = URL.createObjectURL(res.data);
+                  setImageUrl(objectUrl);
+                })
+                .catch();
+            }
+          }, [id]);
+
+          return imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={name}
+              style={{ width: 50, height: 50, objectFit: "cover", borderRadius: 4 }}
+            />
+          ) : null;
+        };
+
+        return <ImageCell />;
+      }
+    },
     {
       field: "name",
       headerName: "Produto",
@@ -331,237 +308,287 @@ const Products = () => {
         />
       </div>
 
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            width: '700px',
+            maxWidth: '90vw',
+          },
+        }}
+        open={open}
+        onClose={closeModal}
+      >
         <DialogTitle>
-          {isEditing ? "Editar Produto" : "Adicionar Produto"}
+          Editar Produto
         </DialogTitle>
         <DialogContent>
-          <TextField
-            label="Nome do Produto"
-            fullWidth
-            margin="normal"
-            value={selectedProduct?.name || ""}
-            onChange={(e) =>
-              setSelectedProduct({ ...selectedProduct, name: e.target.value })
-            }
-            InputProps={{ readOnly: true }}
-            sx={{ mb: 3 }}
-          />
-          <Controller
-            name="suppliers"
-            control={control}
-            render={({ field }) => (
-              <Autocomplete
-                multiple
-                options={suppliers || []}
-                getOptionLabel={(option) => option.socialReason || ""}
-                value={suppliers?.filter((sup) =>
-                  selectedProduct?.supplierIds?.includes(sup.id)
-                )}
-                onChange={(_, value) => {
-                  const ids = value.map((v) => v.id);
-                  field.onChange(ids);
-                  setSelectedProduct({ ...selectedProduct, supplierIds: ids });
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} label="Fornecedores" />
-                )}
-                sx={{ mb: 3 }}
-              />
-            )}
-          />
-          <Controller
-            name="category"
-            control={control}
-            render={({ field }) => (
-              <Autocomplete
-                options={categories || []}
-                getOptionLabel={(option) => option.name || ""}
-                value={
-                  categories?.find(
-                    (cat) => cat.id === selectedProduct?.categoryId
-                  ) || null
+          <Box display="flex" flexDirection="column" gap={4} sx={{ mt: 2 }}>
+            <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
+              <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                badgeContent={
+                  <label htmlFor="upload-image2">
+                    <input
+                      accept="image/*"
+                      id="upload-image2"
+                      type="file"
+                      hidden
+                      onChange={handleImageChange}
+                    />
+                    <IconButton
+                      component="span"
+                      sx={{
+                        backgroundColor: 'white',
+                        boxShadow: 2,
+                        '&:hover': { backgroundColor: '#eee' },
+                      }}
+                    >
+                      <PhotoCameraIcon />
+                    </IconButton>
+                  </label>
                 }
-                onChange={(_, value) => {
-                  field.onChange(value ? value.id : "");
-                  setSelectedProduct({
+              >
+                <Avatar
+                  src={imagePreviewEdit}
+                  alt="Preview"
+                  sx={{
+                    width: 110,
+                    height: 110,
+                    boxShadow: 3,
+                    border: '2px solid #ccc',
+                    backgroundColor: '#f0f0f0',
+                  }}
+                >
+                  {!imagePreviewEdit && <CategoryIcon fontSize="large" sx={{ color: '#888' }} />}
+                </Avatar>
+              </Badge>
+
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                Clique no ícone para alterar a imagem
+              </Typography>
+            </Box>
+
+            <TextField
+              label="Nome do Produto"
+              fullWidth
+              value={selectedProduct?.name || ""}
+              onChange={(e) =>
+                useProductListStore.setState({ selectedProduct: { ...selectedProduct, name: e.target.value } })
+              }
+              InputProps={{ readOnly: true }}
+            />
+
+            <Controller
+              name="suppliers"
+              control={control}
+              render={({ field }) => (
+                <Autocomplete
+                  multiple
+                  options={suppliers || []}
+                  getOptionLabel={(option) => option.socialReason || ""}
+                  value={suppliers?.filter((sup) =>
+                    (selectedProduct?.supplierIds || []).includes(sup.id))
+                  }
+                  onChange={(_, value) => {
+                    const ids = value.map((v) => v.id);
+                    field.onChange(ids);
+                    useProductListStore.setState({ selectedProduct: { ...selectedProduct, supplierIds: ids } });
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Fornecedores" />
+                  )}
+                />
+              )}
+            />
+
+            <Controller
+              name="category"
+              control={control}
+              render={({ field }) => (
+                <Autocomplete
+                  options={categories}
+                  getOptionLabel={(option) => option.name || ""}
+                  value={
+                    categories.find(cat => cat.id === (field.value ?? selectedProduct?.categoryId)) || null
+                  }
+                  onChange={(_, value) => {
+                    const categoryId = value?.id || null;
+                    field.onChange(categoryId)
+                    useProductListStore.setState({ selectedProduct: { ...selectedProduct, categoryId } });
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Categoria" />
+                  )}
+                />
+              )}
+            />
+
+            <TextField
+              label="Descrição"
+              fullWidth
+              value={selectedProduct?.description || ""}
+              onChange={(e) =>
+                useProductListStore.setState({ selectedProduct: { ...selectedProduct, description: e.target.value } })
+              }
+            />
+
+            <TextField
+              label="Preço Unitário"
+              fullWidth
+              type="number"
+              value={selectedProduct?.unitPrice || ""}
+              onChange={(e) =>
+                useProductListStore.setState({
+                  selectedProduct: {
                     ...selectedProduct,
-                    categoryId: value?.id,
-                  });
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} label="Categoria" />
-                )}
-              />
-            )}
-            sx={{ mb: 3 }}
-          />
-          <TextField
-            label="Descrição"
-            fullWidth
-            margin="normal"
-            value={selectedProduct?.description || ""}
-            onChange={(e) =>
-              setSelectedProduct({
-                ...selectedProduct,
-                description: e.target.value,
-              })
-            }
-            sx={{ mb: 3 }}
-          />
-          <TextField
-            label="Preço Unitário"
-            fullWidth
-            type="number"
-            margin="normal"
-            value={selectedProduct?.unitPrice || ""}
-            onChange={(e) =>
-              setSelectedProduct({
-                ...selectedProduct,
-                unitPrice: parseFloat(e.target.value),
-              })
-            }
-            sx={{ mb: 3 }}
-          />
-          <TextField
-            label="Data de Expiração"
-            type="date"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={
-              selectedProduct?.expirationDate
-                ? selectedProduct.expirationDate.split("T")[0]
-                : ""
-            }
-            onChange={(e) =>
-              setSelectedProduct({
-                ...selectedProduct,
-                expirationDate: e.target.value,
-              })
-            }
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{ mb: 3 }}
-          />
+                    unitPrice: parseFloat(e.target.value)
+                  }
+                })
+              }
+            />
+
+            <TextField
+              label="Data de Expiração"
+              type="date"
+              variant="outlined"
+              fullWidth
+              value={
+                selectedProduct?.expirationDate
+                  ? selectedProduct.expirationDate.split("T")[0]
+                  : ""
+              }
+              onChange={(e) =>
+                useProductListStore.setState({
+                  selectedProduct: {
+                    ...selectedProduct,
+                    expirationDate: e.target.value
+                  }
+                })
+              }
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancelar</Button>
-          <Button onClick={handleSave}>Salvar</Button>
+          <Button onClick={closeModal} color="secondary">Cancelar</Button>
+          <Button onClick={handleSave} color="primary">Confirmar</Button>
         </DialogActions>
       </Dialog>
 
       <Dialog
         open={detailDialogOpen}
-        onClose={() => setDetailDialogOpen(false)}
+        onClose={closeDetailDialog}
+        fullWidth
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            p: isMobile ? 2 : 4,
+            borderRadius: 3,
+          },
+        }}
       >
-        <DialogTitle>Detalhes do Produto</DialogTitle>
-        <DialogContent>
-          {detailedProduct && (
-            <div>
-              <p>
-                <strong>ID:</strong> {detailedProduct.id}
-              </p>
-              <p>
-                <strong>Nome:</strong> {detailedProduct.name}
-              </p>
-              <p>
-                <strong>Descrição:</strong> {detailedProduct.description}
-              </p>
-              <p>
-                <strong>Quantidade:</strong> {detailedProduct.stockQuantity}
-              </p>
-              <p>
-                <strong>Preço unitário:</strong>{" "}
-                {detailedProduct.unitPrice.toFixed(2)} BRL
-              </p>
-              <p>
-                <strong>Valor Total:</strong>{" "}
-                {(
-                  detailedProduct.unitPrice * detailedProduct.stockQuantity
-                ).toFixed(2)}{" "}
-                BRL
-              </p>
-              <p>
-                <strong>Data de Expiração:</strong>{" "}
-                {detailedProduct.expirationDate}
-              </p>
-              <p>
-                <strong>Categoria:</strong> {detailedProduct.category?.name}
-              </p>
-              <hr />
-              <h3>Inventário</h3>
-              {detailedProduct.inventory.map((item) => (
-                <div key={item.id}>
-                  <p>
-                    <strong>ID do Item:</strong> {item.id}
-                  </p>
-                  <p>
-                    <strong>Localização:</strong> {item.location}
-                  </p>
-                  <p>
-                    <strong>Quantidade:</strong> {item.quantity}
-                  </p>
-                  <p>
-                    <strong>Quantidade (recebimento):</strong>{" "}
-                    {item.receivementQuantity}
-                  </p>
-                  <p>
-                    <strong>Quantidade (saída):</strong> {item.exitQuantity}
-                  </p>
-                  <p>
-                    <strong>Preço Unitário:</strong> {item.unitPrice.toFixed(2)}{" "}
-                    BRL
-                  </p>
-                  <p>
-                    <strong>Desconto:</strong> {item.discount} BRL
-                  </p>
-                  <hr />
-                </div>
-              ))}
+        <DialogTitle>
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Typography variant="h5" margin="auto" fontWeight="bolder">
+              Detalhes do Produto
+            </Typography>
+            <IconButton onClick={closeDetailDialog}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
 
-              <h3>Fornecedores</h3>
-              {detailedProduct.suppliers.map((supplier) => (
-                <div key={supplier.id}>
-                  <p>
-                    <strong>ID do Fornecedor:</strong> {supplier.id}
-                  </p>
-                  <p>
-                    <strong>Nome:</strong> {supplier.socialReason}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {supplier.email}
-                  </p>
-                  <p>
-                    <strong>Telefone:</strong> {supplier.phone}
-                  </p>
-                  <p>
-                    <strong>Data de Criação:</strong>{" "}
-                    {new Date(supplier.createdAt).toLocaleString()}
-                  </p>
-                  <hr />
-                </div>
-              ))}
-            </div>
+        <DialogContent dividers>
+          {detailedProduct && (
+            <Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography><strong>ID:</strong> {detailedProduct.id}</Typography>
+                  <Typography><strong>Nome:</strong> {detailedProduct.name}</Typography>
+                  <Typography><strong>Descrição:</strong> {detailedProduct.description}</Typography>
+                  <Typography><strong>Quantidade:</strong> {detailedProduct.stockQuantity}</Typography>
+                  <Typography>
+                    <strong>Preço Unitário:</strong> {detailedProduct.unitPrice.toFixed(2)} BRL
+                  </Typography>
+                  <Typography>
+                    <strong>Valor Total:</strong>{" "}
+                    {(detailedProduct.unitPrice * detailedProduct.stockQuantity).toFixed(2)} BRL
+                  </Typography>
+                  <Typography><strong>Data de Expiração:</strong> {detailedProduct.expirationDate}</Typography>
+                  <Typography><strong>Categoria:</strong> {detailedProduct.category?.name}</Typography>
+                </Grid>
+              </Grid>
+
+              <Divider sx={{ my: 3 }} />
+
+              <Typography variant="h6">Inventário</Typography>
+              <Grid container spacing={2}>
+                {detailedProduct.inventory.map((item) => (
+                  <Grid item xs={12} sm={6} md={4} key={item.id}>
+                    <Box
+                      p={2}
+                      border="1px solid #ddd"
+                      borderRadius={2}
+                      boxShadow={1}
+                      sx={{ height: "100%" }}
+                    >
+                      <Typography><strong>ID:</strong> {item.id}</Typography>
+                      <Typography><strong>Localização:</strong> {item.location}</Typography>
+                      <Typography><strong>Quantidade:</strong> {item.quantity}</Typography>
+                      <Typography><strong>Recebimento:</strong> {item.receivementQuantity}</Typography>
+                      <Typography><strong>Saída:</strong> {item.exitQuantity}</Typography>
+                      <Typography><strong>Preço:</strong> {item.unitPrice.toFixed(2)} BRL</Typography>
+                      <Typography><strong>Desconto:</strong> {item.discount} BRL</Typography>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+
+              <Divider sx={{ my: 3 }} />
+
+              <Typography variant="h6">Fornecedores</Typography>
+              <Grid container spacing={2}>
+                {detailedProduct.suppliers.map((supplier) => (
+                  <Grid item xs={12} sm={6} md={4} key={supplier.id}>
+                    <Box
+                      p={2}
+                      border="1px solid #ddd"
+                      borderRadius={2}
+                      boxShadow={1}
+                      sx={{ height: "100%" }}
+                    >
+                      <Typography><strong>ID:</strong> {supplier.id}</Typography>
+                      <Typography><strong>Nome:</strong> {supplier.socialReason}</Typography>
+                      <Typography><strong>Email:</strong> {supplier.email}</Typography>
+                      <Typography><strong>Telefone:</strong> {supplier.phone}</Typography>
+                      <Typography>
+                        <strong>Data de Criação:</strong>{" "}
+                        {new Date(supplier.createdAt).toLocaleString()}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDetailDialogOpen(false)}>Fechar</Button>
-        </DialogActions>
       </Dialog>
 
       <Snackbar
-        open={snackbarOpen}
+        open={snackbar.open}
         autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
+        onClose={closeSnackbar}
       >
         <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
+          onClose={closeSnackbar}
+          severity={snackbar.severity}
           sx={{ width: "100%" }}
         >
-          {snackbarMessage}
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </div>

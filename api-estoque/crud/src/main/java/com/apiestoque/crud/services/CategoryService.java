@@ -3,6 +3,7 @@ package com.apiestoque.crud.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -53,12 +54,16 @@ public class CategoryService {
     }
 
     public Page<CategoryResponseDTO> getAll(Pageable pageable) {
-        Page<CategoryResponseDTO> categoryPage = categoryRepository.findAll(pageable)
+        return categoryRepository.findAll(pageable)
                 .map(CategoryResponseDTO::new);
-
-        return categoryPage;
     }
 
+    public List<CategoryResponseDTO> getAll() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(CategoryResponseDTO::new)
+                .collect(Collectors.toList());
+    }
 
     public CategoryResponseDTO getById(String id) {
         Category category = categoryRepository.findById(id)
@@ -66,7 +71,6 @@ public class CategoryService {
 
         return new CategoryResponseDTO(category);
     }
-
 
     public List<CategoryResponseDTO> getByName(String name) {
         List<CategoryResponseDTO> categoryList = categoryRepository.findByName(name).stream()
@@ -78,10 +82,11 @@ public class CategoryService {
 
     public ProductDetailedResponseDTO delete(String id) {
         categoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
 
         if (!productRepository.findByCategoryId(id).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A categoria possuí produtos associados e não pode ser excluída!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "A categoria possuí produtos associados e não pode ser excluída!");
         }
 
         this.categoryRepository.deleteById(id);

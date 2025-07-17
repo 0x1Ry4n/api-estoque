@@ -17,7 +17,7 @@ import {
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import { fileExporters } from "../../../../utils/utils";
-import { useCategoryStore } from "./stores/useCategoryStore";
+import { useCategoryListStore } from "./stores/useCategoryListStore";
 
 const Categories = () => {
   const {
@@ -29,14 +29,13 @@ const Categories = () => {
     showSnackbar,
     closeSnackbar,
     open,
-    isEditing,
     selectedCategory,
     openModal,
     closeModal,
     updateCategoryField,
     saveCategory,
     deleteCategory,
-  } = useCategoryStore();
+  } = useCategoryListStore();
 
    useEffect(() => {
       fetchCategories(pagination.page, pagination.pageSize);
@@ -53,7 +52,7 @@ const Categories = () => {
     });
 
     if (confirmDelete.isConfirmed) {
-      deleteCategory(ids[0]);
+      await deleteCategory(ids[0]);
     }
   };
 
@@ -119,8 +118,18 @@ const Categories = () => {
         />
       </div>
 
-      <Dialog open={open} onClose={closeModal}>
-        <DialogTitle>{isEditing ? "Editar Categoria" : "Adicionar Categoria"}</DialogTitle>
+      <Dialog 
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            width: '700px',
+            maxWidth: '90vw',
+          },
+        }}
+        open={open} 
+        onClose={closeModal}
+      >
+        <DialogTitle>Editar Categoria</DialogTitle>
         <DialogContent>
           <TextField
             label="Nome da Categoria"
@@ -131,10 +140,8 @@ const Categories = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeModal}>Cancelar</Button>
-          <Button onClick={saveCategory}>
-            {isEditing ? "Confirmar" : "Adicionar"}
-          </Button>
+          <Button onClick={closeModal} color="secondary">Cancelar</Button>
+          <Button onClick={saveCategory} color="primary">Confirmar</Button>
         </DialogActions>
       </Dialog>
 

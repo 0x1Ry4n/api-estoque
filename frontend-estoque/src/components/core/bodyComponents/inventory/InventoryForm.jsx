@@ -40,8 +40,8 @@ const InventoryForm = ({ onInventoryAdded }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/products');
-        setProducts(Array.isArray(response.data.content) ? response.data.content : []);
+        const response = await api.get('/products?paged=false');
+        setProducts(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         setSnackbarMessage('Erro ao carregar produtos: ' + (error.response?.data?.message || error.response?.data?.error || error.message));
         setSnackbarSeverity('error');
@@ -207,8 +207,11 @@ const InventoryForm = ({ onInventoryAdded }) => {
         </Box>
       </Paper>
 
-      <Dialog open={openModal} onClose={closeCameraModal} sx={{ backgroundColor: "#f5f5f5" }}>
-        <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>Escanear QR Code</DialogTitle>
+      <Dialog open={openModal} onClose={closeCameraModal}>
+        <DialogTitle sx={{ textAlign: "center", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
+          <QRCodeIcon />
+          Escanear QR Code
+        </DialogTitle>
         <Divider />
         <Box sx={{ padding: 4, textAlign: 'center' }}>
           {isScanning && (

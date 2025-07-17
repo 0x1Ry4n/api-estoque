@@ -3,11 +3,10 @@ package com.apiestoque.crud.controllers;
 import com.apiestoque.crud.controllers.base.CrudController;
 import com.apiestoque.crud.domain.exit.dto.ExitRequestDTO;
 import com.apiestoque.crud.domain.exit.dto.ExitResponseDTO;
-import com.apiestoque.crud.domain.exit.dto.ExitStatusUpdateDTO;     
+import com.apiestoque.crud.domain.exit.dto.ExitStatusUpdateDTO;
 import com.apiestoque.crud.services.ExitService;
-
 import jakarta.validation.Valid;
-
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,9 +37,9 @@ public class ExitController implements CrudController<String, ExitRequestDTO, Ex
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<ExitResponseDTO> updateStatus(
-        @PathVariable String id,
-        @RequestBody @Valid ExitStatusUpdateDTO statusUpdate) {
-        
+            @PathVariable String id,
+            @RequestBody @Valid ExitStatusUpdateDTO statusUpdate) {
+
         ExitResponseDTO updated = exitService.updateStatus(id, statusUpdate.status());
         return ResponseEntity.ok(updated);
     }
@@ -54,9 +53,18 @@ public class ExitController implements CrudController<String, ExitRequestDTO, Ex
 
     @Override
     @GetMapping
-    public ResponseEntity<Page<ExitResponseDTO>> getAll(Pageable pageable) {
-        Page<ExitResponseDTO> responsePage = exitService.getAll(pageable);
-        return ResponseEntity.ok(responsePage);
+    public ResponseEntity<?> getAll(
+            Pageable pageable,
+            @RequestParam(defaultValue = "true") boolean paged) {
+
+        if (paged) {
+            Page<ExitResponseDTO> page = exitService.getAll(pageable);
+            return ResponseEntity.ok(page);
+        } else {
+            List<ExitResponseDTO> list = exitService.getAll();
+            return ResponseEntity.ok(list);
+        }
+
     }
 
     @Override

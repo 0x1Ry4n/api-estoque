@@ -1,11 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
   Snackbar,
   Alert,
 } from "@mui/material";
@@ -15,66 +10,31 @@ import {
 } from "@mui/icons-material";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { fileExporters } from "../../../../utils/utils";
-import api from "../../../../api";
+import { useInventoryListStore } from "./stores/useInventoryListStore";
 import Swal from "sweetalert2";
 
 const Inventory = () => {
-  const [open, setOpen] = useState(false);
-  const [selectedInventory, setSelectedInventory] = useState(null);
-  const [rows, setRows] = useState([]);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [isEditing, setIsEditing] = useState(false);
-  const [products, setProducts] = useState([]);
-  const [pagination, setPagination] = useState({
-    page: 0,
-    pageSize: 20,
-    totalElements: 0,
-    totalPages: 0
-  })
+  const {
+    rows,
+    pagination,
+    setPagination,
+    fetchInventories,
+    fetchProducts,
+    deleteInventory,
+    snackbar,
+    showSnackbar,
+    closeSnackbar,
+    open,
+    isEditing,
+    selectedInventory,
+    openModal,
+    closeModal,
+  } = useInventoryListStore();
 
   useEffect(() => {
-    fetchInventory(pagination.page, pagination.pageSize);
+    fetchInventories(pagination.page, pagination.pageSize);
+    fetchProducts();
   }, []);
-
-  const fetchInventory = async (page, pageSize) => {
-    try {
-      const res = await api.get(`/products/inventory?page=${page}&size=${pageSize}`);
-      setRows(res.data.content);
-      setPagination({
-        page: res.data.number,
-        pageSize: res.data.size,
-        totalElements: res.data.totalElements,
-        totalPages: res.data.totalPages
-      })
-
-      await fetchProducts();
-    } catch (error) {
-      console.error("Erro ao buscar inventário: ", error);
-      setSnackbarMessage("Erro ao carregar inventário.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
-  };
-
-  const fetchProducts = async () => {
-    try {
-      const response = await api.get("/products");
-      setProducts(response.data.content);
-    } catch (error) {
-      console.error("Erro ao buscar produtos: ", error);
-      setSnackbarMessage("Erro ao carregar produtos.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedInventory(null);
-    setIsEditing(false);
-  };
 
   const handleDelete = async (inventory) => {
     const confirmDelete = await Swal.fire({
@@ -86,60 +46,13 @@ const Inventory = () => {
       cancelButtonText: "Cancelar",
     });
     if (confirmDelete.isConfirmed) {
-      try {
-        await api.delete(
-          `/products/${inventory[0].productId}/inventory/${inventory[0].id}`
-        );
-        setRows(rows.filter((row) => row.id !== inventory[0].id));
-        setSnackbarMessage("Item de inventário deletado com sucesso!");
-        setSnackbarSeverity("success");
-      } catch (error) {
-        setSnackbarMessage(
-          `Erro ao deletar o inventário: ${error.response?.data?.message || error.response?.data?.error || error.message}`
-        );
-        setSnackbarSeverity("error");
-      } finally {
-        setSnackbarOpen(true);
-      }
-    }
-  };
-
-  const handleSave = async () => {
-    const { productId, quantity, discount, location } = selectedInventory;
-
-    try {
-      if (isEditing) {
-        await api.patch(
-          `/products/${productId}/inventory/${selectedInventory.id}`,
-          { productId, quantity, discount, location }
-        );
-        setRows(
-          rows.map((row) =>
-            row.id === selectedInventory.id ? selectedInventory : row
-          )
-        );
-        setSnackbarMessage("Item de inventário atualizado com sucesso!");
-      } else {
-        const newInventory = { productId, quantity, discount, location };
-        const response = await api.post("/inventory", newInventory);
-        setRows([...rows, response.data.content]);
-        setSnackbarMessage("Item de inventário adicionado com sucesso!");
-      }
-      setSnackbarSeverity("success");
-    } catch (error) {
-      setSnackbarMessage(`Erro ao salvar o inventário: ${error.response?.data?.message || error.response?.data?.error || error.message}`);
-      setSnackbarSeverity("error");
-    } finally {
-      handleClose();
-      setSnackbarOpen(true);
+      await deleteInventory(inventory);
     }
   };
 
   const handleRefresh = () => {
-    fetchInventory();
-    setSnackbarMessage("Lista de inventário atualizada!");
-    setSnackbarSeverity("info");
-    setSnackbarOpen(true);
+    fetchInventories(pagination.page, pagination.pageSize);
+    showSnackbar("Lista de inventário atualizada!", "info");
   };
 
   const columns = [
@@ -150,7 +63,9 @@ const Inventory = () => {
       headerName: "Nome do Produto",
       width: 200,
       valueGetter: (params) => {
-        const product = products.find((p) => p.id === params.row.productId);
+        const product = useInventoryListStore.getState().products?.find(
+          (p) => p.id === params.row.productId
+        );
         return product ? product.name : "Desconhecido";
       },
     },
@@ -173,7 +88,9 @@ const Inventory = () => {
       headerName: "Preço Unitário",
       width: 150,
       valueGetter: (params) => {
-        const product = products.find((p) => p.id === params.row.productId);
+        const product = useInventoryListStore.getState().products?.find(
+          (p) => p.id === params.row.productId
+        );
         return product ? product.unitPrice.toFixed(2) : "0.00";
       },
     },
@@ -183,7 +100,9 @@ const Inventory = () => {
       headerName: "Valor Total (Lote)",
       width: 150,
       valueGetter: (params) => {
-        const product = products.find((p) => p.id === params.row.productId);
+        const product = useInventoryListStore.getState().products?.find(
+          (p) => p.id === params.row.productId
+        );
         const unitPrice = product ? product.unitPrice : 0;
         return (unitPrice * params.row.quantity).toFixed(2);
       },
@@ -193,168 +112,43 @@ const Inventory = () => {
       headerName: "Ações",
       width: 150,
       renderCell: (cellData) => (
-        <>
-          <Button onClick={() => handleDelete([cellData.row])}>
-            <DeleteIcon />
-          </Button>
-        </>
+        <Button onClick={() => handleDelete([cellData.row])}>
+          <DeleteIcon />
+        </Button>
       ),
     },
   ];
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        backgroundColor: "#f5f5f5",
-        borderRadius: "8px",
-        width: "95%",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "12px",
-          marginBottom: "16px",
-        }}
-      >
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={handleRefresh}
-        >
+    <div style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "8px", width: "95%" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "16px" }}>
+        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={handleRefresh}>
           Atualizar Lista
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() =>
-            fileExporters.exportToExcel("Inventários", "inventarios.xlsx", rows)
-          }
-        >
+        <Button variant="contained" color="primary" onClick={() => fileExporters.exportToExcel("Inventários", "inventarios.xlsx", rows)}>
           Exportar Excel
         </Button>
       </div>
-      <div
-        style={{
-          height: 400,
-          width: "100%",
-          backgroundColor: "white",
-          borderRadius: "8px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-          overflow: "hidden",
-        }}
-      >
+
+      <div style={{ height: 400, width: "100%", backgroundColor: "white", borderRadius: "8px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", overflow: "hidden" }}>
         <DataGrid
           rows={rows}
           columns={columns}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
           rowCount={pagination.totalElements}
           paginationMode="server"
-          paginationModel={{
-            page: pagination.page,
-            pageSize: pagination.pageSize,
-          }}
+          paginationModel={{ page: pagination.page, pageSize: pagination.pageSize }}
           onPaginationModelChange={({ page, pageSize }) => {
-            const newPagination = { ...pagination, page, pageSize };
-            setPagination(newPagination);
-            fetchInventory(page, pageSize);
+            setPagination({ ...pagination, page, pageSize });
+            fetchInventories(page, pageSize);
           }}
           pageSizeOptions={[20, 50, 100]}
         />
       </div>
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>
-          {isEditing
-            ? "Editar Item de Inventário"
-            : "Adicionar Item de Inventário"}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Produto ID"
-            fullWidth
-            margin="normal"
-            value={selectedInventory?.productId || ""}
-            onChange={(e) =>
-              setSelectedInventory({
-                ...selectedInventory,
-                productId: e.target.value,
-              })
-            }
-            InputProps={{ readOnly: true }}
-          />
-          <TextField
-            label="Quantidade (Original)"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={selectedInventory?.originalQuantity || ""}
-            onChange={(e) =>
-              setSelectedInventory({
-                ...selectedInventory,
-                originalQuantity: Number(e.target.value),
-              })
-            }
-          />
-          <TextField
-            label="Quantidade"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={selectedInventory?.quantity || ""}
-            onChange={(e) =>
-              setSelectedInventory({
-                ...selectedInventory,
-                quantity: Number(e.target.value),
-              })
-            }
-          />
-          <TextField
-            label="Desconto"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={selectedInventory?.discount || 0}
-            onChange={(e) =>
-              setSelectedInventory({
-                ...selectedInventory,
-                discount: Number(e.target.value),
-              })
-            }
-          />
-          <TextField
-            label="Localização"
-            fullWidth
-            margin="normal"
-            value={selectedInventory?.location || ""}
-            onChange={(e) =>
-              setSelectedInventory({
-                ...selectedInventory,
-                location: e.target.value,
-              })
-            }
-            InputProps={{ readOnly: true }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancelar</Button>
-          <Button onClick={handleSave}>Confirmar</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={closeSnackbar}>
+        <Alert onClose={closeSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -8,6 +8,7 @@ import {
   TextField,
   Snackbar,
   Alert,
+  Box,
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -17,23 +18,26 @@ import {
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { addDays, format } from "date-fns";
 import { fileExporters } from "../../../../utils/utils";
-import api from "../../../../api";
+import { useExitListStore } from "./stores/useExitListStore";
 import Swal from "sweetalert2";
 
 const ExitList = () => {
-  const [open, setOpen] = useState(false);
-  const [selectedExit, setSelectedExit] = useState(null);
-  const [rows, setRows] = useState([]);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [isEditing, setIsEditing] = useState(false);
-  const [pagination, setPagination] = useState({
-    page: 0,
-    pageSize: 20,
-    totalElements: 0,
-    totalPages: 0
-  })
+  const {
+    rows,
+    pagination,
+    setPagination,
+    fetchExits,
+    saveExit,
+    saveStatus,
+    deleteExit,
+    snackbar,
+    showSnackbar,
+    closeSnackbar,
+    open,
+    selectedExit,
+    openModal,
+    closeModal,
+  } = useExitListStore();
 
   const exitStatusMap = {
     PENDING: "Pendente",
@@ -46,36 +50,6 @@ const ExitList = () => {
     fetchExits(pagination.page, pagination.pageSize);
   }, []);
 
-  const fetchExits = async (page, pageSize) => {
-    try {
-      const res = await api.get(`/exits?page=${page}&size=${pageSize}`);
-      setRows(res.data.content);
-      setPagination({
-        page: res.data.number,
-        pageSize: res.data.size,
-        totalElements: res.data.totalElements,
-        totalPages: res.data.totalPages
-      })
-    } catch (error) {
-      console.error("Erro ao buscar as saídas: ", error);
-      setSnackbarMessage("Erro ao carregar as saídas.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
-  };
-
-  const handleClickOpen = (exit) => {
-    setSelectedExit(exit);
-    setOpen(true);
-    setIsEditing(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedExit(null);
-    setIsEditing(false);
-  };
-
   const handleDelete = async (ids) => {
     const confirmDelete = await Swal.fire({
       title: "Tem certeza?",
@@ -86,46 +60,7 @@ const ExitList = () => {
       cancelButtonText: "Cancelar",
     });
     if (confirmDelete.isConfirmed) {
-      try {
-        await api.delete(`/exits/${ids[0]}`);
-        setSnackbarMessage("Saída deletada com sucesso!");
-        setSnackbarSeverity("success");
-        fetchExits();
-      } catch (error) {
-        setSnackbarMessage(
-          `Erro ao deletar a saída: ${error.response?.data?.message || error.response?.data?.error || error.message
-          }`
-        );
-        setSnackbarSeverity("error");
-      } finally {
-        setSnackbarOpen(true);
-      }
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      if (isEditing) {
-        await api.patch(`/exits/${selectedExit.id}`, {
-          quantity: selectedExit.quantity,
-          exitDate: selectedExit.exitDate,
-        });
-        setSnackbarMessage("Saída atualizada com sucesso!");
-      } else {
-        const newExit = { name: selectedExit.name };
-        await api.post("/exits", newExit);
-        setSnackbarMessage("Saída adicionada com sucesso!");
-      }
-      setSnackbarSeverity("success");
-      fetchExits();
-    } catch (error) {
-      setSnackbarMessage(
-        `Erro ao salvar a saída: ${error.response?.data?.message || error.response?.data?.error || error.message}`
-      );
-      setSnackbarSeverity("error");
-    } finally {
-      handleClose();
-      setSnackbarOpen(true);
+      await deleteExit(ids);
     }
   };
 
@@ -139,62 +74,45 @@ const ExitList = () => {
       confirmButtonText: "Editar",
       cancelButtonText: "Cancelar",
       inputValidator: (value) => {
-        if (!value) {
-          return "Você precisa selecionar um status!";
-        }
+        if (!value) return "Você precisa selecionar um status!";
       },
     });
 
     if (status) {
-      try {
-        await api.patch(`/exits/${id}/status`, { status: status });
-        setSnackbarMessage("Status atualizado com sucesso!");
-        setSnackbarSeverity("success");
-        fetchExits();
-      } catch (error) {
-        setSnackbarMessage(
-          `Erro ao atualizar o status: ${error.response.data.message}`
-        );
-        setSnackbarSeverity("error");
-      } finally {
-        setSnackbarOpen(true);
-      }
+      await saveStatus(id, status);
     }
+  };
+
+  const handleSave = async () => {
+    await saveExit();
   };
 
   const handleRefresh = () => {
     fetchExits(pagination.page, pagination.pageSize);
-    setSnackbarMessage("Lista de Saídas atualizada!");
-    setSnackbarSeverity("info");
-    setSnackbarOpen(true);
+    showSnackbar("Lista de Saídas atualizada!", "info");
   };
 
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
     { field: "productId", headerName: "ID Produto", width: 100 },
-    { field: "quantity", headerName: "Quantidade", type: "number", width: 150 },
+    { field: "quantity", headerName: "Quantidade", width: 150 },
     { field: "inventoryCode", headerName: "Código (Inventário)", width: 150 },
     {
       field: "status",
       headerName: "Status de Saída",
       width: 150,
-      valueGetter: (params) =>
-        exitStatusMap[params.row.status] || "Desconhecido",
+      valueGetter: (params) => exitStatusMap[params.row.status] || "Desconhecido",
     },
     {
       field: "exitDate",
       headerName: "Data de Saída",
       width: 150,
-      type: "date",
       valueGetter: (params) => {
-        const value = params.value;
-        const date = value ? new Date(value) : null;
-        return date && !isNaN(date) ? date : null;
+        const date = new Date(params.value);
+        return !isNaN(date) ? date : null;
       },
-      valueFormatter: (params) => {
-        const date = addDays(params.value, 1);
-        return date && !isNaN(date) ? format(date, "dd/MM/yyyy") : "";
-      },
+      valueFormatter: (params) =>
+        params.value ? format(addDays(params.value, 1), "dd/MM/yyyy") : "",
     },
     {
       field: "actions",
@@ -211,7 +129,7 @@ const ExitList = () => {
           >
             Status
           </Button>
-          <Button onClick={() => handleClickOpen(cellData.row)}>
+          <Button onClick={() => openModal(cellData.row)}>
             <EditIcon />
           </Button>
           <Button onClick={() => handleDelete([cellData.row.id])}>
@@ -223,49 +141,17 @@ const ExitList = () => {
   ];
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        backgroundColor: "#f5f5f5",
-        borderRadius: "8px",
-        width: "95%",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "12px",
-          marginBottom: "16px",
-        }}
-      >
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={handleRefresh}
-        >
+    <div style={{ padding: 20, backgroundColor: "#f5f5f5", borderRadius: 8, width: "95%" }}>
+      <Box display="flex" gap={2} mb={2}>
+        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={handleRefresh}>
           Atualizar Lista
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() =>
-            fileExporters.exportToExcel("Saídas", "saidas.xlsx", rows)
-          }
-        >
+        <Button variant="contained" onClick={() => fileExporters.exportToExcel("Saídas", "saidas.xlsx", rows)}>
           Exportar Excel
         </Button>
-      </div>
-      <div
-        style={{
-          height: 400,
-          width: "100%",
-          backgroundColor: "white",
-          borderRadius: "8px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-          overflow: "hidden",
-        }}
-      >
+      </Box>
+
+      <Box sx={{ height: 400, width: "100%", backgroundColor: "white", borderRadius: 2 }}>
         <DataGrid
           rows={rows}
           columns={columns}
@@ -277,77 +163,77 @@ const ExitList = () => {
             pageSize: pagination.pageSize,
           }}
           onPaginationModelChange={({ page, pageSize }) => {
-            const newPagination = { ...pagination, page, pageSize };
-            setPagination(newPagination);
+            setPagination({ ...pagination, page, pageSize });
             fetchExits(page, pageSize);
           }}
           pageSizeOptions={[20, 50, 100]}
         />
-      </div>
+      </Box>
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>
-          {isEditing ? "Editar Saída" : "Adicionar Saída"}
-        </DialogTitle>
+      <Dialog
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            width: '700px',
+            maxWidth: '90vw',
+          },
+        }}
+        open={open}
+        onClose={closeModal}
+      >
+        <DialogTitle>Editar Saída</DialogTitle>
         <DialogContent>
-          <TextField
-            label="Quantidade"
-            type="number"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={selectedExit?.quantity || ""}
-            onChange={(e) =>
-              setSelectedExit({
-                ...selectedExit,
-                quantity: e.target.value,
-              })
-            }
-            sx={{ mb: 3 }}
-          />
-
-          <TextField
-            label="Data de Saída"
-            type="date"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={
-              selectedExit?.exitDate
-                ? new Date(selectedExit.exitDate).toISOString().split("T")[0]
-                : ""
-            }
-            onChange={(e) =>
-              setSelectedExit({
-                ...selectedExit,
-                exitDate: e.target.value,
-              })
-            }
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{ mb: 3 }}
-          />
+          <Box display="flex" flexDirection="column" gap={4} sx={{ mt: 2 }}>
+            <Box display="flex" flexDirection="column" alignItems="center" gap={3}>
+              <TextField
+                label="Quantidade"
+                type="number"
+                fullWidth
+                value={selectedExit?.quantity || ""}
+                onChange={(e) =>
+                  useExitListStore.setState({
+                    selectedExit: {
+                      ...selectedExit,
+                      quantity: e.target.value,
+                    },
+                  })
+                }
+              />
+              <TextField
+                label="Data de Saída"
+                type="date"
+                fullWidth
+                value={
+                  selectedExit?.exitDate
+                    ? new Date(selectedExit.exitDate).toISOString().split("T")[0]
+                    : ""
+                }
+                onChange={(e) =>
+                  useExitListStore.setState({
+                    selectedExit: {
+                      ...selectedExit,
+                      exitDate: e.target.value,
+                    },
+                  })
+                }
+                InputLabelProps={{ shrink: true }}
+              />
+            </Box>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancelar</Button>
-          <Button onClick={handleSave}>
-            {isEditing ? "Confirmar" : "Adicionar"}
-          </Button>
+          <Button onClick={closeModal} color="secondary">Cancelar</Button>
+          <Button onClick={handleSave} color="primary">Confirmar</Button>
         </DialogActions>
       </Dialog>
 
       <Snackbar
-        open={snackbarOpen}
+        open={snackbar.open}
         autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
+        onClose={closeSnackbar}
       >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
+        <Alert onClose={closeSnackbar} severity={snackbar.severity}>
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </div>

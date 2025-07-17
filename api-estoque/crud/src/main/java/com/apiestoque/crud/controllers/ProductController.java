@@ -7,17 +7,25 @@ import com.apiestoque.crud.domain.product.dto.ProductDetailedResponseDTO;
 import com.apiestoque.crud.domain.product.dto.ProductRequestDTO;
 import com.apiestoque.crud.domain.product.dto.ProductResponseDTO;
 import com.apiestoque.crud.domain.product.dto.ProductUpdateDTO;
+import com.apiestoque.crud.infra.response.ApiResponse;
 import com.apiestoque.crud.services.ProductService;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpHeaders;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 @RestController
@@ -27,8 +35,8 @@ public class ProductController implements CrudController<String, ProductRequestD
     private ProductService productService;
 
     @Override
-    @PostMapping
-    public ResponseEntity<ProductResponseDTO> create(@RequestBody @Validated ProductRequestDTO data) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductResponseDTO> create(@ModelAttribute @Validated ProductRequestDTO data) {
         ProductResponseDTO response = productService.create(data);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -41,10 +49,42 @@ public class ProductController implements CrudController<String, ProductRequestD
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/{id}/image")
+    public ResponseEntity<ApiResponse> updateImage(@PathVariable String id,  @RequestParam("file") MultipartFile file) {
+        productService.updateImage(id, file);
+
+        return ResponseEntity.ok(new ApiResponse("message", "Imagem atualizada com sucesso."));
+    }
+
+    @GetMapping("/{id}/image")
+    public ResponseEntity<Resource> getImage(@PathVariable String id) {
+        Resource image = productService.getImage(id);
+
+        try {   
+            String contentType = Files.probeContentType(image.getFile().toPath());
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + image.getFilename() + "\"")
+                    .header(HttpHeaders.CONTENT_TYPE, contentType != null ? contentType : "application/octet-stream")
+                    .body(image);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao determinar o tipo da imagem.");
+        }
+    }
+
     @Override
     @GetMapping
-    public ResponseEntity<Page<ProductResponseDTO>> getAll(Pageable pageable) {
-        return ResponseEntity.ok(productService.getAll(pageable));
+    public ResponseEntity<?> getAll(
+        Pageable pageable, 
+        @RequestParam(defaultValue = "true") boolean paged) {
+
+        if (paged) {
+            Page<ProductResponseDTO> page = productService.getAll(pageable);
+            return ResponseEntity.ok(page);
+        } else {
+            List<ProductResponseDTO> list = productService.getAll();
+            return ResponseEntity.ok(list);
+        }
     }
 
     @Override

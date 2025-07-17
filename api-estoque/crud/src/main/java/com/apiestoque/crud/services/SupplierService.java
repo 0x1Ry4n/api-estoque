@@ -85,6 +85,13 @@ public class SupplierService {
                 .map(SupplierResponseDTO::new);
     }
 
+    public List<SupplierResponseDTO> getAll() {
+        return supplierRepository.findAll()
+            .stream()
+            .map(SupplierResponseDTO::new)
+            .collect(Collectors.toList());
+    }
+
     public SupplierResponseDTO getById(String id) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado."));

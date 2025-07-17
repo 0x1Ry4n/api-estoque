@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Grid, CircularProgress, Avatar, Button, useMediaQuery, useTheme } from '@mui/material';
-import { AccountCircle } from '@mui/icons-material';
-import api from './../../../../api';
+import { Box, Typography, Paper, Grid, CircularProgress, Button, useMediaQuery, useTheme, Chip } from '@mui/material';
+import { Logout as LogoutIcon } from '@mui/icons-material';
+import { useAuth } from '../../../../context/AuthContext';
+import UserAvatar from '../../subComponents/UserAvatar';
 
 const UserProfile = () => {
-  const [user, setUser] = useState(null);
+  const { user, token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -14,19 +15,16 @@ const UserProfile = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const response = await api.get('/auth/me');
-        setUser(response.data);
-      } catch (error) {
-        setError('Erro ao carregar os dados do usuário.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserProfile();
-  }, []);
+    if (token === null) {
+      navigate('/login');
+    }
+    if (user) {
+      setLoading(false);
+      setError('');
+    } else if (token) {
+      setLoading(true);
+    }
+  }, [user, token, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -35,7 +33,19 @@ const UserProfile = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          width: '100vw',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 9999,
+        }}
+      >
         <CircularProgress size={60} />
       </Box>
     );
@@ -49,6 +59,10 @@ const UserProfile = () => {
     );
   }
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <Box sx={{
       display: 'flex',
@@ -59,28 +73,33 @@ const UserProfile = () => {
       mt: 2,
       boxSizing: 'border-box',
     }}>
-      <Paper elevation={6} sx={{ p: 10, width: '100%', maxWidth: 500, borderRadius: 2 }}>
+      <Paper elevation={6} sx={{ p: 10, width: '100%', maxWidth: 600, borderRadius: 2 }}>
         <Grid container spacing={4}>
-          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Avatar sx={{ width: 100, height: 100, bgcolor: '#00796b' }}>
-              <AccountCircle sx={{ fontSize: 100 }} />
-            </Avatar>
+          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <UserAvatar userId={user.id} />
           </Grid>
           <Grid item xs={12}>
             <Typography variant="h5" align="center" sx={{ fontWeight: 'bold', color: '#00796b' }}>
-              {user?.username}
+              {user.username}
             </Typography>
           </Grid>
           <Grid item xs={12}>
             <Typography variant="body1" align="center" sx={{ color: '#757575' }}>
-              <strong>Email:</strong> {user?.email}
+              <strong>Email:</strong> {user.email}
             </Typography>
           </Grid>
-          <Grid item xs={12}>
-            <Typography variant="body1" align="center" sx={{ color: '#757575' }}>
-              <strong>Tipo:</strong> {user?.role === "ADMIN" ? "Administrador" : "Usuário Comum"}
-            </Typography>
+          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Chip
+              label={user.role === "ADMIN" ? "Administrador" : "Usuário Comum"}
+              color={user.role === "ADMIN" ? "primary" : "default"}
+              sx={{
+                fontWeight: 'bold',
+                bgcolor: '#808080',
+                color: 'white'
+              }}
+            />
           </Grid>
+
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
             <Button
               variant="contained"
@@ -89,11 +108,12 @@ const UserProfile = () => {
               sx={{
                 bgcolor: '#00796b',
                 '&:hover': { bgcolor: '#004d40' },
-                borderRadius: '20px',
-                px: 4
+                borderRadius: '4px',
+                px: 4,
               }}
+              startIcon={<LogoutIcon />}
             >
-              Logout
+              Sair
             </Button>
           </Grid>
         </Grid>

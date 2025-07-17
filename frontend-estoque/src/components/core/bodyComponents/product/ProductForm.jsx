@@ -12,6 +12,9 @@ import {
   Dialog,
   DialogTitle,
   Divider,
+  Avatar,
+  IconButton,
+  Badge
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -20,7 +23,9 @@ import {
   DateRange as DateRangeIcon,
   AddShoppingCart as AddShoppingCartIcon,
   AddCircleOutline as AddCircleOutlineIcon,
-  QrCode2Rounded as QRCodeIcon
+  QrCode2Rounded as QRCodeIcon,
+  PhotoCamera,
+  Category
 } from "@mui/icons-material";
 import { Autocomplete } from "@mui/material";
 import api from "./../../../../api";
@@ -42,16 +47,26 @@ const ProductForm = ({ onProductAdded }) => {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [isScanning, setIsScanning] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const response = await api.get("/category");
-      setCategories(response.data.content);
+      const response = await api.get("/category?paged=false");
+      setCategories(response.data);
     };
 
     const fetchSuppliers = async () => {
-      const response = await api.get("/supplier");
-      setSuppliers(response.data.content);
+      const response = await api.get("/supplier?paged=false");
+      setSuppliers(response.data);
     };
 
     fetchCategories();
@@ -87,29 +102,43 @@ const ProductForm = ({ onProductAdded }) => {
 
   const onSubmit = async (data) => {
     try {
-      const productData = {
+      const formData = new FormData();
+
+      Object.entries({
         ...data,
         unitPrice: parseFloat(data.unitPrice),
-      };
+      }).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((val) => {
+            formData.append(key, val);
+          });
+        } else {
+          formData.append(key, value ?? "");
+        }
+      });
 
-      const response = await api.post("/products", productData);
+      if (image) {
+        formData.append("file", image);
+      }
+
+      const response = await api.post("/products", formData);
+
       if (response.status === 201) {
         setSnackbarMessage("Produto cadastrado com sucesso!");
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
-
-        if (typeof onProductAdded === "function") {
-          onProductAdded(response.data.content);
-        } else {
-          console.error("onProductAdded is not a function");
-        }
-
+        onProductAdded?.(response.data.content);
         reset();
+        setImage(null);
+        setImagePreview(null);
       }
     } catch (error) {
-      setSnackbarMessage(`
-        Erro ao cadastrar produto: ${error.response?.data?.message || error.response?.data?.error || error.message}
-      `);
+      setSnackbarMessage(
+        `Erro ao cadastrar produto: ${error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message
+        }`
+      );
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }
@@ -135,6 +164,55 @@ const ProductForm = ({ onProductAdded }) => {
         </Typography>
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <Box display="flex" flexDirection="column" alignItems="center" gap={2} sx={{ mt: 2 }}>
+                <Badge
+                  overlap="circular"
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  badgeContent={
+                    <label htmlFor="upload-image">
+                      <input
+                        accept="image/*"
+                        id="upload-image"
+                        type="file"
+                        hidden
+                        onChange={handleImageChange}
+                      />
+                      <IconButton
+                        component="span"
+                        sx={{
+                          backgroundColor: 'white',
+                          boxShadow: 2,
+                          '&:hover': { backgroundColor: '#eee' },
+                        }}
+                      >
+                        <PhotoCamera />
+                      </IconButton>
+                    </label>
+                  }
+                >
+                  <Avatar
+                    src={imagePreview}
+                    alt="Preview"
+                    sx={{
+                      width: 110,
+                      height: 110,
+                      boxShadow: 3,
+                      border: '2px solid #ccc',
+                      backgroundColor: '#f0f0f0',
+                    }}
+                  >
+                    {!imagePreview && <Category fontSize="large" sx={{ color: '#888' }} />}
+                  </Avatar>
+
+                </Badge>
+
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  Clique no ícone para alterar a imagem
+                </Typography>
+              </Box>
+            </Grid>
+
             <Grid item md={6} xs={12}>
               <Controller
                 name="name"
@@ -247,7 +325,7 @@ const ProductForm = ({ onProductAdded }) => {
                       endAdornment: (
                         <InputAdornment position="end">
                           <Button onClick={openCameraModal}>
-                            <QRCodeIcon sx={{ ml: 5 }} /> 
+                            <QRCodeIcon sx={{ ml: 5 }} />
                           </Button>
                         </InputAdornment>
                       ),
@@ -358,8 +436,10 @@ const ProductForm = ({ onProductAdded }) => {
       </Paper>
 
       <Dialog open={openModal} onClose={closeCameraModal}>
-        <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>Escanear QR Code</DialogTitle>
-        <Divider />
+        <DialogTitle sx={{ textAlign: "center", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
+          <QRCodeIcon />
+          Escanear QR Code
+        </DialogTitle>        <Divider />
         <Box sx={{ padding: 4, textAlign: 'center' }}>
           {isScanning && (
             <QrScanner

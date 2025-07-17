@@ -8,6 +8,8 @@ import com.apiestoque.crud.services.ReceivementService;
 
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,9 +39,16 @@ public class ReceivementController implements CrudController<String, Receivement
 
     @Override
     @GetMapping
-    public ResponseEntity<Page<ReceivementResponseDTO>> getAll(Pageable pageable) {
-        Page<ReceivementResponseDTO> page = receivementService.getAll(pageable);
-        return ResponseEntity.ok(page);
+    public ResponseEntity<?> getAll(
+        Pageable pageable, @RequestParam(defaultValue = "true") boolean paged) {
+
+        if (paged) {
+            Page<ReceivementResponseDTO> page = receivementService.getAll(pageable);
+            return ResponseEntity.ok(page);
+        } else {
+            List<ReceivementResponseDTO> list = receivementService.getAll();
+            return ResponseEntity.ok(list);
+        }
     }
 
     @Override

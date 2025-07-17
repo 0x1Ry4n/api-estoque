@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.apiestoque.crud.controllers.base.CrudController;
@@ -28,7 +29,8 @@ import com.apiestoque.crud.services.CategoryService;
 
 @RestController
 @RequestMapping("/api/category")
-public class CategoryController implements CrudController<String, CategoryRequestDTO, CategoryUpdateDTO, CategoryResponseDTO> {
+public class CategoryController
+        implements CrudController<String, CategoryRequestDTO, CategoryUpdateDTO, CategoryResponseDTO> {
     @Autowired
     private CategoryService categoryService;
 
@@ -41,15 +43,24 @@ public class CategoryController implements CrudController<String, CategoryReques
     @Override
     @PatchMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> update(@PathVariable String id,
-                                                      @RequestBody @Validated CategoryUpdateDTO data) {
+            @RequestBody @Validated CategoryUpdateDTO data) {
         return ResponseEntity.ok(categoryService.update(id, data));
     }
 
-    @Override
     @GetMapping
-    public ResponseEntity<Page<CategoryResponseDTO>> getAll(Pageable pageable) {
-        return ResponseEntity.ok(categoryService.getAll(pageable));
+    public ResponseEntity<?> getAll(
+            Pageable pageable,
+            @RequestParam(defaultValue = "true") boolean paged) {
+
+        if (paged) {
+            Page<CategoryResponseDTO> page = categoryService.getAll(pageable);
+            return ResponseEntity.ok(page);
+        } else {
+            List<CategoryResponseDTO> list = categoryService.getAll();
+            return ResponseEntity.ok(list);
+        }
     }
+
 
     @Override
     @GetMapping("/{id}")

@@ -1,10 +1,12 @@
 package com.apiestoque.crud.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.apiestoque.crud.domain.inventory.Inventory;
 import com.apiestoque.crud.domain.inventory.dto.InventoryRequestDTO;
@@ -22,6 +24,9 @@ import com.apiestoque.crud.repositories.InventoryRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.ReceivementRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
+
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,6 +50,9 @@ public class ProductService {
 
     @Autowired
     private ExitRepository exitRepository;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     public ProductResponseDTO create(ProductRequestDTO data) {
         Category category = categoryRepository.findById(data.categoryId())
@@ -70,6 +78,13 @@ public class ProductService {
                 suppliers,
                 data.expirationDate());
 
+        try {
+            String imagePath = fileStorageService.save(data.file(), "produtos");
+            newProduct.setImagePath(imagePath);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem.", e);
+        }
+
         Product savedProduct = this.productRepository.save(newProduct);
 
         return new ProductResponseDTO(savedProduct);
@@ -78,15 +93,6 @@ public class ProductService {
     public ProductResponseDTO update(String id, ProductUpdateDTO data) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
-
-        if (data.productCode() != null) {
-            if (productRepository.existsByProductCode(data.productCode())) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Produto com esse código já existe.");
-            }
-
-            product.setProductCode(data.productCode());
-        }
 
         if (!data.supplierIds().isEmpty()) {
             Set<Supplier> suppliers = data.supplierIds().stream()
@@ -100,6 +106,13 @@ public class ProductService {
 
         if (data.name() != null) {
             product.setName(data.name());
+        }
+
+        if (data.categoryId() != null) {
+            Category category = categoryRepository.findById(data.categoryId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
+
+            product.setCategory(category);
         }
 
         if (data.description() != null) {
@@ -118,10 +131,59 @@ public class ProductService {
         return new ProductResponseDTO(updatedProduct);
     }
 
+    public void updateImage(String id, MultipartFile file) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Arquivo de imagem inválido.");
+        }
+
+        try {
+            String imagePath = fileStorageService.save(file, "produtos");
+            product.setImagePath(imagePath);
+            productRepository.save(product);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem.", e);
+        }
+    }
+
+    public Resource getImage(String id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+
+        String imagePath = product.getImagePath();
+        if (imagePath == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "O produto não possui imagem.");
+        }
+
+        try {
+            String fileName = Paths.get(imagePath).getFileName().toString();
+            Resource resource = fileStorageService.load(fileName, "produtos");
+
+            if (resource == null || !resource.exists()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Imagem do produto não encontrada.");
+            }
+
+            return resource;
+        } catch (ResponseStatusException ex) {
+            throw ex;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao obter a imagem.", e);
+        }
+    }
+
     public Page<ProductResponseDTO> getAll(Pageable pageable) {
         Page<ProductResponseDTO> productPage = productRepository.findAll(pageable)
                 .map(ProductResponseDTO::new);
         return productPage;
+    }
+
+    public List<ProductResponseDTO> getAll() {
+        return productRepository.findAll()
+                .stream()
+                .map(ProductResponseDTO::new)
+                .collect(Collectors.toList());
     }
 
     public ProductDetailedResponseDTO getById(String id) {

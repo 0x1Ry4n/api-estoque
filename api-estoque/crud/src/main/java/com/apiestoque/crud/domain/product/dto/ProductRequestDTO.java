@@ -5,10 +5,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public record ProductRequestDTO(
     @NotBlank(message = "Name is required")
     String name,
 
+    MultipartFile file,
+    
     @NotBlank(message = "Description is required")
     String description,
     
@@ -21,7 +25,6 @@ public record ProductRequestDTO(
 
     @NotBlank(message = "Category ID is required")
     String categoryId,
-
     
     @NotNull(message = "Suppliers ID is required")
     Set<@NotBlank(message = "Supplier ID cannot be blank") String> suppliersId,
