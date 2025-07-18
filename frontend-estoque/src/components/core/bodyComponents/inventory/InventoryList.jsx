@@ -3,6 +3,7 @@ import {
   Button,
   Snackbar,
   Alert,
+  Tooltip
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -24,11 +25,6 @@ const Inventory = () => {
     snackbar,
     showSnackbar,
     closeSnackbar,
-    open,
-    isEditing,
-    selectedInventory,
-    openModal,
-    closeModal,
   } = useInventoryListStore();
 
   useEffect(() => {
@@ -112,9 +108,11 @@ const Inventory = () => {
       headerName: "Ações",
       width: 150,
       renderCell: (cellData) => (
-        <Button onClick={() => handleDelete([cellData.row])}>
-          <DeleteIcon />
-        </Button>
+        <Tooltip title="Excluir">
+          <Button onClick={() => handleDelete([cellData.row])}>
+            <DeleteIcon />
+          </Button>
+        </Tooltip>
       ),
     },
   ];

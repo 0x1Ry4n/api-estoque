@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import api from "../../../../../api";
+import { SupplierService } from "../../../../../services/supplierService";
 
 export const useSupplierListStore = create((set, get) => ({
     rows: [],
@@ -34,7 +34,8 @@ export const useSupplierListStore = create((set, get) => ({
 
     fetchSuppliers: async (page, pageSize) => {
         try {
-            const res = await api.get(`/supplier?page=${page}&size=${pageSize}`);
+            const res = await SupplierService.getSuppliers(true, page, pageSize);
+
             set({
                 rows: res.data.content,
                 pagination: {
@@ -64,7 +65,7 @@ export const useSupplierListStore = create((set, get) => ({
         }
 
         try {
-            await api.patch(`/supplier/${selectedSupplier.id}`, selectedSupplier);
+            await SupplierService.updateSupplier(selectedSupplier.id, selectedSupplier);
             get().showSnackbar("Fornecedor atualizado com sucesso!");
             await get().fetchSuppliers(pagination.page, pagination.pageSize)
         } catch (error) {
@@ -75,10 +76,10 @@ export const useSupplierListStore = create((set, get) => ({
         }
     },
 
-    deleteSupplier: async (ids) => {
+    deleteSupplier: async (ids = []) => {
         const { pagination } = get();
         try {
-            await api.delete(`/supplier/${ids[0]}`);
+            await SupplierService.deleteSupplier(ids[0]);
             get().showSnackbar("Fornecedor deletado com sucesso!");
             await get().fetchSuppliers(pagination.page, pagination.pageSize);
         } catch (error) {

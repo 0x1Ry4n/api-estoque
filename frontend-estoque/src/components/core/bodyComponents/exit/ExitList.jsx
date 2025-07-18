@@ -9,6 +9,7 @@ import {
   Snackbar,
   Alert,
   Box,
+  Tooltip
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -119,7 +120,7 @@ const ExitList = () => {
       headerName: "Ações",
       width: 200,
       renderCell: (cellData) => (
-        <>
+        <div>
           <Button
             onClick={() => handleStatusChange(cellData.row.id)}
             variant="outlined"
@@ -129,13 +130,17 @@ const ExitList = () => {
           >
             Status
           </Button>
-          <Button onClick={() => openModal(cellData.row)}>
-            <EditIcon />
-          </Button>
-          <Button onClick={() => handleDelete([cellData.row.id])}>
-            <DeleteIcon />
-          </Button>
-        </>
+          <Tooltip title="Editar">
+            <Button onClick={() => openModal(cellData.row)}>
+              <EditIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Excluir">
+            <Button onClick={() => handleDelete([cellData.row.id])}>
+              <DeleteIcon />
+            </Button>
+          </Tooltip>
+        </div>
       ),
     },
   ];

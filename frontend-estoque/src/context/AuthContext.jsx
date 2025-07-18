@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import api, { setAuthToken } from '../api';
+import { setAuthToken } from '../api';
 import { isTokenExpired } from '../utils/utils';
+import { UserService } from '../services/UserService';
 
 const AuthContext = createContext();
 
@@ -26,8 +27,8 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         setAuthToken(token);
         try {
-          const response = await api.get('/auth/me');
-          setUser(response.data);
+          const res = await UserService.getMe();
+          setUser(res.data);
         } catch (err) {
           logout();
         }
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
+      const response = await UserService.login({ email, password });
 
       if (response.status === 200) {
         const { token } = response.data;

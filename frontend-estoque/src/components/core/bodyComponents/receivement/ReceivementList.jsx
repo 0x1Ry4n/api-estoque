@@ -9,7 +9,8 @@ import {
   Snackbar,
   Alert,
   Autocomplete,
-  Box
+  Box,
+  Tooltip
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -36,12 +37,11 @@ const ReceivementList = () => {
     fetchReceivements,
     fetchProductsAndSuppliers,
     saveReceivement,
-    saveStatus,
+    updateStatus,
     deleteReceivement,
     setSelectedReceivement,
     setOpen,
     open,
-    setEditing
   } = useReceivementListStore();
 
   const receivementStatusMap = {
@@ -59,13 +59,11 @@ const ReceivementList = () => {
   const handleClickOpen = (receivement) => {
     setSelectedReceivement(receivement);
     setOpen(true);
-    setEditing(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedReceivement(null);
-    setEditing(false);
   };
 
   const handleDelete = async (ids) => {
@@ -104,7 +102,7 @@ const ReceivementList = () => {
     });
 
     if (status) {
-      await saveStatus(id, status);
+      await updateStatus(id, status);
     }
   };
 
@@ -152,23 +150,29 @@ const ReceivementList = () => {
       headerName: "Ações",
       width: 200,
       renderCell: (cellData) => (
-        <>
-          <Button
-            onClick={() => handleStatusChange(cellData.row.id)}
-            variant="outlined"
-            size="small"
-            color="primary"
-            sx={{ mr: 1 }}
-          >
-            Status
-          </Button>
-          <Button onClick={() => handleClickOpen(cellData.row)}>
-            <EditIcon />
-          </Button>
-          <Button onClick={() => handleDelete([cellData.row.id])}>
-            <DeleteIcon />
-          </Button>
-        </>
+        <div>
+          <Tooltip title="Editar Status">
+            <Button
+              onClick={() => handleStatusChange(cellData.row.id)}
+              variant="outlined"
+              size="small"
+              color="primary"
+              sx={{ mr: 1 }}
+            >
+              Status
+            </Button>
+          </Tooltip>
+          <Tooltip title="Editar">
+            <Button onClick={() => handleClickOpen(cellData.row)}>
+              <EditIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Excluir">
+            <Button onClick={() => handleDelete([cellData.row.id])}>
+              <DeleteIcon />
+            </Button>
+          </Tooltip>
+        </div>
       ),
     },
   ];

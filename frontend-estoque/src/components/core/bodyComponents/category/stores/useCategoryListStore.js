@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import api from "../../../../../api";
+import { CategoryService } from "../../../../../services/CategoryService";
 
 export const useCategoryListStore = create((set, get) => ({
     rows: [],
@@ -12,7 +12,8 @@ export const useCategoryListStore = create((set, get) => ({
     setPagination: (newPagination) => set({ pagination: newPagination }),
     fetchCategories: async (page, pageSize) => {
         try {
-          const res = await api.get(`/category?page=${page}&size=${pageSize}`);
+          const res = await CategoryService.getCategories(true, page, pageSize);
+          
           set({
             rows: res.data.content,
             pagination: {
@@ -61,15 +62,15 @@ export const useCategoryListStore = create((set, get) => ({
     saveCategory: async () => {
       const { selectedCategory, pagination } = get();
 
+      const { name } = selectedCategory;
+
       if (!selectedCategory?.name) {
         get().showSnackbar("Por favor, preencha o nome da categoria!", "error");
         return;
       }
 
       try {
-        await api.patch(`/category/${selectedCategory.id}`, {
-          name: selectedCategory.name,
-        });
+        await CategoryService.updateCategory(selectedCategory.id, { name });
         get().showSnackbar("Categoria atualizada com sucesso!");
         get().fetchCategories(pagination.page, pagination.pageSize);
       } catch (error) {
@@ -86,7 +87,7 @@ export const useCategoryListStore = create((set, get) => ({
       const { pagination } = get();
 
       try {
-        await api.delete(`/category/${ids}`);
+        await CategoryService.deleteCategory(ids);
 
         get().showSnackbar("Categoria deletada com sucesso!");
         get().fetchCategories(pagination.page, pagination.pageSize);

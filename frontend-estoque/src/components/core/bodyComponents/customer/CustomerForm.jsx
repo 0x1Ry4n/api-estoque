@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -9,50 +9,85 @@ import {
   FormControl,
   Select,
   MenuItem,
-  Checkbox,
-  Alert,
-  FormControlLabel,
   Grid,
-  Snackbar
+  Snackbar,
+  Alert
 } from '@mui/material';
 import { AddCircleOutline, PersonOutline, EmailOutlined, PhoneOutlined, DescriptionOutlined, LocationOnOutlined } from '@mui/icons-material';
-import api from './../../../../api';
 import { useForm, Controller } from 'react-hook-form';
-import InputMask from 'react-input-mask'; 
+import InputMask from 'react-input-mask';
+import api from './../../../../api';
 
 const CustomerForm = ({ onCustomerAdded }) => {
-  const { control, handleSubmit, reset, formState: { errors } } = useForm();
-  const [preferredPaymentMethod, setPreferredPaymentMethod] = useState('CREDIT_CARD');
-  const [communicationPreference, setCommunicationPreference] = useState('EMAIL');
-  const [isDefaultCustomer, setIsDefaultCustomer] = useState(false);
+  const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [isDefaultCustomer] = useState(false);
+
+  const fetchCEP = async (cep) => {
+    try {
+      const cleanedCEP = cep.replace(/\D/g, '');
+      if (cleanedCEP.length !== 8) return;
+
+      const response = await fetch(`https://viacep.com.br/ws/${cleanedCEP}/json/`);
+      const data = await response.json();
+
+      if (!data.erro) {
+        setValue('address', data.logradouro);
+        setValue('neighborhood', data.bairro);
+        setValue('city', data.localidade);
+        setValue('state', data.uf);
+      } else {
+        setSnackbarMessage('CEP não encontrado');
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
+      setSnackbarMessage('Erro ao buscar CEP');
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleCEPBlur = (e) => {
+    const cep = e.target.value;
+    if (cep && cep.length === 9) { 
+      fetchCEP(cep);
+    }
+  };
 
   const onSubmit = async (data) => {
     const customerData = {
-      fullname: isDefaultCustomer ? null : data.fullname,
+      name: isDefaultCustomer ? null : data.name,
+      cpf: isDefaultCustomer ? null : data.cpf,
+      cnpj: isDefaultCustomer ? null : data.cnpj,
+      ie: isDefaultCustomer ? null : data.ie,
+      im: isDefaultCustomer ? null : data.im,
       email: isDefaultCustomer ? null : data.email,
       phone: isDefaultCustomer ? null : data.phone,
-      cpf: isDefaultCustomer ? null : data.cpf,
-      cep: isDefaultCustomer ? null : data.cep,
+      mobile: isDefaultCustomer ? null : data.mobile,
+      address: isDefaultCustomer ? null : data.address,
+      number: isDefaultCustomer ? null : data.number,
+      complement: isDefaultCustomer ? null : data.complement,
+      neighborhood: isDefaultCustomer ? null : data.neighborhood,
+      city: isDefaultCustomer ? null : data.city,
+      state: isDefaultCustomer ? null : data.state,
+      zipCode: isDefaultCustomer ? null : data.cep,
+      status: data.status,
       notes: data.notes,
-      preferredPaymentMethod,
-      communicationPreference,
-      isDefaultCustomer,
     };
 
     try {
       const response = await api.post('/customer', customerData);
       if (response.status === 201) {
         if (typeof onCustomerAdded === 'function') {
-          onCustomerAdded(response.data); 
+          onCustomerAdded(response.data);
         } else {
           console.error('onSupplierAdded is not a function');
         }
 
         setSnackbarMessage('Cliente cadastrado com sucesso!');
         setSnackbarOpen(true);
-        reset(); 
+        reset();
       }
     } catch (error) {
       console.error("Erro ao cadastrar cliente:", error);
@@ -67,16 +102,32 @@ const CustomerForm = ({ onCustomerAdded }) => {
 
   return (
     <Box>
-      <Paper elevation={4} sx={{ padding: 10, borderRadius: 2, backgroundColor: '#f5f5f5' }}>
-        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+      <Paper
+        elevation={4}
+        sx={{
+          padding: 6,
+          borderRadius: 3,
+          backgr408840oundColor: '#f5f5f5',
+          width: "95%"
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            mb: 3,
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
           <PersonOutline sx={{ mr: 1 }} />
           Cadastrar Cliente
         </Typography>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {!isDefaultCustomer && (
-            <>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
               <Controller
-                name="fullname"
+                name="name"
                 control={control}
                 defaultValue=""
                 rules={{ required: 'Nome completo é obrigatório' }}
@@ -86,9 +137,9 @@ const CustomerForm = ({ onCustomerAdded }) => {
                     fullWidth
                     variant="outlined"
                     {...field}
-                    error={!!errors.fullname}
-                    helperText={errors.fullname ? errors.fullname.message : ''}
-                    sx={{ mb: 4 }}
+                    error={!!errors.name}
+                    helperText={errors.name?.message}
+                    sx={{ mb: 2 }}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -99,11 +150,14 @@ const CustomerForm = ({ onCustomerAdded }) => {
                   />
                 )}
               />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
               <Controller
                 name="email"
                 control={control}
                 defaultValue=""
-                rules={{ required: 'E-mail é obrigatório', pattern: { value: /^\S+@\S+$/i, message: 'Formato de e-mail inválido' }}}
+                rules={{ required: 'E-mail é obrigatório', pattern: { value: /^\S+@\S+$/i, message: 'Formato de e-mail inválido' } }}
                 render={({ field }) => (
                   <TextField
                     label="E-mail"
@@ -112,8 +166,8 @@ const CustomerForm = ({ onCustomerAdded }) => {
                     type="email"
                     {...field}
                     error={!!errors.email}
-                    helperText={errors.email ? errors.email.message : ''}
-                    sx={{ mb: 4 }}
+                    helperText={errors.email?.message}
+                    sx={{ mb: 2 }}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -124,6 +178,9 @@ const CustomerForm = ({ onCustomerAdded }) => {
                   />
                 )}
               />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
               <Controller
                 name="phone"
                 control={control}
@@ -131,10 +188,9 @@ const CustomerForm = ({ onCustomerAdded }) => {
                 rules={{ required: 'Telefone é obrigatório' }}
                 render={({ field }) => (
                   <InputMask
-                    mask="(99) 99999-9999"
+                    mask="(99) 9999-9999"
                     value={field.value}
                     onChange={field.onChange}
-                    required
                   >
                     {() => (
                       <TextField
@@ -142,8 +198,8 @@ const CustomerForm = ({ onCustomerAdded }) => {
                         fullWidth
                         variant="outlined"
                         error={!!errors.phone}
-                        helperText={errors.phone ? errors.phone.message : ''}
-                        sx={{ mb: 4 }}
+                        helperText={errors.phone?.message}
+                        sx={{ mb: 2 }}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -156,17 +212,62 @@ const CustomerForm = ({ onCustomerAdded }) => {
                   </InputMask>
                 )}
               />
+            </Grid>
+
+
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="mobile"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <InputMask
+                    mask="(99) 99999-9999"
+                    value={field.value}
+                    onChange={field.onChange}
+                  >
+                    {() => (
+                      <TextField
+                        label="Celular"
+                        fullWidth
+                        variant="outlined"
+                        error={!!errors.mobile}
+                        helperText={errors.mobile?.message}
+                        sx={{ mb: 2 }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <PhoneOutlined />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    )}
+                  </InputMask>
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
               <Controller
                 name="cpf"
                 control={control}
                 defaultValue=""
-                rules={{ required: 'CPF é obrigatório', pattern: { value: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/, message: 'Formato de CPF inválido' }}}
+                rules={{
+                  validate: (value) => {
+                    if (!value && !control._formValues.cnpj) return 'CPF ou CNPJ é obrigatório';
+                    return true;
+                  },
+                  pattern: {
+                    value: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
+                    message: 'Formato de CPF inválido'
+                  }
+                }}
                 render={({ field }) => (
                   <InputMask
                     mask="999.999.999-99"
                     value={field.value}
                     onChange={field.onChange}
-                    required
                   >
                     {() => (
                       <TextField
@@ -174,8 +275,8 @@ const CustomerForm = ({ onCustomerAdded }) => {
                         fullWidth
                         variant="outlined"
                         error={!!errors.cpf}
-                        helperText={errors.cpf ? errors.cpf.message : ''}
-                        sx={{ mb: 4 }}
+                        helperText={errors.cpf?.message}
+                        sx={{ mb: 2 }}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -188,17 +289,59 @@ const CustomerForm = ({ onCustomerAdded }) => {
                   </InputMask>
                 )}
               />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="cnpj"
+                control={control}
+                defaultValue=""
+                rules={{
+                  pattern: {
+                    value: /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
+                    message: 'Formato de CNPJ inválido',
+                  },
+                }}
+                render={({ field }) => (
+                  <InputMask
+                    mask="99.999.999/9999-99"
+                    value={field.value}
+                    onChange={field.onChange}
+                  >
+                    {() => (
+                      <TextField
+                        label="CNPJ"
+                        fullWidth
+                        variant="outlined"
+                        error={!!errors.cnpj}
+                        helperText={errors.cnpj?.message}
+                        sx={{ mb: 2 }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <DescriptionOutlined />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    )}
+                  </InputMask>
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={3}>
               <Controller
                 name="cep"
                 control={control}
                 defaultValue=""
-                rules={{ required: 'CEP é obrigatório', pattern: { value: /^\d{5}-\d{3}$/, message: 'Formato de CEP inválido' }}}
+                rules={{ required: 'CEP é obrigatório', pattern: { value: /^\d{5}-\d{3}$/, message: 'Formato de CEP inválido' } }}
                 render={({ field }) => (
                   <InputMask
                     mask="99999-999"
                     value={field.value}
                     onChange={field.onChange}
-                    required
+                    onBlur={handleCEPBlur}
                   >
                     {() => (
                       <TextField
@@ -206,8 +349,8 @@ const CustomerForm = ({ onCustomerAdded }) => {
                         fullWidth
                         variant="outlined"
                         error={!!errors.cep}
-                        helperText={errors.cep ? errors.cep.message : ''}
-                        sx={{ mb: 4 }}
+                        helperText={errors.cep?.message}
+                        sx={{ mb: 2 }}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -220,84 +363,232 @@ const CustomerForm = ({ onCustomerAdded }) => {
                   </InputMask>
                 )}
               />
-            </>
-          )}
-          <Controller
-            name="notes"
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-              <TextField
-                label="Notas"
-                fullWidth
-                variant="outlined"
-                {...field}
-                multiline
-                rows={4}
-                sx={{ mb: 4 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <DescriptionOutlined />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            )}
-          />
-
-          <Grid container spacing={4} sx={{ mb: 4 }}>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>Método de Pagamento Preferido</Typography>
-                <Select
-                  value={preferredPaymentMethod}
-                  onChange={(e) => setPreferredPaymentMethod(e.target.value)}
-                  variant="outlined"
-                >
-                  <MenuItem value="CREDIT_CARD">Cartão de Crédito</MenuItem>
-                  <MenuItem value="DEBIT_CARD">Cartão de Débito</MenuItem>
-                  <MenuItem value="MONEY">Dinheiro</MenuItem>
-                  <MenuItem value="ANY">Qualquer um</MenuItem>
-                </Select>
-              </FormControl>
             </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>Preferência de Comunicação</Typography>
-                <Select
-                  value={communicationPreference}
-                  onChange={(e) => setCommunicationPreference(e.target.value)}
-                  variant="outlined"
-                >
-                  <MenuItem value="EMAIL">E-mail</MenuItem>
-                  <MenuItem value="SMS">SMS</MenuItem>
-                  <MenuItem value="PHONE">Telefone</MenuItem>
-                  <MenuItem value="ANY">Qualquer um</MenuItem>
-                </Select>
+
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="address"
+                control={control}
+                defaultValue=""
+                rules={{ required: 'Endereço é obrigatório' }}
+                render={({ field }) => (
+                  <TextField
+                    label="Endereço"
+                    fullWidth
+                    variant="outlined"
+                    {...field}
+                    error={!!errors.address}
+                    helperText={errors.address?.message}
+                    sx={{ mb: 2 }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={3}>
+              <Controller
+                name="number"
+                control={control}
+                defaultValue=""
+                rules={{ required: 'Número é obrigatório' }}
+                render={({ field }) => (
+                  <TextField
+                    label="Número"
+                    fullWidth
+                    variant="outlined"
+                    {...field}
+                    error={!!errors.number}
+                    helperText={errors.number?.message}
+                    sx={{ mb: 2 }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="complement"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <TextField
+                    label="Complemento"
+                    fullWidth
+                    variant="outlined"
+                    {...field}
+                    sx={{ mb: 2 }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="neighborhood"
+                control={control}
+                defaultValue=""
+                rules={{ required: 'Bairro é obrigatório' }}
+                render={({ field }) => (
+                  <TextField
+                    label="Bairro"
+                    fullWidth
+                    variant="outlined"
+                    {...field}
+                    error={!!errors.neighborhood}
+                    helperText={errors.neighborhood?.message}
+                    sx={{ mb: 2 }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="city"
+                control={control}
+                defaultValue=""
+                rules={{ required: 'Cidade é obrigatória' }}
+                render={({ field }) => (
+                  <TextField
+                    label="Cidade"
+                    fullWidth
+                    variant="outlined"
+                    {...field}
+                    error={!!errors.city}
+                    helperText={errors.city?.message}
+                    sx={{ mb: 2 }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="state"
+                control={control}
+                defaultValue=""
+                rules={{ required: 'UF é obrigatória', maxLength: { value: 2, message: 'UF deve ter 2 caracteres' } }}
+                render={({ field }) => (
+                  <TextField
+                    label="UF"
+                    fullWidth
+                    variant="outlined"
+                    inputProps={{ maxLength: 2 }}
+                    {...field}
+                    error={!!errors.state}
+                    helperText={errors.state?.message}
+                    sx={{ mb: 2 }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="ie"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <TextField
+                    label="IE"
+                    fullWidth
+                    variant="outlined"
+                    {...field}
+                    error={!!errors.ie}
+                    helperText={errors.ie?.message}
+                    sx={{ mb: 2 }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="im"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <TextField
+                    label="IM"
+                    fullWidth
+                    variant="outlined"
+                    {...field}
+                    error={!!errors.im}
+                    helperText={errors.im?.message}
+                    sx={{ mb: 2 }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Controller
+                name="notes"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <TextField
+                    label="Notas"
+                    fullWidth
+                    variant="outlined"
+                    {...field}
+                    multiline
+                    rows={4}
+                    sx={{ mb: 2 }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <DescriptionOutlined />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>Status</Typography>
+                <Controller
+                  name="status"
+                  control={control}
+                  defaultValue="ACTIVE"
+                  rules={{ required: 'Status é obrigatório' }}
+                  render={({ field }) => (
+                    <Select {...field} variant="outlined" error={!!errors.status}>
+                      <MenuItem value="ACTIVE">Ativo</MenuItem>
+                      <MenuItem value="INACTIVE">Inativo</MenuItem>
+                      <MenuItem value="BLOCKED">Bloqueado</MenuItem>
+                      <MenuItem value="SUSPENDED">Suspenso</MenuItem>
+                    </Select>
+                  )}
+                />
               </FormControl>
             </Grid>
           </Grid>
 
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={isDefaultCustomer}
-                onChange={(e) => setIsDefaultCustomer(e.target.checked)}
-              />
-            }
-            label="Cliente Padrão"
-            sx={{ mb: 4 }}
-          />
-          <Button type="submit" variant="contained" color="primary" sx={{ mt: 4, display: 'flex', alignItems: 'center' }}>
-            <AddCircleOutline sx={{ mr: 1 }} />
-            Cadastrar Cliente
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            sx={{ mt: 4, display: "flex", alignItems: "center" }}
+          >
+            <AddCircleOutline sx={{ mr: 1 }} /> Cadastrar Cliente
           </Button>
-        </form>
+        </Box>
       </Paper>
 
-      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity={snackbarMessage.includes('Erro') ? 'error' : 'success'} sx={{ width: '100%' }}>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarMessage.includes("Erro") ? "error" : "success"}
+          sx={{ width: "100%" }}
+        >
           {snackbarMessage}
         </Alert>
       </Snackbar>

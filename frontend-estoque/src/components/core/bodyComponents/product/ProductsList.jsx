@@ -18,6 +18,7 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Tooltip
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -227,20 +228,26 @@ const Products = () => {
       headerName: "Ações",
       width: 200,
       renderCell: (cellData) => (
-        <>
-          <Button onClick={() => handleClickOpen(cellData.row)}>
-            <EditIcon />
-          </Button>
-          <Button onClick={() => handleDelete([cellData.row.id])}>
-            <DeleteIcon />
-          </Button>
-          <Button
-            onClick={() => handleDetailOpen(cellData.row.id)}
-            color="primary"
-          >
-            <VisibilityIcon />
-          </Button>
-        </>
+        <div>
+          <Tooltip title="Editar">
+            <Button onClick={() => handleClickOpen(cellData.row)}>
+              <EditIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Excluir">
+            <Button onClick={() => handleDelete([cellData.row.id])}>
+              <DeleteIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Visualizar">
+            <Button
+              onClick={() => handleDetailOpen(cellData.row.id)}
+              color="primary"
+            >
+              <VisibilityIcon />
+            </Button>
+          </Tooltip>
+        </div>
       ),
     },
   ];
@@ -377,7 +384,6 @@ const Products = () => {
               onChange={(e) =>
                 useProductListStore.setState({ selectedProduct: { ...selectedProduct, name: e.target.value } })
               }
-              InputProps={{ readOnly: true }}
             />
 
             <Controller

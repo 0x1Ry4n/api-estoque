@@ -11,6 +11,7 @@ import {
   MenuItem,
   InputAdornment,
   Box,
+  Tooltip
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -27,7 +28,7 @@ import { fileExporters } from "../../../../utils/utils";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import InputMask from "react-input-mask";
 import Swal from "sweetalert2";
-import { useSupplierListStore } from "./stores/useSupplierListStore"; 
+import { useSupplierListStore } from "./stores/useSupplierListStore";
 
 const communicationPreferenceMap = {
   EMAIL: "Email",
@@ -123,14 +124,18 @@ const Suppliers = () => {
       headerName: "Ações",
       width: 150,
       renderCell: (cellData) => (
-        <>
-          <Button onClick={() => handleClickOpen(cellData.row)}>
-            <EditIcon />
-          </Button>
-          <Button onClick={() => handleDelete([cellData.row.id])}>
-            <DeleteIcon />
-          </Button>
-        </>
+        <div>
+          <Tooltip title="Editar">
+            <Button onClick={() => handleClickOpen(cellData.row)}>
+              <EditIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Excluir">
+            <Button onClick={() => handleDelete([cellData.row.id])}>
+              <DeleteIcon />
+            </Button>
+          </Tooltip>
+        </div>
       ),
     },
   ];

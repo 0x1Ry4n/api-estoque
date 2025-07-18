@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import api from "../../../../../api";
+import { UserService } from "../../../../../services/UserService";
 
 const roleMap = {
   ADMIN: "Administrador",
@@ -34,7 +35,7 @@ export const useUserListStore = create((set, get) => ({
 
   fetchUsers: async () => {
     try {
-      const res = await api.get(`/auth/users`);
+      const res = await UserService.getUsers();
       const formatted = res.data.map((user) => ({
         ...user,
         role: roleMap[user.role] || user.role,
@@ -51,7 +52,7 @@ export const useUserListStore = create((set, get) => ({
 
   saveUser: async (id, data) => {
     try {
-      await api.put(`/auth/users/${id}`, data);
+      await UserService.updateUser(id, data);
       get().showSnackbar("Usuário atualizado com sucesso!");
       get().fetchUsers();
     } catch (error) {
@@ -64,7 +65,7 @@ export const useUserListStore = create((set, get) => ({
 
   saveStatus: async (id, status) => {
     try {
-      await api.patch(`/auth/users/${id}/status`, status);
+      await UserService.updateStatus(id, status);
       get().showSnackbar("Status atualizado com sucesso!");
       get().fetchUsers();
     } catch (error) {
@@ -77,7 +78,7 @@ export const useUserListStore = create((set, get) => ({
 
   savePassword: async (id, password) => {
     try {
-      await api.patch(`/auth/users/${id}/password`, password);
+      await UserService.updatePassword(id, password);
       get().showSnackbar("Senha atualizada com sucesso!");
       get().fetchUsers();
     } catch (error) {

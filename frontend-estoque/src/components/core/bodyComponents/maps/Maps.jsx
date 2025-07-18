@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, FeatureGroup, useMap } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
-import { Dialog, Button, Box, TextField, AppBar, Toolbar, Typography, Container, Grid, Tooltip, Avatar, Chip, Divider, CircularProgress, Alert, InputAdornment, useMediaQuery, useTheme } from '@mui/material';
+import { Dialog, Button, Box, TextField, AppBar, Toolbar, Typography, Container, Grid, Tooltip, Avatar, Chip, Divider, CircularProgress, Alert, InputAdornment, useMediaQuery, useTheme, Paper } from '@mui/material';
 import {
   FilterList as FilterListIcon,
   LocationSearching as LocationSearchingIcon,
@@ -299,241 +299,249 @@ const MapComponent = () => {
   };
 
   return (
-    <Container sx={{
-      width: isMobile ? '100vw' : '80vw',
+    <Box sx={{
+      width: isMobile ? '100vw' : '60vw',
       minHeight: '100vh',
       p: isMobile ? 4 : 6,
-      backgroundColor: "#f5f5f5",
+      mt: 5,
       boxSizing: 'border-box',
       borderRadius: 1,
       mx: 'auto',
+      '& .fc-toolbar-title': {
+        width: '100%',
+        textAlign: 'center',
+        fontSize: '1.25rem',
+        fontWeight: 600,
+      },
     }}>
-      <AppBar position="static" sx={{ borderRadius: 1, boxShadow: 2, backgroundColor: '#00796b' }}>
-        <Toolbar>
-          <Typography variant="h6">Mapa de Fornecedores e Marcadores</Typography>
-        </Toolbar>
-      </AppBar>
+      <Paper elevation={4} sx={{ padding: 4, borderRadius: 2 }}>
+        <AppBar position="static" sx={{ borderRadius: 1, boxShadow: 2, backgroundColor: '#00796b' }}>
+          <Toolbar>
+            <Typography margin="auto" variant="h7">Mapa de Fornecedores e Marcadores</Typography>
+          </Toolbar>
+        </AppBar>
 
-      {loadingSuppliers && (
-        <Dialog
-          open={loadingSuppliers}
-          PaperProps={{
-            sx: {
-              backgroundColor: 'rgba(0, 0, 0, 0.6)', 
-              boxShadow: 'none',
-              backdropFilter: 'blur(3px)',
-              backgroundColor: "#f5f5f5"
-            },
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center',
-              p: 4,
-              borderRadius: 2,
-              backgroundColor: "#f5f5f5",
-              minWidth: 300,
+        {loadingSuppliers && (
+          <Dialog
+            open={loadingSuppliers}
+            PaperProps={{
+              sx: {
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                boxShadow: 'none',
+                backdropFilter: 'blur(3px)',
+                backgroundColor: "#f5f5f5"
+              },
             }}
           >
-            <CircularProgress
-              variant="determinate"
-              value={geocodingProgress}
-              size={60}
-              thickness={4}
-              sx={{ mb: 3, color: 'primary.main' }}
-            />
-            <Typography variant="h6" sx={{ fontWeight: "bold" }} gutterBottom>
-              Carregando fornecedores...
-            </Typography>
-            <Typography gutterBottom>
-              {geocodingProgress}% completo
-            </Typography>
-
-            <Button
-              onClick={handleCancelGeocoding}
-              variant="outlined"
-              color="error"
-              size="small"
-              sx={{ mt: 2 }}
-            >
-              Cancelar
-            </Button>
-          </Box>
-        </Dialog>
-      )}
-
-      {geocodingError && (
-        <Alert severity="error" sx={{ my: 2 }}>
-          {geocodingError}
-        </Alert>
-      )}
-
-      <Box sx={{ my: 2, mt: 4 }}>
-        <Grid container spacing={2} alignItems="center">
-          {/* Filtro */}
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              label="Filtrar Notas"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              variant="outlined"
-              size="small"
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FilterListIcon />
-                  </InputAdornment>
-                ),
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                p: 4,
+                borderRadius: 2,
+                backgroundColor: "#f5f5f5",
+                minWidth: 300,
               }}
-            />
-          </Grid>
-        </Grid>
-      </Box>
-
-      <Box sx={{ my: 2 }}>
-        <Grid container spacing={2}>
-          {/* Mostrar/Esconder Polígonos */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Tooltip title={showPolygons ? "Esconder Polígonos" : "Mostrar Polígonos"}>
-              <Button
-                variant="outlined"
-                fullWidth
-                onClick={() => setShowPolygons(!showPolygons)}
-                startIcon={showPolygons ? <VisibilityOffIcon /> : <VisibilityIcon />}
-              >
-                {showPolygons ? 'Esconder' : 'Mostrar'} Polígonos
-              </Button>
-            </Tooltip>
-          </Grid>
-
-          {/* Mostrar/Esconder Linhas */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Tooltip title={showLines ? "Esconder Linhas" : "Mostrar Linhas"}>
-              <Button
-                variant="outlined"
-                fullWidth
-                onClick={() => setShowLines(!showLines)}
-                startIcon={showLines ? <PolylineIcon /> : <ShowChartIcon />}
-              >
-                {showLines ? 'Esconder' : 'Mostrar'} Linhas
-              </Button>
-            </Tooltip>
-          </Grid>
-
-          {/* Limpar Marcadores */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Tooltip title="Limpar Marcadores">
-              <Button
-                variant="outlined"
-                color="warning"
-                fullWidth
-                onClick={clearMarkers}
-                startIcon={<ClearIcon />}
-              >
-                Limpar Marcadores
-              </Button>
-            </Tooltip>
-          </Grid>
-
-          {/* Restaurar Padrão */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Tooltip title="Restaurar Marcadores Padrão">
-              <Button
-                variant="outlined"
-                color="secondary"
-                fullWidth
-                onClick={restoreDefaultMarkers}
-                startIcon={<RestoreIcon />}
-              >
-                Restaurar Padrão
-              </Button>
-            </Tooltip>
-          </Grid>
-        </Grid>
-      </Box>
-
-      <MapContainer center={[-23.5505, -46.6333]} zoom={13} onClick={addMarker} style={{ height: '600px', width: '100%' }}>
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        <FeatureGroup>
-          <EditControl
-            position="topright"
-            onCreated={handlePolygonCreate}
-            draw={{
-              rectangle: false,
-              circle: false,
-              polyline: {
-                allowIntersection: false,
-                shapeOptions: {
-                  color: '#f357a1',
-                  weight: 10,
-                },
-              },
-              marker: false,
-              polygon: {
-                allowIntersection: false,
-              },
-            }}
-          />
-        </FeatureGroup>
-
-        {suppliers.map((supplier, index) => {
-          if (!supplier.latitude || !supplier.longitude) return null;
-
-          return (
-            <Marker
-              key={`supplier-${index}`}
-              position={[supplier.latitude, supplier.longitude]}
             >
-              <Popup>{renderSupplierPopup(supplier)}</Popup>
-            </Marker>
-          );
-        })}
-
-        {markers.filter(marker => marker.note.includes(filter)).map((marker, index) => (
-          <Marker
-            key={`marker-${index}`}
-            position={[marker.lat, marker.lng]}
-            eventHandlers={{
-              click: () => handleMarkerClick(marker),
-            }}
-          >
-            <Popup>
-              <TextField
-                label="Anotações"
-                value={marker.note}
-                onChange={(e) => handleNoteChange(index, e.target.value)}
-                variant="outlined"
-                fullWidth
+              <CircularProgress
+                variant="determinate"
+                value={geocodingProgress}
+                size={60}
+                thickness={4}
+                sx={{ mb: 3, color: 'primary.main' }}
               />
-              <Button sx={{ mt: 3 }} variant="outlined" color="error" onClick={() => deleteMarker(index)}>
-                Deletar
+              <Typography variant="h6" sx={{ fontWeight: "bold" }} gutterBottom>
+                Carregando fornecedores...
+              </Typography>
+              <Typography gutterBottom>
+                {geocodingProgress}% completo
+              </Typography>
+
+              <Button
+                onClick={handleCancelGeocoding}
+                variant="outlined"
+                color="error"
+                size="small"
+                sx={{ mt: 2 }}
+              >
+                Cancelar
               </Button>
-            </Popup>
-          </Marker>
-        ))}
-
-        {showPolygons && polygons.map((polygon, index) => (
-          <Polygon key={`polygon-${index}`} positions={polygon} />
-        ))}
-
-        {showLines && lines.map((line, index) => (
-          <Polyline key={`line-${index}`} positions={line} />
-        ))}
-
-        {distanceLine && (
-          <Polyline positions={distanceLine.map(marker => [marker.lat, marker.lng])} color="red" />
+            </Box>
+          </Dialog>
         )}
 
-        <MapZoomToShapes />
-      </MapContainer>
-    </Container>
+        {geocodingError && (
+          <Alert severity="error" sx={{ my: 2 }}>
+            {geocodingError}
+          </Alert>
+        )}
+
+        <Box sx={{ my: 2, mt: 4 }}>
+          <Grid container spacing={2} alignItems="center">
+            {/* Filtro */}
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                label="Filtrar Notas"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                variant="outlined"
+                size="small"
+                fullWidth
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <FilterListIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+
+        <Box sx={{ my: 2 }}>
+          <Grid container spacing={2}>
+            {/* Mostrar/Esconder Polígonos */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Tooltip title={showPolygons ? "Esconder Polígonos" : "Mostrar Polígonos"}>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  onClick={() => setShowPolygons(!showPolygons)}
+                  startIcon={showPolygons ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                >
+                  {showPolygons ? 'Esconder' : 'Mostrar'} Polígonos
+                </Button>
+              </Tooltip>
+            </Grid>
+
+            {/* Mostrar/Esconder Linhas */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Tooltip title={showLines ? "Esconder Linhas" : "Mostrar Linhas"}>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  onClick={() => setShowLines(!showLines)}
+                  startIcon={showLines ? <PolylineIcon /> : <ShowChartIcon />}
+                >
+                  {showLines ? 'Esconder' : 'Mostrar'} Linhas
+                </Button>
+              </Tooltip>
+            </Grid>
+
+            {/* Limpar Marcadores */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Tooltip title="Limpar Marcadores">
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  fullWidth
+                  onClick={clearMarkers}
+                  startIcon={<ClearIcon />}
+                >
+                  Limpar Marcadores
+                </Button>
+              </Tooltip>
+            </Grid>
+
+            {/* Restaurar Padrão */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Tooltip title="Restaurar Marcadores Padrão">
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  fullWidth
+                  onClick={restoreDefaultMarkers}
+                  startIcon={<RestoreIcon />}
+                >
+                  Restaurar Padrão
+                </Button>
+              </Tooltip>
+            </Grid>
+          </Grid>
+        </Box>
+
+        <MapContainer center={[-23.5505, -46.6333]} zoom={13} onClick={addMarker} style={{ height: '600px', width: '100%' }}>
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+          <FeatureGroup>
+            <EditControl
+              position="topright"
+              onCreated={handlePolygonCreate}
+              draw={{
+                rectangle: false,
+                circle: false,
+                polyline: {
+                  allowIntersection: false,
+                  shapeOptions: {
+                    color: '#f357a1',
+                    weight: 10,
+                  },
+                },
+                marker: false,
+                polygon: {
+                  allowIntersection: false,
+                },
+              }}
+            />
+          </FeatureGroup>
+
+          {suppliers.map((supplier, index) => {
+            if (!supplier.latitude || !supplier.longitude) return null;
+
+            return (
+              <Marker
+                key={`supplier-${index}`}
+                position={[supplier.latitude, supplier.longitude]}
+              >
+                <Popup>{renderSupplierPopup(supplier)}</Popup>
+              </Marker>
+            );
+          })}
+
+          {markers.filter(marker => marker.note.includes(filter)).map((marker, index) => (
+            <Marker
+              key={`marker-${index}`}
+              position={[marker.lat, marker.lng]}
+              eventHandlers={{
+                click: () => handleMarkerClick(marker),
+              }}
+            >
+              <Popup>
+                <TextField
+                  label="Anotações"
+                  value={marker.note}
+                  onChange={(e) => handleNoteChange(index, e.target.value)}
+                  variant="outlined"
+                  fullWidth
+                />
+                <Button sx={{ mt: 3 }} variant="outlined" color="error" onClick={() => deleteMarker(index)}>
+                  Deletar
+                </Button>
+              </Popup>
+            </Marker>
+          ))}
+
+          {showPolygons && polygons.map((polygon, index) => (
+            <Polygon key={`polygon-${index}`} positions={polygon} />
+          ))}
+
+          {showLines && lines.map((line, index) => (
+            <Polyline key={`line-${index}`} positions={line} />
+          ))}
+
+          {distanceLine && (
+            <Polyline positions={distanceLine.map(marker => [marker.lat, marker.lng])} color="red" />
+          )}
+
+          <MapZoomToShapes />
+        </MapContainer>
+      </Paper>
+    </Box>
   );
 };
 

@@ -22,6 +22,7 @@ import {
   CreditCardOutlined,
   GroupOutlined,
   Inventory2Outlined,
+  Person2Outlined
 } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -42,6 +43,7 @@ export default function SideBarComponent({ isSidebarOpen, toggleSidebar }) {
     { title: "Home", route: "home", component: <HomeOutlined /> },
     { title: "Calendário", route: "calendar", component: <CalendarTodayOutlined /> },
     { title: "Mapa", route: "maps", component: <MapOutlined /> },
+    { title: "Clientes", route: "customers", component: <Person2Outlined /> },
     { title: "Fornecedores", route: "suppliers", component: <LocalShippingOutlined /> },
     { title: "Categorias", route: "categories", component: <CategoryOutlined /> },
     { title: "Produtos", route: "products", component: <InventoryOutlined /> },

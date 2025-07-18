@@ -61,7 +61,7 @@ const CategoryForm = ({ onCategoryAdded }) => {
             name="name"
             control={control}
             defaultValue=""
-            rules={{ required: 'Nome da categoria é obrigatório' }}
+            rules={{ required: 'O nome da categoria é obrigatório.' }}
             render={({ field }) => (
               <TextField
                 label="Nome da Categoria"

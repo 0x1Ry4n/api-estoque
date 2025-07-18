@@ -56,6 +56,7 @@ function App() {
           <Route path="/user" element={<UserProfile />} />
           <Route path="/create-user" element={<PrivateRoute onlyAdmin={true}> <UserManagement /> </PrivateRoute>} />
           <Route path="/categories" element={<CategoryManagement />} />
+          <Route path="/customers" element={<CustomerManagement />} />
           <Route path="/suppliers" element={<SupplierManagement />} />
           <Route path="/products" element={<ProductManagement />} />
           <Route path="/inventory" element={<InventoryManagement />} />
@@ -63,8 +64,8 @@ function App() {
           <Route path="/exits" element={<ExitManagement />} />
           <Route path="/customers" element={<CustomerManagement />} />
           <Route path="/qrcode-generator" element={<QRCodeGenerator />} />
-          <Route path="/settings" element={<PrivateRoute onlyAdmin={true}> 
-            <Settings onToggleTheme={handleToggleTheme} /> 
+          <Route path="/settings" element={<PrivateRoute onlyAdmin={true}>
+            <Settings onToggleTheme={handleToggleTheme} />
           </PrivateRoute>} />
         </Route>
       </Route>

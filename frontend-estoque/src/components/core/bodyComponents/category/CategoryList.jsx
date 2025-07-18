@@ -8,6 +8,7 @@ import {
   TextField,
   Snackbar,
   Alert,
+  Tooltip
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -37,9 +38,9 @@ const Categories = () => {
     deleteCategory,
   } = useCategoryListStore();
 
-   useEffect(() => {
-      fetchCategories(pagination.page, pagination.pageSize);
-    }, []);
+  useEffect(() => {
+    fetchCategories(pagination.page, pagination.pageSize);
+  }, []);
 
   const handleDelete = async (ids) => {
     const confirmDelete = await Swal.fire({
@@ -52,7 +53,7 @@ const Categories = () => {
     });
 
     if (confirmDelete.isConfirmed) {
-      await deleteCategory(ids[0]);
+      await deleteCategory(ids);
     }
   };
 
@@ -69,14 +70,18 @@ const Categories = () => {
       headerName: "Ações",
       width: 150,
       renderCell: (cellData) => (
-        <>
-          <Button onClick={() => openModal(cellData.row)}>
-            <EditIcon />
-          </Button>
-          <Button onClick={() => handleDelete([cellData.row.id])}>
-            <DeleteIcon />
-          </Button>
-        </>
+        <div>
+          <Tooltip title="Editar">
+            <Button onClick={() => openModal(cellData.row)}>
+              <EditIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Excluir">
+            <Button onClick={() => handleDelete([cellData.row.id])}>
+              <DeleteIcon />
+            </Button>
+          </Tooltip>
+        </div>
       ),
     },
   ];
@@ -118,7 +123,7 @@ const Categories = () => {
         />
       </div>
 
-      <Dialog 
+      <Dialog
         maxWidth="md"
         PaperProps={{
           sx: {
@@ -126,7 +131,7 @@ const Categories = () => {
             maxWidth: '90vw',
           },
         }}
-        open={open} 
+        open={open}
         onClose={closeModal}
       >
         <DialogTitle>Editar Categoria</DialogTitle>

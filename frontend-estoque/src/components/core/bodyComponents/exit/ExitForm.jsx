@@ -170,7 +170,7 @@ const ExitForm = ({ onExitAdded }) => {
                 name="quantity"
                 control={control}
                 defaultValue=""
-                rules={{ required: "A quantidade obrigatória." }}
+                rules={{ required: "A quantidade é obrigatória." }}
                 render={({ field }) => (
                   <TextField
                     label="Quantidade"

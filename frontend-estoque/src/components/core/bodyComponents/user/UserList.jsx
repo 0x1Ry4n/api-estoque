@@ -8,6 +8,7 @@ import {
   Snackbar,
   Alert,
   TextField,
+  Tooltip
 } from "@mui/material";
 import { Edit as EditIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
@@ -119,29 +120,35 @@ const UserList = () => {
       headerName: "Ações",
       width: 200,
       renderCell: (params) => (
-        <>
-          <Button
-            onClick={() => handleStatusChange(params.row.id)}
-            variant="outlined"
-            size="small"
-            color="primary"
-            sx={{ mr: 1 }}
-          >
-            Status
-          </Button>
-          <Button
-            onClick={() => handlePasswordChange(params.row.id)}
-            variant="outlined"
-            size="small"
-            color="primary"
-            sx={{ mr: 1 }}
-          >
-            Senha
-          </Button>
-          <Button onClick={() => handleClickOpen(params.row)}>
-            <EditIcon />
-          </Button>
-        </>
+        <div>
+          <Tooltip title="Editar Status">
+            <Button
+              onClick={() => handleStatusChange(params.row.id)}
+              variant="outlined"
+              size="small"
+              color="primary"
+              sx={{ mr: 1 }}
+            >
+              Status
+            </Button>
+          </Tooltip>
+          <Tooltip title="Editar Senha">
+            <Button
+              onClick={() => handlePasswordChange(params.row.id)}
+              variant="outlined"
+              size="small"
+              color="primary"
+              sx={{ mr: 1 }}
+            >
+              Senha
+            </Button>
+          </Tooltip>
+          <Tooltip title="Editar">
+            <Button onClick={() => handleClickOpen(params.row)}>
+              <EditIcon />
+            </Button>
+          </Tooltip>
+        </div>
       ),
     },
   ];

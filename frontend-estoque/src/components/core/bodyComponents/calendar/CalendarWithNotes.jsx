@@ -281,9 +281,10 @@ const CalendarWithNotes = () => {
 
   return (
     <Box sx={{
-      width: isMobile ? '100vw' : '80vw',
+      width: isMobile ? '100vw' : '60vw',
       minHeight: '100vh',
       p: isMobile ? 4 : 6,
+      mt: 5,
       boxSizing: 'border-box',
       borderRadius: 1,
       mx: 'auto',
@@ -294,7 +295,7 @@ const CalendarWithNotes = () => {
         fontWeight: 600,
       },
     }}>
-      <Paper elevation={4} sx={{ padding: 10, borderRadius: 2 }}>
+      <Paper elevation={4} sx={{ padding: 4, borderRadius: 2 }}>
         <Typography variant="h5" sx={{ mt: 2, mb: 3, fontWeight: 'bolder' }}>
           Calendário de Notas
         </Typography>

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import api from "../../../../../api";
+import { ExitService } from "../../../../../services/ExitService";
 
 export const useExitListStore = create((set, get) => ({
     rows: [],
@@ -12,7 +13,7 @@ export const useExitListStore = create((set, get) => ({
     setPagination: (newPagination) => set({ pagination: newPagination }),
     fetchExits: async (page, pageSize) => {
         try {
-            const res = await api.get(`/exits?page=${page}&size=${pageSize}`);
+            const res = await ExitService.getExits(true, page, pageSize);
             set({
                 rows: res.data.content,
                 pagination: {
@@ -33,7 +34,7 @@ export const useExitListStore = create((set, get) => ({
         const { selectedExit, pagination } = get();
 
         try {
-            await api.patch(`/exits/${selectedExit.id}`, {
+            await ExitService.updateExit(selectedExit.id, {
                 quantity: selectedExit.quantity,
                 exitDate: selectedExit.exitDate,
             });

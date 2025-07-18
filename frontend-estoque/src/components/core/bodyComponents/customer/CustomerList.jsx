@@ -8,20 +8,28 @@ import {
   TextField,
   Snackbar,
   Alert,
+  Grid,
+  InputAdornment,
+  Tooltip,
+  FormControl,
+  InputLabel,
   Select,
   MenuItem,
-  InputLabel,
-  FormControl,
-  Pagination,
 } from "@mui/material";
 import {
-  Delete as DeleteIcon,
   Edit as EditIcon,
   Refresh as RefreshIcon,
+  PersonOutline,
+  EmailOutlined,
+  PhoneOutlined,
+  DescriptionOutlined,
+  LocationOnOutlined,
 } from "@mui/icons-material";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { fileExporters } from "../../../../utils/utils";
 import api from "../../../../api";
+import InputMask from "react-input-mask";
+import { CustomerService } from "../../../../services/customerService";
 
 const Customers = () => {
   const [open, setOpen] = useState(false);
@@ -30,20 +38,22 @@ const Customers = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
   useEffect(() => {
-    fetchCustomers();
-  }, [page, pageSize]);
+    fetchCustomers(page, pageSize);
+  }, []);
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = async (page, pageSize) => {
     try {
-      const response = await api.get(`/customer?page=${page}&size=${pageSize}`);
-      setRows(response.data.content);
-      setTotalPages(response.data.totalPages);
+      const res = await CustomerService.getCustomer(true, page, pageSize);
+      setRows(res.data.content);
+      setTotalPages(res.data.totalPages);
+      setTotalElements(res.data.totalElements);
     } catch (error) {
       console.error("Erro ao buscar clientes: ", error);
       setSnackbarMessage("Erro ao carregar clientes.");
@@ -55,8 +65,7 @@ const Customers = () => {
   const handleClickOpen = (customer) => {
     setSelectedCustomer({
       ...customer,
-      preferredPaymentMethod: customer.preferredPaymentMethod || "ANY",
-      communicationPreference: customer.communicationPreference || "EMAIL",
+      status: customer.status || "ACTIVE",
     });
     setOpen(true);
     setIsEditing(true);
@@ -68,81 +77,22 @@ const Customers = () => {
     setIsEditing(false);
   };
 
-  const handleDelete = async (ids) => {
-    try {
-      await Promise.all(ids.map((id) => api.delete(`/customer/${id}`)));
-      setRows(rows.filter((row) => !ids.includes(row.id)));
-      setSnackbarMessage("Cliente deletado com sucesso!");
-      setSnackbarSeverity("success");
-    } catch (error) {
-      setSnackbarMessage(
-        `Erro ao deletar o cliente: ${error.response?.data?.message || error.response?.data?.error || error.message
-        }`
-      );
-      setSnackbarSeverity("error");
-    } finally {
-      setSnackbarOpen(true);
-    }
-  };
-
   const handleSave = async () => {
-    if (
-      !selectedCustomer.fullname ||
-      !selectedCustomer.email ||
-      !selectedCustomer.phone
-    ) {
+    if (!selectedCustomer.name || !selectedCustomer.email || !selectedCustomer.phone) {
       setSnackbarMessage("Por favor, preencha todos os campos obrigatórios!");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
       return;
     }
 
-    const validPaymentMethods = ["CREDIT_CARD", "DEBIT_CARD", "MONEY", "ANY"];
-    const validCommunicationPreferences = ["EMAIL", "PHONE", "SMS", "ANY"];
-
-    if (
-      !validPaymentMethods.includes(selectedCustomer.preferredPaymentMethod)
-    ) {
-      setSnackbarMessage("Método de pagamento inválido.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-      return;
-    }
-
-    if (
-      !validCommunicationPreferences.includes(
-        selectedCustomer.communicationPreference
-      )
-    ) {
-      setSnackbarMessage("Preferência de comunicação inválida.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-      return;
-    }
-
     try {
-      if (isEditing) {
-        await api.patch(`/customer/${selectedCustomer.id}`, {
-          fullname: selectedCustomer.fullname,
-          email: selectedCustomer.email,
-          phone: selectedCustomer.phone,
-          cpf: selectedCustomer.cpf,
-          cep: selectedCustomer.cep,
-          notes: selectedCustomer.notes,
-          preferredPaymentMethod: selectedCustomer.preferredPaymentMethod,
-          communicationPreference: selectedCustomer.communicationPreference,
-        });
-        setRows(
-          rows.map((row) =>
-            row.id === selectedCustomer.id ? selectedCustomer : row
-          )
-        );
-        setSnackbarMessage("Cliente atualizado com sucesso!");
-      } else {
-        const response = await api.post("/customer", selectedCustomer);
-        setRows([...rows, response.data.content]);
-        setSnackbarMessage("Cliente adicionado com sucesso!");
-      }
+      await CustomerService.updateCustomer(selectedCustomer.id, selectedCustomer);
+      setRows(
+        rows.map((row) =>
+          row.id === selectedCustomer.id ? selectedCustomer : row
+        )
+      );
+      setSnackbarMessage("Cliente atualizado com sucesso!");
       setSnackbarSeverity("success");
     } catch (error) {
       setSnackbarMessage("Erro ao salvar cliente.");
@@ -160,59 +110,77 @@ const Customers = () => {
     setSnackbarOpen(true);
   };
 
-  const paymentMethods = {
-    CREDIT_CARD: "Cartão de Crédito",
-    DEBIT_CARD: "Cartão de Débito",
-    MONEY: "Dinheiro",
-    ANY: "Qualquer um",
-  };
-
-  const communicationPreferences = {
-    EMAIL: "E-mail",
-    PHONE: "Telefone",
-    SMS: "SMS",
-    ANY: "Qualquer um",
+  const statusOptions = {
+    ACTIVE: "Ativo",
+    INACTIVE: "Inativo",
+    BLOCKED: "Bloqueado",
+    SUSPENDED: "Suspenso",
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
+    { field: "id", headerName: "ID", width: 100 },
     {
-      field: "fullname",
-      headerName: "Nome Completo",
+      field: "name",
+      headerName: "Nome",
       width: 200,
-      editable: true,
-    },
-    { field: "email", headerName: "E-mail", width: 200, editable: true },
-    { field: "phone", headerName: "Telefone", width: 150, editable: true },
-    { field: "cpf", headerName: "CPF", width: 150, editable: true },
-    { field: "cep", headerName: "CEP", width: 150, editable: true },
-    { field: "notes", headerName: "Notas", width: 200, editable: true },
-    {
-      field: "preferredPaymentMethod",
-      headerName: "Método de Pagamento Preferido",
-      width: 200,
-      renderCell: (params) => paymentMethods[params.value] || params.value,
     },
     {
-      field: "communicationPreference",
-      headerName: "Preferência de Comunicação",
-      width: 200,
-      renderCell: (params) =>
-        communicationPreferences[params.value] || params.value,
+      field: "cpf",
+      headerName: "CPF",
+      width: 175,
+    },
+    {
+      field: "cnpj",
+      headerName: "CNPJ",
+      width: 175,
+    },
+    {
+      field: "email",
+      headerName: "E-mail",
+      width: 200
+    },
+    {
+      field: "phone",
+      headerName: "Telefone",
+      width: 150
+    },
+    {
+      field: "mobile",
+      headerName: "Celular",
+      width: 150
+    },
+    {
+      field: "addressInfo",
+      headerName: "Endereço",
+      width: 250,
+      valueGetter: (params) =>
+        `${params.row.address || ''}, ${params.row.number || ''} - ${params.row.neighborhood || ''}`
+    },
+    {
+      field: "cityState",
+      headerName: "Cidade/UF",
+      width: 150,
+      valueGetter: (params) => `${params.row.city || ''}/${params.row.state || ''}`
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 120,
+      renderCell: (params) => statusOptions[params.value] || params.value,
     },
     {
       field: "actions",
       headerName: "Ações",
-      width: 150,
-      renderCell: (cellData) => (
-        <>
-          <Button onClick={() => handleClickOpen(cellData.row)}>
-            <EditIcon />
-          </Button>
-          <Button onClick={() => handleDelete([cellData.row.id])}>
-            <DeleteIcon />
-          </Button>
-        </>
+      width: 120,
+      sortable: false,
+      renderCell: (params) => (
+        <div>
+          <Tooltip title="Editar">
+            <Button onClick={() => handleClickOpen(params.row)}>
+              <EditIcon />
+            </Button>
+          </Tooltip>
+        </div>
       ),
     },
   ];
@@ -223,6 +191,7 @@ const Customers = () => {
         padding: "20px",
         backgroundColor: "#f5f5f5",
         borderRadius: "8px",
+        width: "95%",
       }}
     >
       <div
@@ -233,23 +202,18 @@ const Customers = () => {
           marginBottom: "16px",
         }}
       >
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={handleRefresh}
-        >
+        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={handleRefresh}>
           Atualizar Lista
         </Button>
         <Button
           variant="contained"
           color="primary"
-          onClick={() =>
-            fileExporters.exportToExcel("Clientes", "clientes.xlsx", rows)
-          }
+          onClick={() => fileExporters.exportToExcel("Fornecedores", "fornecedores.xlsx", rows)}
         >
           Exportar Excel
         </Button>
       </div>
+
       <div
         style={{
           height: 400,
@@ -264,137 +228,374 @@ const Customers = () => {
           rows={rows}
           columns={columns}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
-          page={page}
-          pageSize={pageSize}
-          rowCount={totalPages * pageSize}
+          rowCount={totalElements}
           paginationMode="server"
-          onPageChange={(newPage) => setPage(newPage)}
-          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+          paginationModel={{
+            page,
+            pageSize,
+          }}
+          onPaginationModelChange={({ page, pageSize }) => {
+            setPage(page);
+            setPageSize(pageSize);
+            fetchSuppliers(page, pageSize);
+          }}
+          pageSizeOptions={[20, 50, 100]}
         />
       </div>
-      <Pagination
-        count={totalPages}
-        page={page + 1}
-        onChange={(event, value) => setPage(value - 1)}
-        color="primary"
-        sx={{ mt: 2 }}
-      />
 
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle>
-          {isEditing ? "Editar Cliente" : "Adicionar Cliente"}
+          Editar Cliente
         </DialogTitle>
         <DialogContent>
-          <TextField
-            label="Nome Completo"
-            fullWidth
-            margin="normal"
-            value={selectedCustomer?.fullname || ""}
-            onChange={(e) =>
-              setSelectedCustomer({
-                ...selectedCustomer,
-                fullname: e.target.value,
-              })
-            }
-          />
-          <TextField
-            label="E-mail"
-            fullWidth
-            margin="normal"
-            value={selectedCustomer?.email || ""}
-            onChange={(e) =>
-              setSelectedCustomer({
-                ...selectedCustomer,
-                email: e.target.value,
-              })
-            }
-          />
-          <TextField
-            label="Telefone"
-            fullWidth
-            margin="normal"
-            value={selectedCustomer?.phone || ""}
-            onChange={(e) =>
-              setSelectedCustomer({
-                ...selectedCustomer,
-                phone: e.target.value,
-              })
-            }
-          />
-          <TextField
-            label="CPF"
-            fullWidth
-            margin="normal"
-            value={selectedCustomer?.cpf || ""}
-            onChange={(e) =>
-              setSelectedCustomer({ ...selectedCustomer, cpf: e.target.value })
-            }
-          />
-          <TextField
-            label="CEP"
-            fullWidth
-            margin="normal"
-            value={selectedCustomer?.cep || ""}
-            onChange={(e) =>
-              setSelectedCustomer({ ...selectedCustomer, cep: e.target.value })
-            }
-          />
-          <TextField
-            label="Notas"
-            fullWidth
-            margin="normal"
-            multiline
-            rows={4}
-            value={selectedCustomer?.notes || ""}
-            onChange={(e) =>
-              setSelectedCustomer({
-                ...selectedCustomer,
-                notes: e.target.value,
-              })
-            }
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Método de Pagamento Preferido</InputLabel>
-            <Select
-              value={selectedCustomer?.preferredPaymentMethod || "ANY"}
-              onChange={(e) =>
-                setSelectedCustomer({
-                  ...selectedCustomer,
-                  preferredPaymentMethod: e.target.value,
-                })
-              }
-            >
-              {Object.entries(paymentMethods).map(([key, value]) => (
-                <MenuItem key={key} value={key}>
-                  {value}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Preferência de Comunicação</InputLabel>
-            <Select
-              value={selectedCustomer?.communicationPreference || "EMAIL"} // Valor padrão
-              onChange={(e) =>
-                setSelectedCustomer({
-                  ...selectedCustomer,
-                  communicationPreference: e.target.value,
-                })
-              }
-            >
-              {Object.entries(communicationPreferences).map(([key, value]) => (
-                <MenuItem key={key} value={key}>
-                  {value}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12}>
+              <TextField
+                label="Nome Completo"
+                fullWidth
+                margin="normal"
+                value={selectedCustomer?.name || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    name: e.target.value,
+                  })
+                }
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonOutline />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="E-mail"
+                fullWidth
+                margin="normal"
+                value={selectedCustomer?.email || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    email: e.target.value,
+                  })
+                }
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EmailOutlined />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <InputMask
+                mask="(99) 9999-9999"
+                value={selectedCustomer?.phone || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    phone: e.target.value,
+                  })
+                }
+              >
+                {() => (
+                  <TextField
+                    label="Telefone"
+                    fullWidth
+                    margin="normal"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PhoneOutlined />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              </InputMask>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <InputMask
+                mask="999.999.999-99"
+                value={selectedCustomer?.cpf || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    cpf: e.target.value,
+                  })
+                }
+              >
+                {() => (
+                  <TextField
+                    label="CPF"
+                    fullWidth
+                    margin="normal"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <DescriptionOutlined />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              </InputMask>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <InputMask
+                mask="99.999.999/9999-99"
+                value={selectedCustomer?.cnpj || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    cnpj: e.target.value,
+                  })
+                }
+              >
+                {() => (
+                  <TextField
+                    label="CNPJ"
+                    fullWidth
+                    margin="normal"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <DescriptionOutlined />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              </InputMask>
+            </Grid>
+
+            <Grid item xs={12} sm={3}>
+              <InputMask
+                mask="99999-999"
+                value={selectedCustomer?.zipCode || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    zipCode: e.target.value,
+                  })
+                }
+              >
+                {() => (
+                  <TextField
+                    label="CEP"
+                    fullWidth
+                    margin="normal"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LocationOnOutlined />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              </InputMask>
+            </Grid>
+
+            <Grid item xs={12} sm={7}>
+              <TextField
+                label="Endereço"
+                fullWidth
+                margin="normal"
+                value={selectedCustomer?.address || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    address: e.target.value,
+                  })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={2}>
+              <TextField
+                label="Número"
+                fullWidth
+                margin="normal"
+                value={selectedCustomer?.number || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    number: e.target.value,
+                  })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Complemento"
+                fullWidth
+                margin="normal"
+                value={selectedCustomer?.complement || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    complement: e.target.value,
+                  })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Bairro"
+                fullWidth
+                margin="normal"
+                value={selectedCustomer?.neighborhood || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    neighborhood: e.target.value,
+                  })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={8}>
+              <TextField
+                label="Cidade"
+                fullWidth
+                margin="normal"
+                value={selectedCustomer?.city || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    city: e.target.value,
+                  })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="UF"
+                fullWidth
+                margin="normal"
+                value={selectedCustomer?.state || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    state: e.target.value,
+                  })
+                }
+                inputProps={{ maxLength: 2 }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <InputMask
+                mask="(99) 99999-9999"
+                value={selectedCustomer?.mobile || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    mobile: e.target.value,
+                  })
+                }
+              >
+                {() => (
+                  <TextField
+                    label="Celular"
+                    fullWidth
+                    margin="normal"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PhoneOutlined />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              </InputMask>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="IE"
+                fullWidth
+                margin="normal"
+                value={selectedCustomer?.ie || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    ie: e.target.value,
+                  })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="IM"
+                fullWidth
+                margin="normal"
+                value={selectedCustomer?.im || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    im: e.target.value,
+                  })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={selectedCustomer?.status || "ACTIVE"}
+                  onChange={(e) =>
+                    setSelectedCustomer({
+                      ...selectedCustomer,
+                      status: e.target.value,
+                    })
+                  }
+                >
+                  {Object.entries(statusOptions).map(([key, value]) => (
+                    <MenuItem key={key} value={key}>
+                      {value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                label="Notas"
+                fullWidth
+                margin="normal"
+                multiline
+                rows={4}
+                value={selectedCustomer?.notes || ""}
+                onChange={(e) =>
+                  setSelectedCustomer({
+                    ...selectedCustomer,
+                    notes: e.target.value,
+                  })
+                }
+              />
+            </Grid>
+          </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancelar</Button>
-          <Button onClick={handleSave}>
-            {isEditing ? "Confirmar" : "Adicionar"}
-          </Button>
+          <Button onClick={handleClose} color="secondary">Cancelar</Button>
+          <Button onClick={handleSave} color="primary">Confirmar</Button>
         </DialogActions>
       </Dialog>
 

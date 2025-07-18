@@ -51,7 +51,7 @@ const CreateUser = ({ onUserAdded }) => {
   const [isFaceDetected, setIsFaceDetected] = useState(false);
   const [userFaceImage, setUserFaceImage] = useState(null);
   const [faceDetection, setFaceDetection] = useState(null);
-  const [faceRecognitionEnabled, setFaceRecognitionEnabled] = useState(JSON.parse(localStorage.getItem("facialRecognition")));
+  const [faceRecognitionEnabled] = useState(JSON.parse(localStorage.getItem("facialRecognition")));
   const [detectionScore, setDetectionScore] = useState(0);
 
   useEffect(() => {

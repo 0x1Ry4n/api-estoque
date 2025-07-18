@@ -1,5 +1,7 @@
 import { create } from "zustand";
-import api from "../../../../../api";
+import { ProductService } from "../../../../../services/ProductService";
+import { CategoryService } from "../../../../../services/CategoryService";
+import { SupplierService } from "../../../../../services/supplierService";
 
 export const useProductListStore = create((set, get) => ({
     rows: [],
@@ -39,7 +41,8 @@ export const useProductListStore = create((set, get) => ({
 
     fetchProducts: async (page, pageSize) => {
         try {
-            const res = await api.get(`/products?page=${page}&size=${pageSize}`);
+            const res = await ProductService.getProducts(true, page, pageSize);
+            
             set({
                 rows: res.data.content,
                 pagination: {
@@ -59,8 +62,8 @@ export const useProductListStore = create((set, get) => ({
     fetchCategoriesAndSuppliers: async () => {
         try {
             const [catRes, supRes] = await Promise.all([
-                api.get("/category?paged=false"),
-                api.get("/supplier?paged=false"),
+                CategoryService.getCategories(false),
+                SupplierService.getSuppliers(false),
             ]);
             set({ categories: catRes.data, suppliers: supRes.data });
         } catch (err) {
@@ -73,9 +76,8 @@ export const useProductListStore = create((set, get) => ({
 
         if (product) {
             try {
-                const res = await api.get(`/products/${product.id}/image`, {
-                    responseType: "blob",
-                });
+                const res = await ProductService.getImage(product.id);
+                
                 imagePreviewEdit = URL.createObjectURL(res.data);
             } catch (err) {
                 if (err?.response?.status !== 404) {
@@ -103,7 +105,8 @@ export const useProductListStore = create((set, get) => ({
 
     openDetailDialog: async (id) => {
         try {
-            const res = await api.get(`/products/${id}`);
+            const res = await ProductService.getProductById(id);
+            
             set({ detailedProduct: res.data, detailDialogOpen: true });
         } catch (err) {
             get().showSnackbar("Erro ao carregar detalhes do produto", "error");
@@ -130,12 +133,11 @@ export const useProductListStore = create((set, get) => ({
             if (imageEdit) {
                 const formData = new FormData();
                 formData.append("file", imageEdit);
-                await api.patch(`/products/${selectedProduct.id}/image`, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
+
+                await ProductService.updateProductImage(selectedProduct.id, formData);
             }
 
-            await api.patch(`/products/${selectedProduct.id}`, productToSave);
+            await ProductService.updateProduct(selectedProduct.id, productToSave);
             get().showSnackbar("Produto atualizado com sucesso!");
             await get().fetchProducts(page, pageSize);
         } catch (error) {
@@ -154,7 +156,7 @@ export const useProductListStore = create((set, get) => ({
         } = get();
 
         try {
-            await api.delete(`/products/${ids[0]}`);
+            await ProductService.deleteProduct(ids);
             get().showSnackbar("Produto deletado com sucesso!");
             await get().fetchProducts(page, pageSize);
         } catch (error) {
