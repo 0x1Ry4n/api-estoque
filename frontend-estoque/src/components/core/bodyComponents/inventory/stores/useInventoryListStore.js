@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import api from "../../../../../api";
+import { ProductService } from "../../../../../services/productService";
 
 export const useInventoryListStore = create((set, get) => ({
     rows: [],
@@ -9,11 +9,11 @@ export const useInventoryListStore = create((set, get) => ({
         totalElements: 0,
         totalPages: 0
     },
-    products: null,
+    products: [],
     setPagination: (newPagination) => set({ pagination: newPagination }),
     fetchInventories: async (page, pageSize) => {
         try {
-            const res = await api.get(`/products/inventory?page=${page}&size=${pageSize}`);
+            const res = await ProductService.inventory.getInventories(page, pageSize);
             set({
                 rows: res.data.content,
                 pagination: {
@@ -29,9 +29,9 @@ export const useInventoryListStore = create((set, get) => ({
     },
     fetchProducts: async () => {
         try {
-            const res = await api.get("/products?paged=false");
+            const res = await ProductService.product.getProducts(false, 0, 0);
             set({
-                products: res.data
+                products: res.data || []
             });
         } catch (error) {
             get().showSnackbar(
@@ -44,9 +44,7 @@ export const useInventoryListStore = create((set, get) => ({
         const { pagination } = get();
 
         try {
-            await api.delete(
-                `/products/${inventories[0].productId}/inventory/${inventories[0].id}`
-            );
+            await ProductService.inventory.deleteInventory(inventories[0].productId, inventories[0].id);
             get().showSnackbar("Item de inventário deletado com sucesso!");
             get().fetchInventories(pagination.page, pagination.pageSize);
         } catch (error) {

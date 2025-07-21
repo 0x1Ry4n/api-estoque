@@ -14,10 +14,10 @@ import {
   Divider,
 } from '@mui/material';
 import {
-  AddCircleOutline, Inventory2, QrCode2Rounded as QRCodeIcon
+  AddCircleOutline as AddCircleOutlineIcon, Inventory2 as Inventory2Icon, QrCode2Rounded as QRCodeIcon
 } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
-import api from './../../../../api';
+import { ProductService } from '../../../../services/productService';
 import QrScanner from 'react-qr-scanner';
 import Autocomplete from '@mui/material/Autocomplete';
 
@@ -40,7 +40,7 @@ const InventoryForm = ({ onInventoryAdded }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/products?paged=false');
+        const response = await ProductService.product.getProducts(false, 0, 0);
         setProducts(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         setSnackbarMessage('Erro ao carregar produtos: ' + (error.response?.data?.message || error.response?.data?.error || error.message));
@@ -54,17 +54,18 @@ const InventoryForm = ({ onInventoryAdded }) => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await api.post(`/products/${data.productId}/inventory`, {
+      const res = await ProductService.inventory.createInventory(`${data.productId}`, {
         discount: parseFloat(data.discount),
         inventoryCode: data.inventoryCode,
       });
-      if (response.status === 201) {
+
+      if (res.status === 201) {
         setSnackbarMessage('Inventário cadastrado com sucesso!');
         setSnackbarSeverity('success');
         setSnackbarOpen(true);
 
         if (typeof onInventoryAdded === 'function') {
-          onInventoryAdded(response.data);
+          onInventoryAdded(res.data);
         }
 
         reset();
@@ -107,7 +108,7 @@ const InventoryForm = ({ onInventoryAdded }) => {
     <Box>
       <Paper elevation={4} sx={{ padding: 6, borderRadius: 2, backgroundColor: '#f5f5f5', width: '95%' }}>
         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-          <Inventory2 sx={{ mr: 1 }} />
+          <Inventory2Icon sx={{ mr: 1 }} />
           Cadastrar Inventário
         </Typography>
 
@@ -157,7 +158,7 @@ const InventoryForm = ({ onInventoryAdded }) => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <AddCircleOutline />
+                          <AddCircleOutlineIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -201,7 +202,7 @@ const InventoryForm = ({ onInventoryAdded }) => {
           </Grid>
 
           <Button type="submit" variant="contained" color="primary" sx={{ mt: 4, display: 'flex', alignItems: 'center' }}>
-            <AddCircleOutline sx={{ mr: 1 }} />
+            <AddCircleOutlineIcon sx={{ mr: 1 }} />
             Cadastrar Inventário
           </Button>
         </Box>

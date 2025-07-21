@@ -4,6 +4,7 @@ import com.apiestoque.crud.domain.user.dto.AuthenticationDTO;
 import com.apiestoque.crud.domain.user.dto.LoginResponseDTO;
 import com.apiestoque.crud.domain.user.dto.RegisterUserDTO;
 import com.apiestoque.crud.domain.user.dto.UpdatePasswordDTO;
+import com.apiestoque.crud.domain.user.dto.UpdateUserRequestDTO;
 import com.apiestoque.crud.domain.user.dto.UserResponseDTO;
 import com.apiestoque.crud.domain.user.dto.UserStatusUpdateDTO;
 import com.apiestoque.crud.infra.response.ApiResponse;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -96,6 +98,11 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new LoginResponseDTO("Falha ao renovar o token: " + e.getMessage()));
         }
+    }
+
+    @PatchMapping("/users/{id}")
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable String id, @RequestBody @Validated UpdateUserRequestDTO data) {
+        return ResponseEntity.ok(userService.updateUser(id, data));
     }
 
     @PatchMapping("/users/{id}/image")

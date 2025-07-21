@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { useAuth } from '../../../../context/AuthContext';
 import CustomerForm from './CustomerForm';
 import Customers from './CustomerList';
-import { useAuth } from '../../../../context/AuthContext';
 
 const CustomerManagement = () => {
     const [rows, setRows] = useState([]);

@@ -74,6 +74,7 @@ public class SupplierService {
         if (data.website() != null) supplier.setWebsite(data.website());
         if (data.contactPerson() != null) supplier.setContactPerson(data.contactPerson());
         if (data.cep() != null) supplier.setCep(data.cep());
+        if (data.communicationPreference() != null) supplier.setCommunicationPreference(data.communicationPreference());
 
         Supplier updatedSupplier = supplierRepository.save(supplier);
 

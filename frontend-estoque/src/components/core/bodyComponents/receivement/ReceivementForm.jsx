@@ -15,7 +15,7 @@ import {
   Description as DescriptionIcon,
   DateRange as DateRangeIcon,
   AddShoppingCart as AddShoppingCartIcon,
-  AddCircleOutline,
+  AddCircleOutline as AddCircleOutlineIcon,
 } from "@mui/icons-material";
 import { Autocomplete } from "@mui/material";
 import api from "./../../../../api";
@@ -305,7 +305,7 @@ const ReceivementForm = ({ onReceivementAdded }) => {
             color="primary"
             type="submit"
             sx={{ mt: 4, display: 'flex', alignItems: 'center' }}
-            startIcon={<AddCircleOutline />}
+            startIcon={<AddCircleOutlineIcon />}
           >
             Cadastrar Entrada
           </Button>

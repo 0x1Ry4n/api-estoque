@@ -1,6 +1,5 @@
 import { create } from "zustand";
-import api from "../../../../../api";
-import { ExitService } from "../../../../../services/ExitService";
+import { ExitService } from "../../../../../services/exitService";
 
 export const useExitListStore = create((set, get) => ({
     rows: [],
@@ -53,7 +52,7 @@ export const useExitListStore = create((set, get) => ({
         const { pagination } = get();
 
         try {
-            await api.patch(`/exits/${id}/status`, { status: status });
+            await ExitService.updateStatus(id, { status });
             get().showSnackbar(`Status atualizado com sucesso!`);
             await get().fetchExits(pagination.page, pagination.pageSize);
         } catch (error) {
@@ -69,7 +68,7 @@ export const useExitListStore = create((set, get) => ({
         const { pagination } = get();
 
         try {
-            await api.delete(`/exits/${ids}`);
+            await ExitService.deleteExit(ids);
             get().showSnackbar("Saída deletada com sucesso!", "success");
             await get().fetchExits(pagination.page, pagination.pageSize);
         } catch (error) {

@@ -1,6 +1,5 @@
 package com.apiestoque.crud.services;
 
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +28,14 @@ public class CustomerService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este e-mail já existe.");
         }
 
+        if (customerRepository.existsByCpf(data.cpf())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este cpf já existe.");
+        }
+
+        if (customerRepository.existsByCnpj(data.cnpj())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este cnpj já existe.");
+        }
+
         if (customerRepository.existsByPhone(data.phone())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este telefone já existe.");
         }
@@ -39,7 +46,8 @@ public class CustomerService {
 
         Customer newCustomer = new Customer(
                 data.name(),
-                data.document(),
+                data.cpf(),
+                data.cnpj(),
                 data.ie(),
                 data.im(),
                 data.email(),
@@ -52,6 +60,7 @@ public class CustomerService {
                 data.city(),
                 data.state(),
                 data.zipCode(),
+                data.notes(),
                 data.status());
 
         Customer savedCustomer = customerRepository.save(newCustomer);
@@ -62,6 +71,16 @@ public class CustomerService {
     public CustomerResponseDTO update(String id, CustomerRequestDTO data) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado."));
+
+        if (data.cpf() != null && !customer.getCpf().equals(data.cpf())
+                && customerRepository.existsByCpf(data.cpf())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este cpf já existe.");
+        }
+
+        if (data.cnpj() != null && !customer.getCnpj().equals(data.cnpj())
+                && customerRepository.existsByCnpj(data.cnpj())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este cnpj já existe.");
+        }
 
         if (data.email() != null && !customer.getEmail().equals(data.email())
                 && customerRepository.existsByEmail(data.email())) {
@@ -78,18 +97,32 @@ public class CustomerService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este telefone já existe.");
         }
 
-        if (data.name() != null) customer.setName(data.name());
-        if (data.document() != null) customer.setDocument(data.document());
-        if (data.ie() != null) customer.setIe(data.ie());
-        if (data.im() != null) customer.setIm(data.im());
-        if (data.address() != null) customer.setAddress(data.address());
-        if (data.number() != null) customer.setNumber(data.number());
-        if (data.complement() != null) customer.setComplement(data.complement());
-        if (data.neighborhood() != null) customer.setNeighborhood(data.neighborhood());
-        if (data.city() != null) customer.setCity(data.city());
-        if (data.state() != null) customer.setState(data.city());
-        if (data.zipCode() != null) customer.setState(data.zipCode());
-        if (data.status() != null) customer.setStatus(data.status());
+        if (data.name() != null)
+            customer.setName(data.name());
+        if (data.cpf() != null)
+            customer.setCpf(data.cpf());
+        if (data.cnpj() != null)
+            customer.setCnpj(data.cnpj());
+        if (data.ie() != null)
+            customer.setIe(data.ie());
+        if (data.im() != null)
+            customer.setIm(data.im());
+        if (data.address() != null)
+            customer.setAddress(data.address());
+        if (data.number() != null)
+            customer.setNumber(data.number());
+        if (data.complement() != null)
+            customer.setComplement(data.complement());
+        if (data.neighborhood() != null)
+            customer.setNeighborhood(data.neighborhood());
+        if (data.city() != null)
+            customer.setCity(data.city());
+        if (data.state() != null)
+            customer.setState(data.state());
+        if (data.zipCode() != null)
+            customer.setZipCode(data.zipCode());
+        if (data.status() != null)
+            customer.setStatus(data.status());
 
         Customer updatedCustomer = customerRepository.save(customer);
 
@@ -98,19 +131,19 @@ public class CustomerService {
 
     public Page<CustomerResponseDTO> getAll(Pageable pageable) {
         return customerRepository.findAll(pageable)
-            .map(CustomerResponseDTO::new);
+                .map(CustomerResponseDTO::new);
     }
 
     public List<CustomerResponseDTO> getAll() {
         return customerRepository.findAll()
-            .stream()
-            .map(CustomerResponseDTO::new)
-            .collect(Collectors.toList()); 
+                .stream()
+                .map(CustomerResponseDTO::new)
+                .collect(Collectors.toList());
     }
 
     public CustomerResponseDTO getById(String id) {
         Customer customer = customerRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado."));
 
         return new CustomerResponseDTO(customer);
     }
@@ -118,7 +151,7 @@ public class CustomerService {
     @Transactional
     public CustomerResponseDTO updateStatus(String id, CustomerStatus status) {
         Customer customer = customerRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado."));
 
         if (status == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O status não pode ser nulo.");

@@ -1,31 +1,48 @@
 import api from "../api";
 
 export const ProductService = {
-    createProduct: async (data) =>
-        api.post(`/products`, data),
+    product: {
+        createProduct: async (data) =>
+            api.post(`/products`, data),
 
-    getProductById: async (productId) =>
-        api.get(`/products/${productId}`),
+        getProductById: async (productId) =>
+            api.get(`/products/${productId}`),
 
-    getImage: async (productId) =>
-        api.get(`/products/${productId}/image`, {
-            responseType: "blob",
-        }),
+        getImage: async (productId) =>
+            api.get(`/products/${productId}/image`, {
+                responseType: "blob",
+            }),
 
-    getProducts: async (paged = false, page, size) => {
-        if (paged)
-            return api.get(`/products?page=${page}&size=${size}`)
-        else
-            return api.get(`/products?paged=false`)
-    },
-    updateProduct: async (productId, data) =>
-        api.patch(`/products/${productId}`, data),
+        getProducts: async (paged = false, page, size) => {
+            if (paged)
+                return api.get(`/products?page=${page}&size=${size}`)
+            else
+                return api.get(`/products?paged=false`)
+        },
 
-    updateProductImage: async (productId, image) =>
-        api.patch(`/products/${productId}/image`, image, {
-            headers: { "Content-Type": "multipart/form-data" },
-        }),
+        updateProduct: async (productId, data) =>
+            api.patch(`/products/${productId}`, data),
 
-    deleteProduct: async (productId) =>
-        api.delete(`/products/${productId}`)
+        updateProductImage: async (productId, image) =>
+            api.patch(`/products/${productId}/image`, image, {
+                headers: { "Content-Type": "multipart/form-data" },
+            }),
+
+        deleteProduct: async (productId) =>
+            api.delete(`/products/${productId}`)
+    }, 
+
+    inventory: {
+        createInventory: async(productId, data) => 
+            api.post(`/products/${productId}/inventory`, data), 
+
+        getInventories: async (page, size) =>
+            api.get(`/products/inventory?page=${page}&size=${size}`),
+
+        getInventoriesByProduct: async (productId) => 
+            api.get(`/products/${productId}/inventory`),
+
+        deleteInventory: async(productId, inventoryId) => 
+            api.delete(`/products/${productId}/inventory/${inventoryId}`)
+    }
 };

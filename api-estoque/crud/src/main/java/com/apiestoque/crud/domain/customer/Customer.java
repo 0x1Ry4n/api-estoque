@@ -29,8 +29,11 @@ public class Customer {
     @Column(nullable = false, length = 100)
     private String name;
 
+    @Column(length = 14)
+    private String cpf;
+
     @Column(length = 20)
-    private String document;
+    private String cnpj;
 
     @Column(length = 20)
     private String ie;
@@ -62,11 +65,14 @@ public class Customer {
     @Column(length = 50)
     private String city;
 
-    @Column(length = 2)
+    @Column(length = 4)
     private String state;
 
     @Column(length = 10)
     private String zipCode;
+
+    @Column(length = 500)
+    private String notes;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -93,7 +99,8 @@ public class Customer {
 
     public Customer(
             String name,
-            String document,
+            String cpf,
+            String cnpj,
             String ie,
             String im,
             String email,
@@ -106,9 +113,11 @@ public class Customer {
             String city,
             String state,
             String zipCode,
+            String notes,
             CustomerStatus status) {
         this.name = name;
-        this.document = document;
+        this.cpf = cpf;
+        this.cnpj = cnpj;
         this.ie = ie;
         this.im = im;
         this.email = email;
@@ -121,6 +130,7 @@ public class Customer {
         this.city = city;
         this.state = state;
         this.zipCode = zipCode;
+        this.notes = notes;
         this.status = status;
     }
 }

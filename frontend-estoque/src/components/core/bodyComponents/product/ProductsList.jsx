@@ -20,6 +20,7 @@ import {
   useTheme,
   Tooltip
 } from "@mui/material";
+import { GridToolbar } from '@mui/x-data-grid';
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
@@ -29,13 +30,13 @@ import {
   Category as CategoryIcon,
   Close as CloseIcon
 } from "@mui/icons-material";
-import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { Controller, useForm } from "react-hook-form";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { addDays, format } from "date-fns";
 import { fileExporters } from "../../../../utils/utils";
 import { useProductListStore } from "./stores/useProductListStore";
+import { ProductService } from "../../../../services/productService";
 import Swal from "sweetalert2";
-import api from "../../../../api";
 
 const Products = () => {
   const {
@@ -130,15 +131,27 @@ const Products = () => {
           const [imageUrl, setImageUrl] = useState(null);
 
           useEffect(() => {
-            if (id) {
-              api
-                .get(`/products/${id}/image`, { responseType: "blob" })
-                .then((res) => {
-                  const objectUrl = URL.createObjectURL(res.data);
+            let objectUrl;
+
+            const fetchImage = async () => {
+              try {
+                if (id) {
+                  const res = await ProductService.product.getImage(id);
+                  objectUrl = URL.createObjectURL(res.data);
                   setImageUrl(objectUrl);
-                })
-                .catch();
-            }
+                }
+              } catch (error) {
+                console.error("Erro ao carregar imagem:", error);
+              }
+            };
+
+            fetchImage();
+
+            return () => {
+              if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+              }
+            };
           }, [id]);
 
           return imageUrl ? (
@@ -299,6 +312,10 @@ const Products = () => {
         <DataGrid
           rows={rows}
           columns={columns}
+          slots={{ toolbar: GridToolbar }}
+          onRowSelectionModelChange={(ids) => {
+            setSelectedRows(ids);
+          }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
           rowCount={pagination.totalElements}
           paginationMode="server"

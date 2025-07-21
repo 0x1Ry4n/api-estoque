@@ -45,9 +45,10 @@ public class CategoryService {
         if (data.name() != null && !data.name().equals(category.getName()) &&
                 categoryRepository.existsByName(data.name())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria com esse nome já existe.");
+        } else {
+            category.setName(data.name());
         }
 
-        category.setName(data.name());
         Category updatedCategory = categoryRepository.save(category);
 
         return new CategoryResponseDTO(updatedCategory);
@@ -81,15 +82,16 @@ public class CategoryService {
     }
 
     public ProductDetailedResponseDTO delete(String id) {
-        categoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Categoria não encontrada"));
 
-        if (!productRepository.findByCategoryId(id).isEmpty()) {
+        if (!productRepository.findByCategoryId(category.getId()).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "A categoria possuí produtos associados e não pode ser excluída!");
         }
 
-        this.categoryRepository.deleteById(id);
+        this.categoryRepository.deleteById(category.getId());
         return null;
     }
 }

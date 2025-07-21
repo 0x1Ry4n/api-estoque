@@ -9,8 +9,11 @@ public record CustomerRequestDTO(
     @NotBlank(message = "Customer name is required")
     String name,
 
-    @Size(max = 20, message = "Document must be at most 20 characters")
-    String document,
+    @Size(max = 14, message = "Cpf must be at most 14 characters")
+    String cpf,
+
+    @Size(max = 20, message = "Cpf must be at most 20 characters")
+    String cnpj,
 
     @Size(max = 20)
     String ie,
@@ -48,6 +51,9 @@ public record CustomerRequestDTO(
 
     @Size(max = 10)
     String zipCode,
+
+    @Size(max = 500)
+    String notes,
 
     @NotNull(message = "Status is required")
     CustomerStatus status

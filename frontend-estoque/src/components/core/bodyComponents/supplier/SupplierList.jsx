@@ -17,18 +17,18 @@ import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   Refresh as RefreshIcon,
-  PersonOutline,
-  EmailOutlined,
-  PhoneOutlined,
-  BusinessOutlined,
-  WebOutlined,
-  LocationOnOutlined,
+  PersonOutline as PersonOutlineIcon,
+  EmailOutlined as EmailOutlinedIcon,
+  PhoneOutlined as PhoneOutlinedIcon,
+  BusinessOutlined as BusinessOutlinedIcon,
+  WebOutlined as WebOutlinedIcon,
+  LocationOnOutlined as LocationOnOutlinedIcon,
 } from "@mui/icons-material";
 import { fileExporters } from "../../../../utils/utils";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { useSupplierListStore } from "./stores/useSupplierListStore";
 import InputMask from "react-input-mask";
 import Swal from "sweetalert2";
-import { useSupplierListStore } from "./stores/useSupplierListStore";
 
 const communicationPreferenceMap = {
   EMAIL: "Email",
@@ -218,7 +218,7 @@ const Suppliers = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <BusinessOutlined />
+                      <BusinessOutlinedIcon />
                     </InputAdornment>
                   ),
                 }}
@@ -238,7 +238,7 @@ const Suppliers = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <BusinessOutlined />
+                          <BusinessOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -258,7 +258,7 @@ const Suppliers = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <EmailOutlined />
+                      <EmailOutlinedIcon />
                     </InputAdornment>
                   ),
                 }}
@@ -278,7 +278,7 @@ const Suppliers = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <PhoneOutlined />
+                          <PhoneOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -297,7 +297,7 @@ const Suppliers = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PersonOutline />
+                      <PersonOutlineIcon />
                     </InputAdornment>
                   ),
                 }}
@@ -316,7 +316,7 @@ const Suppliers = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <LocationOnOutlined />
+                          <LocationOnOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -333,7 +333,7 @@ const Suppliers = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <WebOutlined />
+                      <WebOutlinedIcon />
                     </InputAdornment>
                   ),
                 }}

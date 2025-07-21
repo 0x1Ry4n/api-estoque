@@ -12,10 +12,12 @@ import {
   Clear as ClearIcon,
   Restore as RestoreIcon,
 } from '@mui/icons-material';
+import { SupplierService } from '../../../../services/supplierService';
+import { CepService } from '../../../../services/cepService';
+import { OpenStreetService } from '../../../../services/openStreetService';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import L from 'leaflet';
-import api from '../../../../api';
 
 const MapComponent = () => {
   const [markers, setMarkers] = useState([]);
@@ -42,7 +44,7 @@ const MapComponent = () => {
     const loadSuppliers = async () => {
       try {
         setLoadingSuppliers(true);
-        const response = await api.get("/supplier");
+        const response = await SupplierService.getSuppliers(false, 0, 0);
         const suppliersData = response.data?.content || [];
 
         const suppliersWithCoords = await geocodeSuppliers(suppliersData);
@@ -75,7 +77,7 @@ const MapComponent = () => {
         throw new Error('CEP inválido');
       }
 
-      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`);
+      const response = await CepService.getAddress(cleanCEP);
       const data = await response.json();
 
       if (data.erro) {
@@ -83,9 +85,7 @@ const MapComponent = () => {
       }
 
       const address = `${data.logradouro}, ${data.bairro}, ${data.localidade}, ${data.uf}`;
-      const nominatimResponse = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
-      );
+      const nominatimResponse = await OpenStreetService.getCoordsByLocation(address);
       const nominatimData = await nominatimResponse.json();
 
       if (nominatimData.length > 0) {
@@ -95,9 +95,7 @@ const MapComponent = () => {
           address: address
         };
       } else {
-        const cityResponse = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.localidade + ', ' + data.uf)}`
-        );
+        const cityResponse = await OpenStreetService.getCoordsByLocation(data.localidade + ', ' + data.uf);
         const cityData = await cityResponse.json();
 
         if (cityData.length > 0) {
@@ -203,7 +201,7 @@ const MapComponent = () => {
     if (!location) return;
 
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
+      const response = await OpenStreetService.getCoordsByLocation(location);
       const data = await response.json();
       if (data.length > 0) {
         const { lat, lon } = data[0];

@@ -96,9 +96,8 @@ const Inventory = () => {
       headerName: "Valor Total (Lote)",
       width: 150,
       valueGetter: (params) => {
-        const product = useInventoryListStore.getState().products?.find(
-          (p) => p.id === params.row.productId
-        );
+        const products = useInventoryListStore.getState().products || [];
+        const product = products.find((p) => p.id === params.row.productId);
         const unitPrice = product ? product.unitPrice : 0;
         return (unitPrice * params.row.quantity).toFixed(2);
       },

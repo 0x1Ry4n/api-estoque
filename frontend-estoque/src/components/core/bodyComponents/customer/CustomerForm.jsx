@@ -13,10 +13,18 @@ import {
   Snackbar,
   Alert
 } from '@mui/material';
-import { AddCircleOutline, PersonOutline, EmailOutlined, PhoneOutlined, DescriptionOutlined, LocationOnOutlined } from '@mui/icons-material';
+import { 
+  AddCircleOutline as AddCircleOutlineIcon, 
+  PersonOutlined as PersonOutlinedIcon, 
+  EmailOutlined as EmailOutlinedIcon, 
+  PhoneOutlined as PhoneOutlinedIcon, 
+  DescriptionOutlined as DescriptionOutlinedIcon, 
+  LocationOnOutlined as LocationOnOutlinedIcon 
+} from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
+import { CepService } from '../../../../services/cepService';
+import { CustomerService } from '../../../../services/customerService';
 import InputMask from 'react-input-mask';
-import api from './../../../../api';
 
 const CustomerForm = ({ onCustomerAdded }) => {
   const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm();
@@ -29,7 +37,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
       const cleanedCEP = cep.replace(/\D/g, '');
       if (cleanedCEP.length !== 8) return;
 
-      const response = await fetch(`https://viacep.com.br/ws/${cleanedCEP}/json/`);
+      const response = await CepService.getAddress(cleanedCEP);
       const data = await response.json();
 
       if (!data.erro) {
@@ -50,7 +58,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
 
   const handleCEPBlur = (e) => {
     const cep = e.target.value;
-    if (cep && cep.length === 9) { 
+    if (cep && cep.length === 9) {
       fetchCEP(cep);
     }
   };
@@ -77,7 +85,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
     };
 
     try {
-      const response = await api.post('/customer', customerData);
+      const response = await CustomerService.createCustomer(customerData);
       if (response.status === 201) {
         if (typeof onCustomerAdded === 'function') {
           onCustomerAdded(response.data);
@@ -120,7 +128,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
             alignItems: 'center'
           }}
         >
-          <PersonOutline sx={{ mr: 1 }} />
+          <PersonOutlinedIcon sx={{ mr: 1 }} />
           Cadastrar Cliente
         </Typography>
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
@@ -143,7 +151,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <PersonOutline />
+                          <PersonOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -171,7 +179,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <EmailOutlined />
+                          <EmailOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -203,7 +211,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <PhoneOutlined />
+                              <PhoneOutlinedIcon />
                             </InputAdornment>
                           ),
                         }}
@@ -237,7 +245,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <PhoneOutlined />
+                              <PhoneOutlinedIcon />
                             </InputAdornment>
                           ),
                         }}
@@ -280,7 +288,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <DescriptionOutlined />
+                              <DescriptionOutlinedIcon />
                             </InputAdornment>
                           ),
                         }}
@@ -319,7 +327,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <DescriptionOutlined />
+                              <DescriptionOutlinedIcon />
                             </InputAdornment>
                           ),
                         }}
@@ -354,7 +362,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <LocationOnOutlined />
+                              <LocationOnOutlinedIcon />
                             </InputAdornment>
                           ),
                         }}
@@ -538,7 +546,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <DescriptionOutlined />
+                          <DescriptionOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -574,7 +582,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
             color="primary"
             sx={{ mt: 4, display: "flex", alignItems: "center" }}
           >
-            <AddCircleOutline sx={{ mr: 1 }} /> Cadastrar Cliente
+            <AddCircleOutlineIcon sx={{ mr: 1 }} /> Cadastrar Cliente
           </Button>
         </Box>
       </Paper>

@@ -24,12 +24,14 @@ import {
   AddShoppingCart as AddShoppingCartIcon,
   AddCircleOutline as AddCircleOutlineIcon,
   QrCode2Rounded as QRCodeIcon,
-  PhotoCamera,
-  Category
+  PhotoCamera as PhotoCameraIcon,
+  Category as CategoryIcon
 } from "@mui/icons-material";
-import { Autocomplete } from "@mui/material";
-import api from "./../../../../api";
 import { useForm, Controller } from "react-hook-form";
+import { Autocomplete } from "@mui/material";
+import { SupplierService } from "../../../../services/supplierService";
+import { CategoryService } from "../../../../services/CategoryService";
+import { ProductService } from "../../../../services/productService";
 import QrScanner from 'react-qr-scanner';
 
 const ProductForm = ({ onProductAdded }) => {
@@ -60,12 +62,12 @@ const ProductForm = ({ onProductAdded }) => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const response = await api.get("/category?paged=false");
+      const response = await CategoryService.getCategories(false, 0, 0);
       setCategories(response.data);
     };
 
     const fetchSuppliers = async () => {
-      const response = await api.get("/supplier?paged=false");
+      const response = await SupplierService.getSuppliers(false, 0, 0);
       setSuppliers(response.data);
     };
 
@@ -121,13 +123,13 @@ const ProductForm = ({ onProductAdded }) => {
         formData.append("file", image);
       }
 
-      const response = await api.post("/products", formData);
+      const res = await ProductService.product.createProduct(formData);
 
-      if (response.status === 201) {
+      if (res.status === 201) {
         setSnackbarMessage("Produto cadastrado com sucesso!");
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
-        onProductAdded?.(response.data.content);
+        onProductAdded?.(res.data.content);
         reset();
         setImage(null);
         setImagePreview(null);
@@ -186,7 +188,7 @@ const ProductForm = ({ onProductAdded }) => {
                           '&:hover': { backgroundColor: '#eee' },
                         }}
                       >
-                        <PhotoCamera />
+                        <PhotoCameraIcon />
                       </IconButton>
                     </label>
                   }
@@ -202,7 +204,7 @@ const ProductForm = ({ onProductAdded }) => {
                       backgroundColor: '#f0f0f0',
                     }}
                   >
-                    {!imagePreview && <Category fontSize="large" sx={{ color: '#888' }} />}
+                    {!imagePreview && <CategoryIcon fontSize="large" sx={{ color: '#888' }} />}
                   </Avatar>
 
                 </Badge>

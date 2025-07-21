@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { ReceivementService } from "../../../../../services/ReceivementService";
-import { ProductService } from "../../../../../services/ProductService";
+import { ProductService } from "../../../../../services/productService";
 import { SupplierService } from "../../../../../services/supplierService";
 
 export const useReceivementListStore = create((set, get) => ({
@@ -58,7 +58,7 @@ export const useReceivementListStore = create((set, get) => ({
   fetchProductsAndSuppliers: async () => {
     try {
       const [products, suppliers] = await Promise.all([
-        ProductService.getProducts(false),
+        ProductService.product.getProducts(false),
         SupplierService.getSuppliers(false)
       ]);
       set({ products: products.data, suppliers: suppliers.data });

@@ -9,9 +9,9 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
-import { AddCircleOutline, CategoryOutlined } from '@mui/icons-material';
+import { AddCircleOutline as AddCircleOutlineIcon, CategoryOutlined as CategoryOutlinedIcon } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
-import api from './../../../../api';
+import { CategoryService } from '../../../../services/categoryService';
 
 const CategoryForm = ({ onCategoryAdded }) => {
   const { control, handleSubmit, reset, formState: { errors } } = useForm();
@@ -25,7 +25,7 @@ const CategoryForm = ({ onCategoryAdded }) => {
     };
 
     try {
-      const response = await api.post('/category', categoryData);
+      const response = await CategoryService.createCategory(categoryData);
       if (response.status === 201) {
         if (typeof onCategoryAdded === 'function') {
           onCategoryAdded(response.data);
@@ -53,7 +53,7 @@ const CategoryForm = ({ onCategoryAdded }) => {
     <Box>
       <Paper elevation={4} sx={{ padding: 6, borderRadius: 2, backgroundColor: '#f5f5f5', width: "95%", }}>
         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-          <CategoryOutlined sx={{ mr: 1 }} />
+          <CategoryOutlinedIcon sx={{ mr: 1 }} />
           Cadastrar Categoria
         </Typography>
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
@@ -73,7 +73,7 @@ const CategoryForm = ({ onCategoryAdded }) => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <CategoryOutlined />
+                      <CategoryOutlinedIcon />
                     </InputAdornment>
                   ),
                 }}
@@ -85,7 +85,7 @@ const CategoryForm = ({ onCategoryAdded }) => {
             )}
           />
           <Button type="submit" variant="contained" color="primary" sx={{ mt: 4, display: 'flex', alignItems: 'center' }}>
-            <AddCircleOutline sx={{ mr: 1 }} />
+            <AddCircleOutlineIcon sx={{ mr: 1 }} />
             Cadastrar Categoria
           </Button>
         </Box>

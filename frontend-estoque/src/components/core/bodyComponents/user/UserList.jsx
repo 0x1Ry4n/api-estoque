@@ -64,6 +64,8 @@ const UserList = () => {
       username,
       email,
     });
+
+    handleClose();
   };
 
   const handleStatusChange = async (id) => {

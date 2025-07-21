@@ -10,6 +10,9 @@ public interface UserRepository extends JpaRepository<User, String> {
     User findByUsername(String username);
     User findUserByEmail(String email);
 
+    boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
+
     @Query(value = "EXEC UpdateUserStatus :id, :newStatus", nativeQuery = true)
     void updateUserStatus(String id, String newStatus);
 }

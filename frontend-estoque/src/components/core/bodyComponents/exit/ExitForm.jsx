@@ -13,11 +13,12 @@ import {
 import {
   Add as AddIcon,
   AddShoppingCart as AddShoppingCartIcon,
-  AddCircleOutline,
+  AddCircleOutline as AddCircleOutlineIcon,
 } from "@mui/icons-material";
 import { Autocomplete } from "@mui/material";
-import api from "./../../../../api";
 import { useForm, Controller } from "react-hook-form";
+import { ExitService } from "../../../../services/exitService";
+import { ProductService } from "../../../../services/productService";
 
 const ExitForm = ({ onExitAdded }) => {
   const {
@@ -36,7 +37,7 @@ const ExitForm = ({ onExitAdded }) => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const response = await api.get("/products?paged=false");
+      const response = await ProductService.product.getProducts(false, 0, 0);
       setProducts(response.data);
     };
 
@@ -46,7 +47,7 @@ const ExitForm = ({ onExitAdded }) => {
   useEffect(() => {
     if (selectedProduct) {
       const fetchInventories = async () => {
-        const response = await api.get(`/products/${selectedProduct.id}/inventory`);
+        const response = await ProductService.inventory.getInventoriesByProduct(`${selectedProduct.id}`);
         setInventories(response.data);
       };
 
@@ -60,7 +61,7 @@ const ExitForm = ({ onExitAdded }) => {
         ...data
       };
 
-      const response = await api.post("/exits", productData);
+      const response = await ExitService.createExit(productData);
       if (response.status === 201) {
         setSnackbarMessage("Saída cadastrado com sucesso!");
         setSnackbarSeverity("success");
@@ -202,7 +203,7 @@ const ExitForm = ({ onExitAdded }) => {
             color="primary"
             type="submit"
             sx={{ mt: 4, display: 'flex', alignItems: 'center' }}
-            startIcon={<AddCircleOutline />}
+            startIcon={<AddCircleOutlineIcon />}
           >
             Cadastrar Saída
           </Button>

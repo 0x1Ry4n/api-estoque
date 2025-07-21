@@ -11,17 +11,17 @@ import {
   MenuItem,
 } from "@mui/material";
 import {
-  AddCircleOutline,
-  PersonOutline,
-  EmailOutlined,
-  PhoneOutlined,
-  BusinessOutlined,
-  WebOutlined,
-  LocationOnOutlined,
+  AddCircleOutline as AddCircleOutlineIcon,
+  PersonOutline as PersonOutlineIcon,
+  EmailOutlined as EmailOutlinedIcon,
+  PhoneOutlined as PhoneOutlinedIcon,
+  BusinessOutlined as BusinessOutlinedIcon,
+  WebOutlined as WebOutlinedIcon,
+  LocationOnOutlined as LocationOnOutlinedIcon,
 } from "@mui/icons-material";
+import { useForm, Controller } from "react-hook-form";
 import InputMask from "react-input-mask";
 import api from "./../../../../api";
-import { useForm, Controller } from "react-hook-form";
 
 const SupplierForm = ({ onSupplierAdded }) => {
 
@@ -77,7 +77,7 @@ const SupplierForm = ({ onSupplierAdded }) => {
             alignItems: "center",
           }}
         >
-          <PersonOutline sx={{ mr: 1 }} /> Cadastrar Fornecedor
+          <PersonOutlineIcon sx={{ mr: 1 }} /> Cadastrar Fornecedor
         </Typography>
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           {/* Campo Razão Social */}
@@ -100,7 +100,7 @@ const SupplierForm = ({ onSupplierAdded }) => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <BusinessOutlined />
+                      <BusinessOutlinedIcon />
                     </InputAdornment>
                   ),
                 }}
@@ -132,7 +132,7 @@ const SupplierForm = ({ onSupplierAdded }) => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <BusinessOutlined />
+                          <BusinessOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -166,7 +166,7 @@ const SupplierForm = ({ onSupplierAdded }) => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <EmailOutlined />
+                      <EmailOutlinedIcon />
                     </InputAdornment>
                   ),
                 }}
@@ -198,7 +198,7 @@ const SupplierForm = ({ onSupplierAdded }) => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <PhoneOutlined />
+                          <PhoneOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -223,7 +223,7 @@ const SupplierForm = ({ onSupplierAdded }) => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PersonOutline />
+                      <PersonOutlineIcon />
                     </InputAdornment>
                   ),
                 }}
@@ -251,7 +251,7 @@ const SupplierForm = ({ onSupplierAdded }) => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <LocationOnOutlined />
+                          <LocationOnOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -276,7 +276,7 @@ const SupplierForm = ({ onSupplierAdded }) => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <WebOutlined />
+                      <WebOutlinedIcon />
                     </InputAdornment>
                   ),
                 }}
@@ -298,7 +298,7 @@ const SupplierForm = ({ onSupplierAdded }) => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <WebOutlined />
+                      <WebOutlinedIcon />
                     </InputAdornment>
                   ),
                 }}
@@ -318,7 +318,7 @@ const SupplierForm = ({ onSupplierAdded }) => {
             color="primary"
             sx={{ mt: 4, display: "flex", alignItems: "center" }}
           >
-            <AddCircleOutline sx={{ mr: 1 }} /> Cadastrar Fornecedor
+            <AddCircleOutlineIcon sx={{ mr: 1 }} /> Cadastrar Fornecedor
           </Button>
         </Box>
       </Paper>

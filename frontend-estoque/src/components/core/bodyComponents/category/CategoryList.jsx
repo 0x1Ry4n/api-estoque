@@ -16,9 +16,9 @@ import {
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
-import Swal from "sweetalert2";
 import { fileExporters } from "../../../../utils/utils";
 import { useCategoryListStore } from "./stores/useCategoryListStore";
+import Swal from "sweetalert2";
 
 const Categories = () => {
   const {

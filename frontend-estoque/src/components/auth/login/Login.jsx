@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   TextField,
@@ -15,17 +16,16 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import {
-  Email,
-  Lock,
-  Visibility,
-  VisibilityOff,
-  Face,
-  CameraAlt,
-  ArrowBack,
+  Email as EmailIcon,
+  Lock as LockIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+  Face as FaceIcon,
+  CameraAlt as CameraAltIcon,
+  ArrowBack as ArrowBackIcon,
+  Login as LoginIcon
 } from "@mui/icons-material";
-import LoginIcon from "@mui/icons-material/Login";
 import { useAuth } from "../../../context/AuthContext";
 import Webcam from "react-webcam";
 import * as faceapi from "@vladmandic/face-api";
@@ -289,7 +289,7 @@ const Login = () => {
       >
         {isVerifyingFace && (
           <Button
-            startIcon={<ArrowBack />}
+            startIcon={<ArrowBackIcon />}
             onClick={() => setIsVerifyingFace(false)}
             sx={{ mb: 2, color: 'black' }}
           >
@@ -338,7 +338,7 @@ const Login = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Email sx={{ color: "#00796b" }} />
+                    <EmailIcon sx={{ color: "#00796b" }} />
                   </InputAdornment>
                 ),
               }}
@@ -355,7 +355,7 @@ const Login = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Lock sx={{ color: "#00796b" }} />
+                    <LockIcon sx={{ color: "#00796b" }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -364,7 +364,7 @@ const Login = () => {
                       onClick={() => setShowPassword(!showPassword)}
                       edge="end"
                     >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -379,7 +379,7 @@ const Login = () => {
                   fullWidth
                   sx={{ py: 1.5 }}
                   onClick={() => setIsVerifyingFace(true)}
-                  startIcon={<Face />}
+                  startIcon={<FaceIcon />}
                   disabled={!modelsLoaded || isLoading}
                 >
                   {faceImage
@@ -433,7 +433,7 @@ const Login = () => {
                   <Button
                     variant="contained"
                     onClick={verifyFace}
-                    startIcon={<Face />}
+                    startIcon={<FaceIcon />}
                     color="success"
                     disabled={isLoading}
                     sx={{ py: 1.5 }}
@@ -444,7 +444,7 @@ const Login = () => {
                   <Button
                     variant="outlined"
                     onClick={() => setFaceImage(null)}
-                    startIcon={<CameraAlt />}
+                    startIcon={<CameraAltIcon />}
                     disabled={isLoading}
                     sx={{ py: 1.5 }}
                   >
@@ -501,7 +501,7 @@ const Login = () => {
                       <Button
                         variant="contained"
                         onClick={captureFace}
-                        startIcon={<CameraAlt />}
+                        startIcon={<CameraAltIcon />}
                         sx={{ mt: 2, py: 1.5, width: "100%", maxWidth: 300 }}
                         disabled={isLoading}
                       >

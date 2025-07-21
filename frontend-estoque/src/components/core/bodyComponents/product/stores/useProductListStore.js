@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ProductService } from "../../../../../services/ProductService";
+import { ProductService } from "../../../../../services/productService";
 import { CategoryService } from "../../../../../services/CategoryService";
 import { SupplierService } from "../../../../../services/supplierService";
 
@@ -41,7 +41,7 @@ export const useProductListStore = create((set, get) => ({
 
     fetchProducts: async (page, pageSize) => {
         try {
-            const res = await ProductService.getProducts(true, page, pageSize);
+            const res = await ProductService.product.getProducts(true, page, pageSize);
             
             set({
                 rows: res.data.content,
@@ -76,7 +76,7 @@ export const useProductListStore = create((set, get) => ({
 
         if (product) {
             try {
-                const res = await ProductService.getImage(product.id);
+                const res = await ProductService.product.getImage(product.id);
                 
                 imagePreviewEdit = URL.createObjectURL(res.data);
             } catch (err) {
@@ -105,7 +105,7 @@ export const useProductListStore = create((set, get) => ({
 
     openDetailDialog: async (id) => {
         try {
-            const res = await ProductService.getProductById(id);
+            const res = await ProductService.product.getProductById(id);
             
             set({ detailedProduct: res.data, detailDialogOpen: true });
         } catch (err) {
@@ -134,10 +134,10 @@ export const useProductListStore = create((set, get) => ({
                 const formData = new FormData();
                 formData.append("file", imageEdit);
 
-                await ProductService.updateProductImage(selectedProduct.id, formData);
+                await ProductService.product.updateProductImage(selectedProduct.id, formData);
             }
 
-            await ProductService.updateProduct(selectedProduct.id, productToSave);
+            await ProductService.product.updateProduct(selectedProduct.id, productToSave);
             get().showSnackbar("Produto atualizado com sucesso!");
             await get().fetchProducts(page, pageSize);
         } catch (error) {
@@ -156,7 +156,7 @@ export const useProductListStore = create((set, get) => ({
         } = get();
 
         try {
-            await ProductService.deleteProduct(ids);
+            await ProductService.product.deleteProduct(ids);
             get().showSnackbar("Produto deletado com sucesso!");
             await get().fetchProducts(page, pageSize);
         } catch (error) {

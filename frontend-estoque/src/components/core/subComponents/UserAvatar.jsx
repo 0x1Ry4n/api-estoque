@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { Avatar, Box, Button, Dialog, DialogContent, IconButton } from '@mui/material';
-import { Close as CloseIcon, Edit as EditIcon, Add as AddIcon, Remove as RemoveIcon, PhotoCamera } from '@mui/icons-material';
-import api from './../../../api';
+import { Add as AddIcon, PhotoCamera as PhotoCameraIcon, Remove as RemoveIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useAuth } from '../../../context/AuthContext';
+import { UserService } from '../../../services/UserService';
 
 const UserAvatar = ({ userId, showable = true, editable = true, sx = {} }) => {
   const { user } = useAuth();
@@ -20,9 +20,7 @@ const UserAvatar = ({ userId, showable = true, editable = true, sx = {} }) => {
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        const response = await api.get(`/auth/users/${userId}/image`, {
-          responseType: 'blob'
-        });
+        const response = await UserService.getUserImage(userId);
 
         const imageBlob = response.data;
         const imageObjectUrl = URL.createObjectURL(imageBlob);
@@ -48,8 +46,8 @@ const UserAvatar = ({ userId, showable = true, editable = true, sx = {} }) => {
     formData.append('file', file);
 
     try {
-      await api.patch(`/auth/users/${userId}/image`, formData);
-      const response = await api.get(`/auth/users/${userId}/image`, { responseType: 'blob' });
+      await UserService.updateImage(userId, formData);
+      const response = UserService.getUserImage(userId);
       const imageObjectUrl = URL.createObjectURL(response.data);
       setImageUrl(imageObjectUrl);
     } catch (err) {
@@ -206,7 +204,7 @@ const UserAvatar = ({ userId, showable = true, editable = true, sx = {} }) => {
                   '&:hover': { bgcolor: '#004d40' },
                 }}
               >
-                <PhotoCamera fontSize="medium" />
+                <PhotoCameraIcon fontSize="medium" />
               </Button>
             </label>
           </>

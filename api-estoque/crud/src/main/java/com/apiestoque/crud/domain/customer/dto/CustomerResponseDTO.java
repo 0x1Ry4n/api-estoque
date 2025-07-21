@@ -5,7 +5,8 @@ import com.apiestoque.crud.domain.customer.Customer;
 public record CustomerResponseDTO(
         String id,
         String name,
-        String document,
+        String cpf, 
+        String cnpj,
         String ie,
         String im,
         String email,
@@ -18,13 +19,15 @@ public record CustomerResponseDTO(
         String city,
         String state,
         String zipCode,
+        String notes,
         CustomerStatus status
 ) {
     public CustomerResponseDTO(Customer customer) {
         this(
             customer.getId(),
             customer.getName(),
-            customer.getDocument(),
+            customer.getCpf(),
+            customer.getCnpj(),
             customer.getIe(),
             customer.getIm(),
             customer.getEmail(),
@@ -37,6 +40,7 @@ public record CustomerResponseDTO(
             customer.getCity(),
             customer.getState(),
             customer.getZipCode(),
+            customer.getNotes(),
             customer.getStatus()
         );
     }

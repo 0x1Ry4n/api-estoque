@@ -4,6 +4,7 @@ import com.apiestoque.crud.domain.user.User;
 import com.apiestoque.crud.domain.user.dto.AuthenticationDTO;
 import com.apiestoque.crud.domain.user.dto.LoginResponseDTO;
 import com.apiestoque.crud.domain.user.dto.RegisterUserDTO;
+import com.apiestoque.crud.domain.user.dto.UpdateUserRequestDTO;
 import com.apiestoque.crud.domain.user.dto.UserResponseDTO;
 import com.apiestoque.crud.repositories.UserRepository;
 import com.apiestoque.crud.infra.response.ApiResponse;
@@ -152,6 +153,30 @@ public class UserService {
         return new UserResponseDTO(user);
     }
 
+    @Transactional
+    public UserResponseDTO updateUser(String id, UpdateUserRequestDTO data) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        if (data.username() != null && !data.username().equals(user.getUsername()) &&
+                userRepository.existsByUsername(data.username())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário com esse username já existe.");
+        } else {
+            user.setUsername(data.username());
+        }
+
+        if (data.email() != null && !data.email().equals(user.getEmail()) &&
+                userRepository.existsByEmail(data.email())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário com esse e-mail já existe.");
+        } else {
+            user.setEmail(data.email());
+        }
+
+        User updatedUser = userRepository.save(user);
+
+        return new UserResponseDTO(updatedUser);
+    }
+
     public LoginResponseDTO authenticateUser(AuthenticationDTO data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
 
@@ -286,7 +311,7 @@ public class UserService {
             String imagePath = fileStorageService.save(file, "usuarios");
             user.setImagePath(imagePath);
             userRepository.save(user);
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem.", e);
         }
     }
@@ -294,16 +319,15 @@ public class UserService {
     public Resource getImage(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
-        
+
         try {
             String fileName = Paths.get(user.getImagePath()).getFileName().toString();
 
             return fileStorageService.load(fileName, "usuarios");
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao obter a imagem.", e);
         }
     }
-
 
     public UserResponseDTO getLoggedUser(User user) {
         return new UserResponseDTO(

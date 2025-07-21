@@ -19,17 +19,16 @@ import {
 import {
   Edit as EditIcon,
   Refresh as RefreshIcon,
-  PersonOutline,
-  EmailOutlined,
-  PhoneOutlined,
-  DescriptionOutlined,
-  LocationOnOutlined,
+  PersonOutline as PersonOutlineIcon,
+  EmailOutlined as EmailOutlinedIcon,
+  PhoneOutlined as PhoneOutlinedIcon,
+  DescriptionOutlined as DescriptionOutlinedIcon,
+  LocationOnOutlined as LocationOnOutlinedIcon,
 } from "@mui/icons-material";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { fileExporters } from "../../../../utils/utils";
-import api from "../../../../api";
-import InputMask from "react-input-mask";
 import { CustomerService } from "../../../../services/customerService";
+import InputMask from "react-input-mask";
 
 const Customers = () => {
   const [open, setOpen] = useState(false);
@@ -264,7 +263,7 @@ const Customers = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PersonOutline />
+                      <PersonOutlineIcon />
                     </InputAdornment>
                   ),
                 }}
@@ -286,7 +285,7 @@ const Customers = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <EmailOutlined />
+                      <EmailOutlinedIcon />
                     </InputAdornment>
                   ),
                 }}
@@ -312,7 +311,7 @@ const Customers = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <PhoneOutlined />
+                          <PhoneOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -340,7 +339,7 @@ const Customers = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <DescriptionOutlined />
+                          <DescriptionOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -368,7 +367,7 @@ const Customers = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <DescriptionOutlined />
+                          <DescriptionOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -396,7 +395,7 @@ const Customers = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <LocationOnOutlined />
+                          <LocationOnOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
@@ -515,7 +514,7 @@ const Customers = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <PhoneOutlined />
+                          <PhoneOutlinedIcon />
                         </InputAdornment>
                       ),
                     }}
