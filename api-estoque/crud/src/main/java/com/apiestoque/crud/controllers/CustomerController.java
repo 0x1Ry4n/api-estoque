@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.data.domain.Page;
@@ -66,7 +67,9 @@ public class CustomerController
 
     @Override
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) {
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> delete(@PathVariable String id) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_IMPLEMENTED)
+                .body("Método não implementado.");
     }
 }

@@ -74,6 +74,8 @@ const Products = () => {
     deleteProduct
   } = useProductListStore();
 
+  const [selectedRows, setSelectedRows] = useState([]);
+
   useEffect(() => {
     fetchCategoriesAndSuppliers();
     fetchProducts(pagination.page, pagination.pageSize);
@@ -313,9 +315,6 @@ const Products = () => {
           rows={rows}
           columns={columns}
           slots={{ toolbar: GridToolbar }}
-          onRowSelectionModelChange={(ids) => {
-            setSelectedRows(ids);
-          }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
           rowCount={pagination.totalElements}
           paginationMode="server"

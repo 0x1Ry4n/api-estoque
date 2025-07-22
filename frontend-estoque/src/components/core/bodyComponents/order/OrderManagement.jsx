@@ -1,26 +1,57 @@
 // OrderManagement.js
 import React, { useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import OrderForm from './OrderForm';
 import OrdersList from './OrderList';
 
 const OrderManagement = () => {
   const [rows, setRows] = useState([]);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const handleAddOrder = (newOrder) => {
-    setRows((prevRows) => [...prevRows, { id: prevRows.length + 1, ...newOrder }]); 
+    setRows((prevRows) => [...prevRows, { id: prevRows.length + 1, ...newOrder }]);
   };
 
   return (
-    <Box sx={{ padding: 3 }}>
-      <Typography variant="h4" sx={{ mb: 4, mt: 10, fontWeight: 'bold' }}>
-        Gerenciamento de Pedidos
-      </Typography>
-      <OrderForm onAddOrder={handleAddOrder} />
-      <Box sx={{ mt: 3 }}>
-        <OrdersList rows={rows} on />
+    <Box sx={{
+      width: isMobile ? '100vw' : '80vw',
+      minHeight: '100vh',
+      p: isMobile ? 4 : 2,
+      boxSizing: 'border-box',
+    }}>
+      <Box sx={{}}>
+        <Typography variant={isMobile ? "h5" : "h4"}
+          sx={{
+            fontWeight: 'bold',
+            fontSize: {
+              xs: '1.5rem',
+              sm: '1.75rem',
+              md: '2rem'
+            },
+            mb: { xs: 2, sm: 3, md: 4 },
+            ml: { xs: 0, sm: 4, md: 5 },
+            mt: { xs: 2, sm: 6, md: 10 },
+            lineHeight: 1.2,
+          }}>
+          {isMobile ? 'Pedidos' : 'Gerenciamento de Pedidos'}
+        </Typography>
       </Box>
-    </Box>
+
+      <Box sx={{
+        mt: 2,
+        pb: isMobile ? 8 : 4,
+        width: isMobile ? '105%' : '100%',
+        overflowX: 'hidden'
+      }}>
+        <OrderForm onAddOrder={handleAddOrder} />
+
+        <Box sx={{ mt: 3 }}>
+          <OrdersList rows={rows} />
+        </Box>
+      </Box>
+    </Box >
   );
 };
 

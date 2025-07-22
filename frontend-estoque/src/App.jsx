@@ -25,6 +25,7 @@ import CalendarWithNotes from "./components/core/bodyComponents/calendar/Calenda
 import MapComponent from "./components/core/bodyComponents/maps/Maps";
 import ReceivementManagement from "./components/core/bodyComponents/receivement/ReceivementManagement";
 import ExitManagement from "./components/core/bodyComponents/exit/ExitManagement";
+import OrderManagement from "./components/core/bodyComponents/order/OrderManagement";
 import 'leaflet/dist/leaflet.css';
 
 function App() {
@@ -63,6 +64,7 @@ function App() {
           <Route path="/receivements" element={<ReceivementManagement />} />
           <Route path="/exits" element={<ExitManagement />} />
           <Route path="/customers" element={<CustomerManagement />} />
+          <Route path="/orders" element={<OrderManagement />} />
           <Route path="/qrcode-generator" element={<QRCodeGenerator />} />
           <Route path="/settings" element={<PrivateRoute onlyAdmin={true}>
             <Settings onToggleTheme={handleToggleTheme} />

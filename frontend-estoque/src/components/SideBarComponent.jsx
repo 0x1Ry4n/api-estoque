@@ -22,7 +22,8 @@ import {
   CreditCardOutlined,
   GroupOutlined,
   Inventory2Outlined,
-  Person2Outlined
+  Person2Outlined,
+  SellOutlined,
 } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -51,6 +52,7 @@ export default function SideBarComponent({ isSidebarOpen, toggleSidebar }) {
     { title: "Inventário", route: "inventory", component: <Inventory2Outlined /> },
     { title: "Entradas", route: "receivements", component: <AddCircleOutline /> },
     { title: "Saídas", route: "exits", component: <CreditCardOutlined /> },
+    { title: "Pedidos", route: "orders", component: <SellOutlined /> },
     { title: "Usuários", route: "create-user", component: <GroupOutlined /> },
   ];
 
@@ -117,26 +119,24 @@ export default function SideBarComponent({ isSidebarOpen, toggleSidebar }) {
   );
 
   return (
-    <>
-      <Drawer
-        variant="temporary"
-        open={isSidebarOpen}
-        onClose={toggleSidebar}
-        ModalProps={{
-          keepMounted: true,
-        }}
-        sx={{
-          '& .MuiDrawer-paper': {
-            backgroundColor: '#f5f5f5',
-            boxSizing: 'border-box',
-            width: 300,
-            p: 2,
-            borderRight: 'none',
-          },
-        }}
-      >
-        {SidebarContent}
-      </Drawer>
-    </>
+    <Drawer
+      variant="temporary"
+      open={isSidebarOpen}
+      onClose={toggleSidebar}
+      ModalProps={{
+        keepMounted: true,
+      }}
+      sx={{
+        '& .MuiDrawer-paper': {
+          backgroundColor: '#f5f5f5',
+          boxSizing: 'border-box',
+          width: 300,
+          p: 2,
+          borderRight: 'none',
+        },
+      }}
+    >
+      {SidebarContent}
+    </Drawer>
   );
 }

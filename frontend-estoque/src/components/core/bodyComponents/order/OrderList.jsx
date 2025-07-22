@@ -1,8 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Snackbar, Alert, CircularProgress, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
-import { Delete as DeleteIcon, Edit as EditIcon, Visibility as VisibilityIcon, Refresh as RefreshIcon } from '@mui/icons-material';
-import { DataGrid } from "@mui/x-data-grid";
-import api from '../../../../api'; 
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Snackbar,
+  Alert,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography
+} from "@mui/material";
+import {
+  Delete as DeleteIcon,
+  Visibility as VisibilityIcon,
+  Refresh as RefreshIcon
+} from '@mui/icons-material';
+import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { OrderService } from "../../../../services/orderService";
+import { fileExporters } from "../../../../utils/utils";
 
 const Orders = () => {
   const [open, setOpen] = useState(false);
@@ -13,37 +35,44 @@ const Orders = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [loading, setLoading] = useState(false);  
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
   const paymentMethods = {
     CREDIT_CARD: "Cartão de Crédito",
     DEBIT_CARD: "Cartão de Débito",
     MONEY: "Dinheiro",
-    ANY: "Qualquer um"
+    PIX: "Pix",
+    BANK_SLIP: "Boleto"
   };
 
   const orderStatus = {
-    DELIVERED: "Entregue", 
     PENDING: "Pendente",
-    IN_PROGRESS: "Em progresso"
+    IN_TRANSIT: "Em trânsito",
+    DELIVERED: "Entregue",
+    CANCELED: "Cancelado"
   };
 
   useEffect(() => {
-    fetchOrders(); 
+    fetchOrders(page, pageSize);
   }, []);
 
-  const fetchOrders = async () => {
-    setLoading(true); 
+  const fetchOrders = async (page, pageSize) => {
+    setLoading(true);
+
     try {
-      const response = await api.get('/orders/details');
+      const response = await OrderService.getOrders(true, page, pageSize);
 
       if (response.status === 200) {
-        const ordersWithId = response.data.content.map(order => ({
-          id: order.orderId, 
-          ...order 
+        const ordersWithId = response.data.map(order => ({
+          id: order.orderId,
+          ...order
         }));
-        setRows(ordersWithId); 
-      } 
+        setRows(ordersWithId);
+      }
     } catch (error) {
       if (error.response && error.response.status === 404) return;
 
@@ -51,18 +80,13 @@ const Orders = () => {
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedOrder(null);
-  };
-
-  const handleDetailOpen = async (id) => {
+  const handleDetailOpen = async (orderNumber) => {
     try {
-      const response = await api.get(`/orders/${id}/details`);
+      const response = await OrderService.getOrderByOrderNumber(orderNumber);
       setDetailedOrder(response.data);
       setDetailDialogOpen(true);
     } catch (error) {
@@ -72,22 +96,8 @@ const Orders = () => {
     }
   };
 
-  const handleDelete = async (ids) => {
-    try {
-      await api.delete(`/orders/${ids[0]}`);
-      setRows(rows.filter((row) => !ids.includes(row.id)));
-      setSnackbarMessage("Pedido deletado com sucesso!");
-      setSnackbarSeverity("success");
-    } catch (error) {
-      setSnackbarMessage("Erro ao deletar pedido.");
-      setSnackbarSeverity("error");
-    } finally {
-      setSnackbarOpen(true);
-    }
-  };
-
   const handleRefresh = () => {
-    fetchOrders(); 
+    fetchOrders();
     setSnackbarMessage("Lista de pedidos atualizada!");
     setSnackbarSeverity("info");
     setSnackbarOpen(true);
@@ -96,82 +106,47 @@ const Orders = () => {
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
     {
-      field: "fullName",
+      field: "orderNumber",
+      headerName: "Número do Pedido",
+      width: 150
+    },
+    {
+      field: "customer.name",
       headerName: "Cliente",
       width: 200,
-      valueGetter: (params) => params.row.customer?.fullname || "",
+      valueGetter: (params) => params.row.customer?.name || "N/A",
     },
     {
-      field: "phone",
-      headerName: "Telefone",
-      width: 150,
-      valueGetter: (params) => params.row.customer?.phone || "",
-    },
-    {
-      field: "cpf",
-      headerName: "CPF",
-      width: 150,
-      valueGetter: (params) => params.row.customer?.cpf || "",
-    },
-    {
-      field: "orderDate",
-      headerName: "Data do Pedido",
-      width: 150,
-      type: 'date',
-      valueGetter: (params) => new Date(params.row.orderDate),
-    },
-    {
-      field: "productName",
-      headerName: "Nome do Produto",
-      width: 150,
-      valueGetter: (params) => (params.row.inventory.productName || ""),
-    },
-    {
-      field: "quantity",
-      headerName: "Quantidade Pedido",
-      width: 150,
-      valueGetter: (params) => (params.row.quantity ? params.row.quantity : ""),
-    },
-    {
-      field: "totalPrice",
+      field: "totalAmount",
       headerName: "Valor Total",
-      width: 150,
-      valueGetter: (params) => (params.row.totalPrice ? params.row.totalPrice.toFixed(2) : ""),
+      width: 120,
+      valueGetter: (params) => params.row.totalAmount ? `R$ ${params.row.totalAmount.toFixed(2)}` : "N/A",
     },
     {
-      field: "paymentMethod",
-      headerName: "Método de Pagamento",
-      width: 180,
-      valueGetter: (params) => paymentMethods[params.value] || params.value
-    },
-    {
-      field: "orderStatus",
+      field: "status",
       headerName: "Status",
       width: 150,
       valueGetter: (params) => orderStatus[params.value] || params.value
     },
     {
-      field: "inventoryLocation",
-      headerName: "Localização do Estoque",
+      field: "paymentMethod",
+      headerName: "Pagamento",
       width: 180,
-      valueGetter: (params) => params.row.inventory?.location || "",
+      valueGetter: (params) => paymentMethods[params.value] || params.value
     },
     {
-      field: "inventoryQuantity",
-      headerName: "Quantidade no Estoque",
+      field: "deliveryDate",
+      headerName: "Data de Entrega",
       width: 180,
-      valueGetter: (params) => params.row.inventory?.quantity || "",
+      valueGetter: (params) => params.row.deliveryDate ? new Date(params.row.deliveryDate).toLocaleDateString() : "N/A"
     },
     {
       field: "actions",
       headerName: "Ações",
-      width: 200,
+      width: 150,
       renderCell: (cellData) => (
         <>
-          <Button onClick={() => handleDelete([cellData.row.id])}>
-            <DeleteIcon />
-          </Button>
-          <Button onClick={() => handleDetailOpen(cellData.row.id)} color="primary">
+          <Button onClick={() => handleDetailOpen(cellData.row.orderNumber)} color="primary">
             <VisibilityIcon />
           </Button>
         </>
@@ -180,150 +155,140 @@ const Orders = () => {
   ];
 
   return (
-    <div style={{ padding: '20px', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
-      <Button 
-        variant="outlined" 
-        startIcon={<RefreshIcon />} 
-        onClick={handleRefresh} 
-        sx={{ mb: 2 }}
+    <div style={{ padding: '20px', backgroundColor: '#f5f5f5', borderRadius: '8px', width: "95%" }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
       >
-        Atualizar Lista
-      </Button>
-      <div style={{ height: 400, width: '100%', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', overflow: 'hidden' }}>
-        {loading ? (  
+        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={handleRefresh}>
+          Atualizar Lista
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => fileExporters.exportToExcel("Fornecedores", "fornecedores.xlsx", rows)}
+        >
+          Exportar Excel
+        </Button>
+      </div>
+
+      <div style={{ height: 400, width: '100%', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+        {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             <CircularProgress />
           </div>
         ) : (
-          <DataGrid rows={rows} columns={columns} />
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+            rowCount={totalElements}
+            paginationMode="server"
+            paginationModel={{
+              page,
+              pageSize,
+            }}
+            onPaginationModelChange={({ page, pageSize }) => {
+              setPage(page);
+              setPageSize(pageSize);
+              fetchSuppliers(page, pageSize);
+            }}
+            pageSizeOptions={[20, 50, 100]}
+          />
         )}
       </div>
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Adicionar Pedido</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Nome do Cliente"
-            fullWidth
-            margin="normal"
-            value={selectedOrder?.customer.fullname || ""}
-            onChange={(e) => setSelectedOrder({ ...selectedOrder, fullName: e.target.value })}
-            InputProps={{ readOnly: true }}
-          />
-          <TextField
-            label="CPF do Cliente"
-            fullWidth
-            margin="normal"
-            value={selectedOrder?.customer.cpf || ""}
-            onChange={(e) => setSelectedOrder({ ...selectedOrder, cpf: e.target.value })}
-            InputProps={{ readOnly: true }}
-          />
-          <TextField
-            label="Telefone do Cliente"
-            fullWidth
-            margin="normal"
-            value={selectedOrder?.customer.phone || ""}
-            onChange={(e) => setSelectedOrder({ ...selectedOrder, phone: e.target.value })}
-            InputProps={{ readOnly: true }}
-          />
-          <TextField
-            label="Data do Pedido"
-            fullWidth
-            margin="normal"
-            value={selectedOrder?.orderDate || ""}
-            onChange={(e) => setSelectedOrder({ ...selectedOrder, orderDate: e.target.value })}
-            InputProps={{ readOnly: true }}
-          />
-          <TextField
-            label="Método de Pagamento"
-            fullWidth
-            margin="normal"
-            select
-            value={selectedOrder?.paymentMethod || ""}
-            onChange={(e) => setSelectedOrder({ ...selectedOrder, paymentMethod: e.target.value })}
-            InputProps={{ readOnly: true }}
-          >
-            {Object.entries(paymentMethods).map(([value, label]) => (
-              <MenuItem key={value} value={value}>
-                {label}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            label="Status do Pedido"
-            fullWidth
-            margin="normal"
-            select
-            value={selectedOrder?.orderStatus || ""}
-            onChange={(e) => setSelectedOrder({ ...selectedOrder, orderStatus: e.target.value })}
-            InputProps={{ readOnly: true }}
-          >
-            {Object.entries(orderStatus).map(([value, label]) => (
-              <MenuItem key={value} value={value}>
-                {label}
-              </MenuItem>
-            ))}
-          </TextField>
+      {/* Diálogo de Detalhes do Pedido */}
+      <Dialog open={detailDialogOpen} onClose={() => setDetailDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Detalhes do Pedido #{detailedOrder?.orderNumber}</DialogTitle>
+        <DialogContent dividers>
+          {detailedOrder && (
+            <>
+              <Typography variant="h6" gutterBottom>Informações do Pedido</Typography>
+              <TableContainer component={Paper} sx={{ mb: 3 }}>
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell><strong>Status:</strong></TableCell>
+                      <TableCell>{orderStatus[detailedOrder.status] || detailedOrder.status}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>Método de Pagamento:</strong></TableCell>
+                      <TableCell>{paymentMethods[detailedOrder.paymentMethod] || detailedOrder.paymentMethod}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>Valor Total:</strong></TableCell>
+                      <TableCell>R$ {detailedOrder.totalAmount.toFixed(2)}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>Data de Entrega:</strong></TableCell>
+                      <TableCell>{new Date(detailedOrder.deliveryDate).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>Observações:</strong></TableCell>
+                      <TableCell>{detailedOrder.observation || "Nenhuma"}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              <Typography variant="h6" gutterBottom>Itens do Pedido</Typography>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Produto</TableCell>
+                      <TableCell>Quantidade</TableCell>
+                      <TableCell>Preço Unitário</TableCell>
+                      <TableCell>Total</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {detailedOrder.items.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{item.productId}</TableCell>
+                        <TableCell>{item.quantity} {item.unit}</TableCell>
+                        <TableCell>R$ {item.unitPrice.toFixed(2)}</TableCell>
+                        <TableCell>R$ {(item.quantity * item.unitPrice).toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>Informações do Cliente</Typography>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell><strong>Nome:</strong></TableCell>
+                      <TableCell>{detailedOrder.customer?.name || "N/A"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>Telefone:</strong></TableCell>
+                      <TableCell>{detailedOrder.customer?.phone || "N/A"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>CPF:</strong></TableCell>
+                      <TableCell>{detailedOrder.customer?.cpf || "N/A"}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </>
+          )}
         </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDetailDialogOpen(false)}>Fechar</Button>
+        </DialogActions>
       </Dialog>
 
       <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={() => setSnackbarOpen(false)}>
         <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-
-      <Dialog open={detailDialogOpen} onClose={() => setDetailDialogOpen(false)}>
-  <DialogTitle>Detalhes do Pedido</DialogTitle>
-  <DialogContent>
-    {detailedOrder && (
-      <div>
-        {/* Informações do Pedido */}
-        <p><strong>ID do Pedido:</strong> {detailedOrder.orderId}</p>
-        <p><strong>Quantidade:</strong> {detailedOrder.quantity}</p>
-        <p><strong>Método de Pagamento:</strong> {detailedOrder.paymentMethod}</p>
-        <p><strong>Status do Pedido:</strong> {detailedOrder.orderStatus}</p>
-        <p><strong>Valor Total:</strong> {detailedOrder.totalPrice.toFixed(2)} BRL</p>
-        <p><strong>Data do Pedido:</strong> {new Date(detailedOrder.orderDate).toLocaleDateString()}</p>
-
-        <hr />
-
-        {/* Informações do Cliente */}
-        <h3>Informações do Cliente</h3>
-        <p><strong>ID do Cliente:</strong> {detailedOrder.customer.id}</p>
-        <p><strong>Nome Completo:</strong> {detailedOrder.customer.fullname}</p>
-        <p><strong>Email:</strong> {detailedOrder.customer.email}</p>
-        <p><strong>Telefone:</strong> {detailedOrder.customer.phone}</p>
-        <p><strong>CPF:</strong> {detailedOrder.customer.cpf}</p>
-        <p><strong>CEP:</strong> {detailedOrder.customer.cep}</p>
-        <p><strong>Notas:</strong> {detailedOrder.customer.notes}</p>
-        <p><strong>Método de Pagamento Preferido:</strong> {detailedOrder.customer.preferredPaymentMethod}</p>
-        <p><strong>Preferência de Comunicação:</strong> {detailedOrder.customer.communicationPreference}</p>
-        <p><strong>Cliente Padrão:</strong> {detailedOrder.customer.isDefaultCustomer ? "Sim" : "Não"}</p>
-        <p><strong>Status do Cliente:</strong> {detailedOrder.customer.customerStatus}</p>
-        <p><strong>Data de Criação do Cliente:</strong> {new Date(detailedOrder.customer.createdAt).toLocaleDateString()}</p>
-
-        <hr />
-
-        {/* Informações do Inventário */}
-        <h3>Informações do Inventário</h3>
-        <p><strong>ID do Inventário:</strong> {detailedOrder.inventory.id}</p>
-        <p><strong>ID do Produto:</strong> {detailedOrder.inventory.productId}</p>
-        <p><strong>Quantidade Original:</strong> {detailedOrder.inventory.originalQuantity}</p>
-        <p><strong>Quantidade Atual:</strong> {detailedOrder.inventory.quantity}</p>
-        <p><strong>Preço Unitário:</strong> {detailedOrder.inventory.unitPrice.toFixed(2)} BRL</p>
-        <p><strong>Localização:</strong> {detailedOrder.inventory.location}</p>
-        <p><strong>Desconto:</strong> {detailedOrder.inventory.discount.toFixed(2)} BRL</p>
-      </div>
-    )}
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={() => setDetailDialogOpen(false)}>Fechar</Button>
-  </DialogActions>
-</Dialog>
-
-      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={() => setSnackbarOpen(false)}>
-        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

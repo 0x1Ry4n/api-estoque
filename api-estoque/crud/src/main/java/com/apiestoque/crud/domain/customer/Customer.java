@@ -6,6 +6,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import com.apiestoque.crud.domain.customer.dto.CustomerStatus;
+import com.apiestoque.crud.domain.order.Order;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -13,7 +15,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity(name = "customers")
 @Table(name = "customers")
@@ -77,6 +81,10 @@ public class Customer {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private CustomerStatus status;
+
+    @OneToMany(mappedBy = "customer")
+    @JsonIgnore
+    private List<Order> orders = new ArrayList<>();
 
     @CreatedBy
     private String createdBy;

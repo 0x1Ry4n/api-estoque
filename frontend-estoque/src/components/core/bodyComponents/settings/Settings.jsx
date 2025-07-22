@@ -28,12 +28,10 @@ const Settings = ({ onToggleTheme }) => {
   return (
     <Box
       sx={{
-        width: isMobile ? "100%" : "90%",
-        minHeight: "100vh",
+        width: "100%",
         display: "flex",
         justifyContent: "center",
-        alignItems: "flex-start",
-        px: isMobile ? 8 : 2,
+        px: isMobile ? 10 : 2,
         py: 4,
       }}
     >
@@ -41,8 +39,8 @@ const Settings = ({ onToggleTheme }) => {
         elevation={6}
         sx={{
           width: "100%",
-          maxWidth: 750,
-          p: isMobile ? 4 : 5,
+          maxWidth: 850,
+          p: isMobile ? 4 : 6,
           borderRadius: 2,
           backgroundColor: "#fafafa",
         }}
