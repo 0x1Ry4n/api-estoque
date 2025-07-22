@@ -67,7 +67,7 @@ const Orders = () => {
       const response = await OrderService.getOrders(true, page, pageSize);
 
       if (response.status === 200) {
-        const ordersWithId = response.data.map(order => ({
+        const ordersWithId = response.data.content.map(order => ({
           id: order.orderId,
           ...order
         }));
