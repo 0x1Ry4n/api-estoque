@@ -16,7 +16,7 @@ public record OrderResponseDTO(
                 Long invoiceNumber,
                 Long packingNumber,
                 CustomerResponseDTO customer,
-                List<OrderItemDTO> items,
+                List<OrderItemResponseDTO> items,
                 BigDecimal totalAmount,
                 String status,
                 String paymentMethod,
@@ -36,7 +36,7 @@ public record OrderResponseDTO(
                                 new CustomerResponseDTO(order.getCustomer()),
                                 order.getItems()
                                                 .stream()
-                                                .map(OrderItemDTO::new)
+                                                .map(OrderItemResponseDTO::new)
                                                 .collect(Collectors.toList()),
                                 order.getTotalAmount(),
                                 order.getStatus() != null ? order.getStatus().name() : null,

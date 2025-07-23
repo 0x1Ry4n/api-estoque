@@ -11,7 +11,7 @@ public record OrderRequestDTO(
     String customerId,
 
     @NotEmpty(message = "Lista de itens não pode ser vazia")
-    List<OrderItemDTO> items,
+    List<OrderItemRequestDTO> items,
 
     @NotNull(message = "Status do pedido é obrigatório")
     OrderStatus status,

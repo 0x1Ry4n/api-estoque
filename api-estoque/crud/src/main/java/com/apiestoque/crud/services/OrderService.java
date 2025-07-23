@@ -3,7 +3,7 @@ package com.apiestoque.crud.services;
 import com.apiestoque.crud.domain.customer.Customer;
 import com.apiestoque.crud.domain.customer.dto.CustomerResponseDTO;
 import com.apiestoque.crud.domain.order.*;
-import com.apiestoque.crud.domain.order.dto.OrderItemDTO;
+import com.apiestoque.crud.domain.order.dto.OrderItemResponseDTO;
 import com.apiestoque.crud.domain.order.dto.OrderRequestDTO;
 import com.apiestoque.crud.domain.order.dto.OrderResponseDTO;
 import com.apiestoque.crud.domain.order.dto.OrderStatus;
@@ -37,7 +37,7 @@ public class OrderService {
     @Autowired
     private ProductRepository productRepository;
 
-    @Autowired 
+    @Autowired
     private InventoryRepository inventoryRepository;
 
     @Autowired
@@ -84,8 +84,8 @@ public class OrderService {
                     item.setUnitPrice(itemDto.unitPrice());
                     item.setUnit(itemDto.unit());
 
-                    if (!inventoryRepository.existsByInventoryCode(itemDto.inventoryCode())) 
-                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                    if (!inventoryRepository.existsByInventoryCode(itemDto.inventoryCode()))
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                                 "Inventário com esse código não existe.");
 
                     item.setInventoryCode(itemDto.inventoryCode());
@@ -141,6 +141,14 @@ public class OrderService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                 "Produto não encontrado."));
 
+                if (itemDTO.quantity() < 1) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantidade deve ser pelo menos 1.");
+                }
+
+                if (itemDTO.unitPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O preço unitário deve ser maior que 0.");
+                }
+
                 return new OrderItem(
                         order,
                         product,
@@ -164,7 +172,7 @@ public class OrderService {
 
     public Page<OrderResponseDTO> getAll(Pageable pageable) {
         Page<OrderResponseDTO> orderPage = orderRepository.findAll(pageable)
-            .map(OrderResponseDTO::new);
+                .map(OrderResponseDTO::new);
 
         return orderPage;
     }
@@ -190,13 +198,7 @@ public class OrderService {
                 order.getInvoiceNumber(),
                 order.getPackingNumber(),
                 new CustomerResponseDTO(order.getCustomer()),
-                order.getItems().stream().map(item -> new OrderItemDTO(
-                        item.getProduct().getId(),
-                        item.getQuantity(),
-                        item.getUnitPrice(),
-                        item.getUnit(),
-                        item.getInventoryCode(),
-                        item.getOrderItemType())).collect(Collectors.toList()),
+                order.getItems().stream().map(item -> new OrderItemResponseDTO(item)).collect(Collectors.toList()),
                 order.getTotalAmount(),
                 order.getStatus().name(),
                 order.getPaymentMethod().name(),

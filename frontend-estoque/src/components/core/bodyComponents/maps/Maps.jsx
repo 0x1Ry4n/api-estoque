@@ -299,7 +299,7 @@ const MapComponent = () => {
   return (
     <Box sx={{
       width: isMobile ? '100vw' : '60vw',
-      minHeight: '100vh',
+      maxHeight: '80vh',
       p: isMobile ? 4 : 6,
       mt: 5,
       boxSizing: 'border-box',
@@ -312,7 +312,7 @@ const MapComponent = () => {
         fontWeight: 600,
       },
     }}>
-      <Paper elevation={4} sx={{ padding: 4, borderRadius: 2 }}>
+      <Paper elevation={4} sx={{ padding: 8, borderRadius: 2 }}>
         <AppBar position="static" sx={{ borderRadius: 1, boxShadow: 2, backgroundColor: '#00796b' }}>
           <Toolbar>
             <Typography margin="auto" variant="h7">Mapa de Fornecedores e Marcadores</Typography>
@@ -461,7 +461,7 @@ const MapComponent = () => {
           </Grid>
         </Box>
 
-        <MapContainer center={[-23.5505, -46.6333]} zoom={13} onClick={addMarker} style={{ height: '600px', width: '100%' }}>
+        <MapContainer center={[-23.5505, -46.6333]} zoom={13} onClick={addMarker} style={{ height: '530px', width: '100%' }}>
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

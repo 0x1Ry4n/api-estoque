@@ -295,7 +295,7 @@ const CalendarWithNotes = () => {
         fontWeight: 600,
       },
     }}>
-      <Paper elevation={4} sx={{ padding: 4, borderRadius: 2 }}>
+      <Paper elevation={4} sx={{ padding: 8, borderRadius: 2 }}>
         <Typography variant="h5" sx={{ mt: 2, mb: 3, fontWeight: 'bolder' }}>
           Calendário de Notas
         </Typography>

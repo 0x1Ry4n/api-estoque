@@ -15,10 +15,15 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Typography
+  Typography,
+  Chip,
+  IconButton,
+  Box, 
+  useTheme, 
+  useMediaQuery
 } from "@mui/material";
 import {
-  Delete as DeleteIcon,
+  Close as CloseIcon,
   Visibility as VisibilityIcon,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
@@ -41,6 +46,10 @@ const Orders = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+
   const paymentMethods = {
     CREDIT_CARD: "Cartão de Crédito",
     DEBIT_CARD: "Cartão de Débito",
@@ -55,6 +64,10 @@ const Orders = () => {
     DELIVERED: "Entregue",
     CANCELED: "Cancelado"
   };
+
+  const closeDetailDialogOpen = () => {
+    setDetailDialogOpen(false);
+  }
 
   useEffect(() => {
     fetchOrders(page, pageSize);
@@ -202,12 +215,27 @@ const Orders = () => {
         )}
       </div>
 
-      {/* Diálogo de Detalhes do Pedido */}
-      <Dialog open={detailDialogOpen} onClose={() => setDetailDialogOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Detalhes do Pedido #{detailedOrder?.orderNumber}</DialogTitle>
+      <Dialog
+        open={detailDialogOpen}
+        onClose={() => setDetailDialogOpen(false)}
+        fullWidth
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            p: isMobile ? 2 : 4,
+            borderRadius: 2,
+          },
+        }}
+      >
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <DialogTitle>Detalhes do Pedido #{detailedOrder?.orderNumber}</DialogTitle>
+          <IconButton onClick={closeDetailDialogOpen}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
         <DialogContent dividers>
           {detailedOrder && (
-            <>
+            <Box>
               <Typography variant="h6" gutterBottom>Informações do Pedido</Typography>
               <TableContainer component={Paper} sx={{ mb: 3 }}>
                 <Table>
@@ -242,6 +270,7 @@ const Orders = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell>Produto</TableCell>
+                      <TableCell>Categoria</TableCell>
                       <TableCell>Quantidade</TableCell>
                       <TableCell>Preço Unitário</TableCell>
                       <TableCell>Total</TableCell>
@@ -250,7 +279,27 @@ const Orders = () => {
                   <TableBody>
                     {detailedOrder.items.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell>{item.productId}</TableCell>
+                        <TableCell>{item.productName}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={item.productCategory}
+                            sx={{
+                              fontWeight: 'bold',
+                              color: 'gray',
+                              height: 25,
+                              maxWidth: 150,
+                              p: 2,
+                              '& .MuiChip-label': {
+                                paddingLeft: 1,
+                                paddingRight: 1,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              },
+                            }}
+                          />
+                        </TableCell>
+
                         <TableCell>{item.quantity} {item.unit}</TableCell>
                         <TableCell>R$ {item.unitPrice.toFixed(2)}</TableCell>
                         <TableCell>R$ {(item.quantity * item.unitPrice).toFixed(2)}</TableCell>
@@ -279,12 +328,9 @@ const Orders = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
-            </>
+            </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDetailDialogOpen(false)}>Fechar</Button>
-        </DialogActions>
       </Dialog>
 
       <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={() => setSnackbarOpen(false)}>
@@ -292,7 +338,7 @@ const Orders = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </div>
+    </div >
   );
 };
 

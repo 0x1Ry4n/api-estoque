@@ -509,13 +509,13 @@ const Products = () => {
         PaperProps={{
           sx: {
             p: isMobile ? 2 : 4,
-            borderRadius: 3,
+            borderRadius: 2,
           },
         }}
       >
         <DialogTitle>
           <Box display="flex" alignItems="center" justifyContent="space-between">
-            <Typography variant="h5" margin="auto" fontWeight="bolder">
+            <Typography variant="h6" gutterBottom>
               Detalhes do Produto
             </Typography>
             <IconButton onClick={closeDetailDialog}>
@@ -547,7 +547,7 @@ const Products = () => {
 
               <Divider sx={{ my: 3 }} />
 
-              <Typography variant="h6">Inventário</Typography>
+              <Typography variant="h6" gutterBottom>Inventário</Typography>
               <Grid container spacing={2}>
                 {detailedProduct.inventory.map((item) => (
                   <Grid item xs={12} sm={6} md={4} key={item.id}>
@@ -572,7 +572,7 @@ const Products = () => {
 
               <Divider sx={{ my: 3 }} />
 
-              <Typography variant="h6">Fornecedores</Typography>
+              <Typography variant="h6" gutterBottom>Fornecedores</Typography>
               <Grid container spacing={2}>
                 {detailedProduct.suppliers.map((supplier) => (
                   <Grid item xs={12} sm={6} md={4} key={supplier.id}>

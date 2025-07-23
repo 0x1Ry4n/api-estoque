@@ -451,7 +451,7 @@ const ProductForm = ({ onProductAdded }) => {
               style={{ width: '100%', borderRadius: 6 }}
             />
           )}
-          <Button onClick={closeCameraModal} variant="outlined" sx={{ mt: 2 }}>
+          <Button onClick={closeCameraModal} variant="outlined" color="secondary" sx={{ mt: 2 }}>
             Cancelar
           </Button>
         </Box>

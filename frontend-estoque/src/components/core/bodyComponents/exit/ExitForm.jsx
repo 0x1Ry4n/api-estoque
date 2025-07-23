@@ -47,7 +47,7 @@ const ExitForm = ({ onExitAdded }) => {
   useEffect(() => {
     if (selectedProduct) {
       const fetchInventories = async () => {
-        const response = await ProductService.inventory.getInventoriesByProduct(`${selectedProduct.id}`);
+        const response = await ProductService.inventory.getInventoriesByProduct(selectedProduct.id);
         setInventories(response.data);
       };
 
