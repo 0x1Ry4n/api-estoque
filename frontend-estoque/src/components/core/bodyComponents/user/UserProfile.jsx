@@ -94,8 +94,18 @@ const UserProfile = () => {
               color={user.role === "ADMIN" ? "primary" : "default"}
               sx={{
                 fontWeight: 'bold',
-                bgcolor: '#808080',
-                color: 'white'
+                color: '#303030',
+                height: 25,
+                maxWidth: 150,
+                p: 2,
+                '& .MuiChip-label': {
+                  paddingLeft: 1,
+                  paddingRight: 1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                },
+                bgcolor: 'rgba(0, 0, 0, 0.08)',
               }}
             />
           </Grid>

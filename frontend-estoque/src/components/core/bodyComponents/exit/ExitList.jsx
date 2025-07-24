@@ -16,7 +16,7 @@ import {
   Edit as EditIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
 import { addDays, format } from "date-fns";
 import { fileExporters } from "../../../../utils/utils";
 import { useExitListStore } from "./stores/useExitListStore";
@@ -161,6 +161,7 @@ const ExitList = () => {
           rows={rows}
           columns={columns}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          slots={{ toolbar: GridToolbar }}
           rowCount={pagination.totalElements}
           paginationMode="server"
           paginationModel={{

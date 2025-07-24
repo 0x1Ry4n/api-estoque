@@ -11,7 +11,7 @@ import {
   Tooltip
 } from "@mui/material";
 import { Edit as EditIcon, Refresh as RefreshIcon } from "@mui/icons-material";
-import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import { fileExporters } from "../../../../utils/utils";
 import { useUserListStore } from "./stores/useUserListStore";
@@ -183,6 +183,7 @@ const UserList = () => {
           rows={rows}
           columns={columns}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          slots={{ toolbar: GridToolbar }}
         />
       </div>
 

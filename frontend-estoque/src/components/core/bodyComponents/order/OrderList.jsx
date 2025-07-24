@@ -18,16 +18,18 @@ import {
   Typography,
   Chip,
   IconButton,
-  Box, 
-  useTheme, 
-  useMediaQuery
+  Box,
+  Tooltip,
+  useTheme,
+  useMediaQuery, 
 } from "@mui/material";
 import {
   Close as CloseIcon,
   Visibility as VisibilityIcon,
+  Edit as EditIcon,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
-import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
 import { OrderService } from "../../../../services/orderService";
 import { fileExporters } from "../../../../utils/utils";
 
@@ -156,13 +158,20 @@ const Orders = () => {
     {
       field: "actions",
       headerName: "Ações",
-      width: 150,
+      width: 200,
       renderCell: (cellData) => (
-        <>
-          <Button onClick={() => handleDetailOpen(cellData.row.orderNumber)} color="primary">
-            <VisibilityIcon />
-          </Button>
-        </>
+        <div>
+          <Tooltip title="Editar">
+            <Button onClick={() => handleClickOpen(cellData.row)}>
+              <EditIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Visualizar">
+            <Button onClick={() => handleDetailOpen(cellData.row.orderNumber)} color="primary">
+              <VisibilityIcon />
+            </Button>
+          </Tooltip>
+        </div>
       ),
     },
   ];
@@ -198,6 +207,7 @@ const Orders = () => {
           <DataGrid
             rows={rows}
             columns={columns}
+            slots={{ toolbar: GridToolbar }}
             localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
             rowCount={totalElements}
             paginationMode="server"
@@ -285,7 +295,7 @@ const Orders = () => {
                             label={item.productCategory}
                             sx={{
                               fontWeight: 'bold',
-                              color: 'gray',
+                              color: '#303030',
                               height: 25,
                               maxWidth: 150,
                               p: 2,

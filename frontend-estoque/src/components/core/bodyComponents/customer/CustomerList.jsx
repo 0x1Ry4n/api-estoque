@@ -25,7 +25,7 @@ import {
   DescriptionOutlined as DescriptionOutlinedIcon,
   LocationOnOutlined as LocationOnOutlinedIcon,
 } from "@mui/icons-material";
-import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
 import { fileExporters } from "../../../../utils/utils";
 import { CustomerService } from "../../../../services/customerService";
 import InputMask from "react-input-mask";
@@ -226,6 +226,7 @@ const Customers = () => {
         <DataGrid
           rows={rows}
           columns={columns}
+          slots={{ toolbar: GridToolbar }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
           rowCount={totalElements}
           paginationMode="server"

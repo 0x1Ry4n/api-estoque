@@ -9,7 +9,7 @@ import {
   Delete as DeleteIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
 import { fileExporters } from "../../../../utils/utils";
 import { useInventoryListStore } from "./stores/useInventoryListStore";
 import Swal from "sweetalert2";
@@ -132,6 +132,7 @@ const Inventory = () => {
           rows={rows}
           columns={columns}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          slots={{ toolbar: GridToolbar }}
           rowCount={pagination.totalElements}
           paginationMode="server"
           paginationModel={{ page: pagination.page, pageSize: pagination.pageSize }}

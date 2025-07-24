@@ -25,7 +25,7 @@ import {
   LocationOnOutlined as LocationOnOutlinedIcon,
 } from "@mui/icons-material";
 import { fileExporters } from "../../../../utils/utils";
-import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
 import { useSupplierListStore } from "./stores/useSupplierListStore";
 import InputMask from "react-input-mask";
 import Swal from "sweetalert2";
@@ -181,6 +181,7 @@ const Suppliers = () => {
         <DataGrid
           rows={rows}
           columns={columns}
+          slots={{ toolbar: GridToolbar }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
           rowCount={pagination.totalElements}
           paginationMode="server"

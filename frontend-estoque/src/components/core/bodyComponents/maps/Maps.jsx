@@ -406,6 +406,14 @@ const MapComponent = () => {
               <Tooltip title={showPolygons ? "Esconder Polígonos" : "Mostrar Polígonos"}>
                 <Button
                   variant="outlined"
+                  sx={{
+                    boxShadow: 2,
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: 4,
+                    },
+                  }}
                   fullWidth
                   onClick={() => setShowPolygons(!showPolygons)}
                   startIcon={showPolygons ? <VisibilityOffIcon /> : <VisibilityIcon />}
@@ -420,6 +428,14 @@ const MapComponent = () => {
               <Tooltip title={showLines ? "Esconder Linhas" : "Mostrar Linhas"}>
                 <Button
                   variant="outlined"
+                  sx={{
+                    boxShadow: 2,
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: 4,
+                    },
+                  }}
                   fullWidth
                   onClick={() => setShowLines(!showLines)}
                   startIcon={showLines ? <PolylineIcon /> : <ShowChartIcon />}
@@ -434,6 +450,14 @@ const MapComponent = () => {
               <Tooltip title="Limpar Marcadores">
                 <Button
                   variant="outlined"
+                  sx={{
+                    boxShadow: 2,
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: 4,
+                    },
+                  }}
                   color="warning"
                   fullWidth
                   onClick={clearMarkers}
@@ -449,6 +473,14 @@ const MapComponent = () => {
               <Tooltip title="Restaurar Marcadores Padrão">
                 <Button
                   variant="outlined"
+                  sx={{
+                    boxShadow: 2,
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: 4,
+                    },
+                  }}
                   color="secondary"
                   fullWidth
                   onClick={restoreDefaultMarkers}

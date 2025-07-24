@@ -15,7 +15,7 @@ import {
   Edit as EditIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
 import { fileExporters } from "../../../../utils/utils";
 import { useCategoryListStore } from "./stores/useCategoryListStore";
 import Swal from "sweetalert2";
@@ -107,6 +107,7 @@ const Categories = () => {
         <DataGrid
           rows={rows}
           columns={columns}
+          slots={{ toolbar: GridToolbar }}          
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
           rowCount={pagination.totalElements}
           paginationMode="server"

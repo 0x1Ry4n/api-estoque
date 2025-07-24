@@ -295,7 +295,7 @@ const CalendarWithNotes = () => {
         fontWeight: 600,
       },
     }}>
-      <Paper elevation={4} sx={{ padding: 8, borderRadius: 2 }}>
+      <Paper elevation={4} sx={{ padding: 8, borderRadius: 2, cursor: "pointer" }}>
         <Typography variant="h5" sx={{ mt: 2, mb: 3, fontWeight: 'bolder' }}>
           Calendário de Notas
         </Typography>
@@ -305,6 +305,7 @@ const CalendarWithNotes = () => {
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
             initialView={calendarView}
             headerToolbar={headerToolbar}
+
             buttonText={{
               today: 'Hoje',
               month: 'Mês',
@@ -337,7 +338,7 @@ const CalendarWithNotes = () => {
         >
           <Grid item>
             <Button
-              variant="contained"
+              variant="outlined"
               color="secondary"
               onClick={exportEventsToCSV}
               startIcon={<DownloadIcon />}
@@ -358,7 +359,7 @@ const CalendarWithNotes = () => {
 
           <Grid item>
             <Button
-              variant="contained"
+              variant="outlined"
               color="primary"
               onClick={exportNotesToPDF}
               startIcon={<DescriptionIcon />}
@@ -379,7 +380,7 @@ const CalendarWithNotes = () => {
 
           <Grid item>
             <Button
-              variant="contained"
+              variant="outlined"
               color="primary"
               onClick={exportCalendarToPDF}
               startIcon={<PictureAsPdfIcon />}
@@ -409,12 +410,13 @@ const CalendarWithNotes = () => {
               width: { xs: '90%', sm: 500 },
               bgcolor: 'background.paper',
               borderRadius: 2,
-              boxShadow: 24,
+              boxShadow: 6,
               p: 4,
             }}
           >
-            <Typography variant="h6" gutterBottom>
-              {isEditing ? 'Editar Nota' : 'Nova Nota'} - {selectedDate && format(selectedDate, 'dd/MM/yyyy')}
+            <Typography variant="h6" fontWeight="bold" mb={3}>
+              {isEditing ? 'Editar Nota' : 'Nova Nota'}{' '}
+              {selectedDate && `- ${format(selectedDate, 'dd/MM/yyyy')}`}
             </Typography>
 
             <TextField
@@ -422,7 +424,7 @@ const CalendarWithNotes = () => {
               fullWidth
               value={currentNote.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
-              sx={{ mb: 2 }}
+              sx={{ mb: 3 }}
               required
             />
 
@@ -430,18 +432,18 @@ const CalendarWithNotes = () => {
               label="Descrição"
               multiline
               fullWidth
-              rows={4}
+              minRows={4}
               value={currentNote.note}
               onChange={(e) => handleInputChange('note', e.target.value)}
-              sx={{ mb: 2 }}
+              sx={{ mb: 3 }}
             />
 
-            <FormControl fullWidth sx={{ mb: 3 }}>
+            <FormControl fullWidth sx={{ mb: 4 }}>
               <InputLabel>Prioridade *</InputLabel>
               <Select
                 value={currentNote.priority}
                 onChange={(e) => handleInputChange('priority', e.target.value)}
-                label="Prioridade"
+                label="Prioridade *"
                 required
               >
                 <MenuItem value="Baixa">Baixa</MenuItem>
@@ -450,29 +452,24 @@ const CalendarWithNotes = () => {
               </Select>
             </FormControl>
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Button variant="outlined" onClick={() => setModalOpen(false)}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+              <Button variant="outlined" color="secondary" onClick={() => setModalOpen(false)}>
                 Cancelar
               </Button>
-              <Box>
-                {isEditing && (
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    onClick={handleDeleteNote}
-                    sx={{ mr: 2 }}
-                  >
-                    Excluir
-                  </Button>
-                )}
-                <Button
-                  variant="contained"
-                  onClick={handleSaveNote}
-                  disabled={!currentNote.title || !currentNote.priority}
-                >
-                  {isEditing ? 'Salvar' : 'Criar'}
+
+              {isEditing && (
+                <Button variant="outlined" color="error" onClick={handleDeleteNote}>
+                  Excluir
                 </Button>
-              </Box>
+              )}
+
+              <Button
+                variant="contained"
+                onClick={handleSaveNote}
+                disabled={!currentNote.title || !currentNote.priority}
+              >
+                {isEditing ? 'Salvar' : 'Adicionar'}
+              </Button>
             </Box>
           </Box>
         </Modal>
@@ -481,7 +478,7 @@ const CalendarWithNotes = () => {
           open={snackbarOpen}
           autoHideDuration={6000}
           onClose={handleSnackbarClose}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         >
           <Alert
             onClose={handleSnackbarClose}
