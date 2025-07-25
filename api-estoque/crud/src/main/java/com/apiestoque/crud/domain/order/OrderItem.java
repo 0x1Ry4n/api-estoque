@@ -95,8 +95,9 @@ public class OrderItem {
         return unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
-    public OrderItem(Order order, Product product, Integer quantity, BigDecimal unitPrice, String inventoryCode) {
+    public OrderItem(Order order, OrderItemType orderItemType, Product product, Integer quantity, BigDecimal unitPrice, String inventoryCode) {
         this.order = order;
+        this.orderItemType = orderItemType;
         this.product = product;
         this.quantity = quantity;
         this.unitPrice = unitPrice;

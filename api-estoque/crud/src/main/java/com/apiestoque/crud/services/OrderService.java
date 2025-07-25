@@ -151,6 +151,7 @@ public class OrderService {
 
                 return new OrderItem(
                         order,
+                        itemDTO.orderItemType(),
                         product,
                         itemDTO.quantity(),
                         itemDTO.unitPrice(),

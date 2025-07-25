@@ -26,6 +26,7 @@ import {
   InputAdornment,
   Tooltip
 } from '@mui/material';
+import { formatDocument } from '../../../../utils/utils';
 import { AddCircleOutline, Delete, Add, ShoppingBag, Construction, CardGiftcard, Stars, ShoppingCartOutlined } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { CustomerService } from '../../../../services/customerService';
@@ -184,16 +185,6 @@ const OrderForm = ({ onOrderAdded }) => {
   const handleSnackbarClose = () => {
     setErrorMessage('');
     setSuccessMessage('');
-  };
-
-  const formatDocument = (doc) => {
-    if (!doc) return '';
-    if (doc.length === 11) {
-      return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    } else if (doc.length === 14) {
-      return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
-    }
-    return doc;
   };
 
   return (
@@ -422,11 +413,11 @@ const OrderForm = ({ onOrderAdded }) => {
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Observação"
+                    label="Observações"
                     fullWidth
                     variant="outlined"
                     multiline
-                    rows={2}
+                    rows={5}
                   />
                 )}
               />

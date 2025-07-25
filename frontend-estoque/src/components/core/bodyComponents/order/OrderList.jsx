@@ -7,7 +7,10 @@ import {
   DialogTitle,
   Snackbar,
   Alert,
-  CircularProgress,
+  FormControl,
+  MenuItem,
+  TextField,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -21,17 +24,21 @@ import {
   Box,
   Tooltip,
   useTheme,
-  useMediaQuery, 
+  useMediaQuery,
+  Autocomplete
 } from "@mui/material";
 import {
   Close as CloseIcon,
   Visibility as VisibilityIcon,
   Edit as EditIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
+import { formatDocument } from "../../../../utils/utils";
 import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
 import { OrderService } from "../../../../services/orderService";
 import { fileExporters } from "../../../../utils/utils";
+import { CustomerService } from "../../../../services/customerService";
 
 const Orders = () => {
   const [open, setOpen] = useState(false);
@@ -42,15 +49,53 @@ const Orders = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
-  const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  const [customers, setCustomers] = useState([]);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const res = await CustomerService.getCustomer(false, 0, 0);
+        setCustomers(res.data || []);
+      } catch (error) {
+        console.error("Error fetching customers:", error);
+        setCustomers([]);
+      }
+    };
+    fetchCustomers();
+  }, []);
+
+  const handleSave = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      console.log(selectedOrder);
+
+      await OrderService.updateOrder(selectedOrder.orderNumber, {
+        customerId: selectedOrder.customer?.id,
+        status: selectedOrder.status,
+        paymentMethod: selectedOrder.paymentMethod,
+        deliveryDate: selectedOrder.deliveryDate,
+        observation: selectedOrder.observation,
+        items: selectedOrder.items
+      });
+
+      setSnackbarMessage('Pedido atualizado com sucesso!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+      fetchOrders(page, pageSize);
+      closeModal();
+    } catch (e) {
+      setSnackbarMessage(`Erro ao atualizar o pedido: ${e.message}`);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    } 
+  }
 
   const paymentMethods = {
     CREDIT_CARD: "Cartão de Crédito",
@@ -71,13 +116,24 @@ const Orders = () => {
     setDetailDialogOpen(false);
   }
 
+  const openModal = async (order) => {
+    setSelectedOrder(order);
+    setOpen(true);
+  }
+
+  const closeModal = () => {
+    setOpen(false);
+  }
+
+  const handleClickOpen = (order) => {
+    openModal(order);
+  }
+
   useEffect(() => {
     fetchOrders(page, pageSize);
   }, []);
 
   const fetchOrders = async (page, pageSize) => {
-    setLoading(true);
-
     try {
       const response = await OrderService.getOrders(true, page, pageSize);
 
@@ -94,9 +150,7 @@ const Orders = () => {
       setSnackbarMessage("Erro ao carregar pedidos.");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   const handleDetailOpen = async (orderNumber) => {
@@ -199,31 +253,148 @@ const Orders = () => {
       </div>
 
       <div style={{ height: 400, width: '100%', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
-        {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <CircularProgress />
-          </div>
-        ) : (
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            slots={{ toolbar: GridToolbar }}
-            localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
-            rowCount={totalElements}
-            paginationMode="server"
-            paginationModel={{
-              page,
-              pageSize,
-            }}
-            onPaginationModelChange={({ page, pageSize }) => {
-              setPage(page);
-              setPageSize(pageSize);
-              fetchSuppliers(page, pageSize);
-            }}
-            pageSizeOptions={[20, 50, 100]}
-          />
-        )}
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          slots={{ toolbar: GridToolbar }}
+          localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          rowCount={totalElements}
+          paginationMode="server"
+          paginationModel={{
+            page,
+            pageSize,
+          }}
+          onPaginationModelChange={({ page, pageSize }) => {
+            setPage(page);
+            setPageSize(pageSize);
+            fetchSuppliers(page, pageSize);
+          }}
+          pageSizeOptions={[20, 50, 100]}
+        />
       </div>
+
+
+      <Dialog
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            width: '700px',
+            maxWidth: '90vw',
+          },
+        }}
+        open={open}
+        onClose={closeModal}
+      >
+        <DialogTitle>
+          Editar Pedido
+        </DialogTitle>
+        <DialogContent>
+          <Box display="flex" flexDirection="column" gap={4} sx={{ mt: 2 }}>
+            <Autocomplete
+              options={customers || []}
+              loading={customers === null}
+              getOptionLabel={(option) => {
+                const doc = option.cpf ? `CPF: ${formatDocument(option.cpf)}` :
+                  option.cnpj ? `CNPJ: ${formatDocument(option.cnpj)}` : '';
+                return `${option.name || 'Sem nome'} ${doc ? `(${doc})` : ''}`;
+              }}
+              value={selectedOrder?.customer || null}
+              onChange={(event, newValue) => setSelectedOrder({ ...selectedOrder, customer: newValue })}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Cliente"
+                  variant="outlined"
+                  fullWidth
+                  error={!customers}
+                  helperText={!customers ? "Carregando clientes..." : ""}
+                />
+              )}
+            />
+
+            <FormControl fullWidth variant="outlined">
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>Método de Pagamento</Typography>
+              <Select
+                value={selectedOrder?.paymentMethod || 'CREDIT_CARD'}
+                onChange={(e) => setSelectedOrder({ ...selectedOrder, paymentMethod: e.target.value })}
+                variant="outlined"
+                required
+              >
+                <MenuItem value="MONEY">Dinheiro</MenuItem>
+                <MenuItem value="PIX">PIX</MenuItem>
+                <MenuItem value="CREDIT_CARD">Cartão de Crédito</MenuItem>
+                <MenuItem value="DEBIT_CARD">Cartão de Débito</MenuItem>
+                <MenuItem value="BANK_SLIP">Boleto</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth variant="outlined">
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>Status do Pedido</Typography>
+              <Select
+                value={selectedOrder?.status || 'PENDING'}
+                onChange={(e) => setSelectedOrder({ ...selectedOrder, status: e.target.value })}
+                variant="outlined"
+                required
+              >
+                <MenuItem value="PENDING">Pendente</MenuItem>
+                <MenuItem value="IN_TRANSIT">Em Trânsito</MenuItem>
+                <MenuItem value="DELIVERED">Entregue</MenuItem>
+                <MenuItem value="CANCELED">Cancelado</MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField
+              label="Data de Entrega"
+              type="datetime-local"
+              fullWidth
+              variant="outlined"
+              value={selectedOrder?.deliveryDate ? new Date(selectedOrder.deliveryDate).toISOString().slice(0, 16) : ''}
+              onChange={(e) => setSelectedOrder({ ...selectedOrder, deliveryDate: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+            />
+
+            <TextField
+              label="Observações"
+              fullWidth
+              variant="outlined"
+              multiline
+              rows={5}
+              value={selectedOrder?.observation || ''}
+              onChange={(e) => setSelectedOrder({ ...selectedOrder, observation: e.target.value })}
+            />
+
+            <Box>
+              <Typography variant="h6" sx={{ mb: 2 }}>Itens do Pedido</Typography>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Produto</TableCell>
+                      <TableCell>Quantidade</TableCell>
+                      <TableCell>Preço Unitário</TableCell>
+                      <TableCell>Total</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {selectedOrder?.items?.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{item.productName}</TableCell>
+                        <TableCell>{item.quantity} {item.unit}</TableCell>
+                        <TableCell>R$ {item.unitPrice.toFixed(2)}</TableCell>
+                        <TableCell>R$ {(item.quantity * item.unitPrice).toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeModal} color="secondary">Cancelar</Button>
+          <Button onClick={handleSave} color="primary">Confirmar</Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog
         open={detailDialogOpen}
