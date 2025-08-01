@@ -9,13 +9,13 @@ import {
   InputAdornment,
   Snackbar,
   Alert,
+  Autocomplete
 } from "@mui/material";
 import {
   Add as AddIcon,
   AddShoppingCart as AddShoppingCartIcon,
   AddCircleOutline as AddCircleOutlineIcon,
 } from "@mui/icons-material";
-import { Autocomplete } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { ExitService } from "../../../../services/exitService";
 import { ProductService } from "../../../../services/productService";
@@ -93,7 +93,12 @@ const ExitForm = ({ onExitAdded }) => {
     <Box>
       <Paper
         elevation={4}
-        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: '95%' }}
+        sx={{ 
+          padding: 6, 
+          borderRadius: 2, 
+          backgroundColor: "background.paper", 
+          width: '95%' 
+        }}
       >
         <Typography
           variant="h5"

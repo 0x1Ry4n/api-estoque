@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { UserService } from '../services/UserService';
 import { setAuthToken } from '../api';
 import { isTokenExpired } from '../utils/utils';
-import { UserService } from '../services/UserService';
 
 const AuthContext = createContext();
 

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { CategoryService } from "../../../../../services/CategoryService";
+import { CategoryService } from "../../../../../services/categoryService";
 
 export const useCategoryListStore = create((set, get) => ({
     rows: [],

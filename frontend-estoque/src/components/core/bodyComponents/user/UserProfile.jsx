@@ -1,7 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Grid, CircularProgress, Button, useMediaQuery, useTheme, Chip } from '@mui/material';
-import { Logout as LogoutIcon } from '@mui/icons-material';
+import { 
+  Box, 
+  Typography, 
+  Paper, 
+  Grid, 
+  CircularProgress, 
+  Button, 
+  useMediaQuery, 
+  useTheme, 
+  Chip 
+} from '@mui/material';
+import { 
+  Logout as LogoutIcon 
+} from '@mui/icons-material';
 import { useAuth } from '../../../../context/AuthContext';
 import UserAvatar from '../../subComponents/UserAvatar';
 
@@ -69,6 +81,7 @@ const UserProfile = () => {
       alignItems: 'center',
       ml: !isMobile ? '25%' : '',
       width: isMobile ? '100vw' : '40vw',
+      height: '100vh',
       p: isMobile ? 4 : 2,
       mt: 2,
       boxSizing: 'border-box',
@@ -94,7 +107,7 @@ const UserProfile = () => {
               color={user.role === "ADMIN" ? "primary" : "default"}
               sx={{
                 fontWeight: 'bold',
-                color: '#303030',
+                color: 'gainsboro',
                 height: 25,
                 maxWidth: 150,
                 p: 2,

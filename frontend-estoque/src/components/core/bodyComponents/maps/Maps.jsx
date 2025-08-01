@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, FeatureGroup, useMap } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
-import { Dialog, Button, Box, TextField, AppBar, Toolbar, Typography, Container, Grid, Tooltip, Avatar, Chip, Divider, CircularProgress, Alert, InputAdornment, useMediaQuery, useTheme, Paper } from '@mui/material';
+import { Dialog, Button, Box, TextField, AppBar, Toolbar, Typography, Grid, Tooltip, Chip, CircularProgress, Alert, InputAdornment, useMediaQuery, useTheme, Paper } from '@mui/material';
 import {
   FilterList as FilterListIcon,
-  LocationSearching as LocationSearchingIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   Polyline as PolylineIcon,
@@ -299,7 +298,6 @@ const MapComponent = () => {
   return (
     <Box sx={{
       width: isMobile ? '100vw' : '60vw',
-      maxHeight: '80vh',
       p: isMobile ? 4 : 6,
       mt: 5,
       boxSizing: 'border-box',

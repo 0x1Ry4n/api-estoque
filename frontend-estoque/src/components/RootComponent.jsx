@@ -6,14 +6,18 @@ import SideBarComponent from "./SideBarComponent";
 export default function RootComponent() {
   const location = useLocation();
 
-  const noNavBarRoutes = ["/login", "/signup"]; 
+  const noNavBarRoutes = ["/login", "/signup"];
 
   const shouldDisplayNavBar = !noNavBarRoutes.includes(location.pathname);
 
   return (
     <>
       {shouldDisplayNavBar && <NavBarComponent />}
-      <Box sx={{}}>
+      <Box
+        sx={{
+          bgcolor: "background.variant"
+        }}
+      >
         <Grid container spacing={0}>
           {shouldDisplayNavBar && (
             <Grid item md={2} sm={0}>

@@ -8,15 +8,15 @@ import {
   TextField,
   Snackbar,
   Alert,
-  Tooltip
+  Tooltip,
+  Box
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
-  Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
-import { fileExporters } from "../../../../utils/utils";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGridToolbar } from "../../subComponents/DataGridToolbar";
 import { useCategoryListStore } from "./stores/useCategoryListStore";
 import Swal from "sweetalert2";
 
@@ -87,27 +87,22 @@ const Categories = () => {
   ];
 
   return (
-    <div style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "8px", width: "95%" }}>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "16px" }}>
-        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={handleRefresh}>
-          Atualizar Lista
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() =>
-            fileExporters.exportToExcel("Categorias", "categorias.xlsx", rows)
-          }
-        >
-          Exportar Excel
-        </Button>
-      </div>
-
-      <div style={{ height: 400, width: "100%", backgroundColor: "white", borderRadius: "8px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", overflow: "hidden" }}>
+    <Box
+      sx={{
+        p: "20px",
+        bgcolor: "background.paper",
+        borderRadius: "8px",
+        width: "95%"
+      }}
+    >      <div style={{ height: 400, width: "100%", backgroundColor: "white", borderRadius: "8px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", overflow: "hidden" }}>
         <DataGrid
           rows={rows}
           columns={columns}
-          slots={{ toolbar: GridToolbar }}          
+          sx={{
+            bgcolor: 'background.variant'
+          }}
+          slots={{ toolbar: DataGridToolbar }}
+          slotProps={{ toolbar: { onReload: handleRefresh } }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
           rowCount={pagination.totalElements}
           paginationMode="server"
@@ -164,7 +159,7 @@ const Categories = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 

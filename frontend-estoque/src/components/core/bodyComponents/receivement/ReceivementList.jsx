@@ -15,12 +15,11 @@ import {
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
-  Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
-import { addDays, format } from "date-fns";
-import { fileExporters } from "../../../../utils/utils";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGridToolbar } from "../../subComponents/DataGridToolbar";
 import { useReceivementListStore } from "./stores/useReceivementListStore";
+import { addDays, format } from "date-fns";
 import Swal from "sweetalert2";
 
 const ReceivementList = () => {
@@ -178,54 +177,29 @@ const ReceivementList = () => {
   ];
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        backgroundColor: "#f5f5f5",
+    <Box
+      sx={{
+        p: "20px",
+        bgcolor: "background.paper",
         borderRadius: "8px",
-        width: "95%",
+        width: "95%"
       }}
     >
       <div
         style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "12px",
-          marginBottom: "16px",
-        }}
-      >
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={handleRefresh}
-        >
-          Atualizar Lista
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() =>
-            fileExporters.exportToExcel("Recebimentos", "recebimentos.xlsx", rows)
-          }
-        >
-          Exportar Excel
-        </Button>
-      </div>
-      <div
-        style={{
           height: 400,
           width: "100%",
-          backgroundColor: "white",
-          borderRadius: "8px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-          overflow: "hidden",
         }}
       >
         <DataGrid
           rows={rows}
           columns={columns}
+          sx={{
+            bgcolor: 'background.variant'
+          }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
-          slots={{ toolbar: GridToolbar }}
+          slots={{ toolbar: DataGridToolbar }}
+          slotProps={{ toolbar: { onReload: handleRefresh } }}
           rowCount={pagination.totalElements}
           paginationMode="server"
           paginationModel={{
@@ -371,7 +345,7 @@ const ReceivementList = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 

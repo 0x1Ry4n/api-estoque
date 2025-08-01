@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   List,
   ListItem,
@@ -11,21 +12,20 @@ import {
   useTheme,
 } from "@mui/material";
 import {
-  HomeOutlined,
-  CalendarTodayOutlined,
-  MapOutlined,
-  QrCodeOutlined,
-  LocalShippingOutlined,
-  CategoryOutlined,
-  InventoryOutlined,
-  AddCircleOutline,
-  CreditCardOutlined,
-  GroupOutlined,
-  Inventory2Outlined,
-  Person2Outlined,
-  SellOutlined,
+  HomeOutlined as HomeOutlinedIcon,
+  CalendarTodayOutlined as CalendarTodayOutlinedIcon,
+  MapOutlined as MapOutlinedIcon,
+  QrCodeOutlined as QrCodeOutlinedIcon,
+  LocalShippingOutlined as LocalShippingOutlinedIcon,
+  CategoryOutlined as CategoryOutlinedIcon,
+  InventoryOutlined as InventoryOutlinedIcon,
+  AddCircleOutline as AddCircleOutlineIcon,
+  CreditCardOutlined as CreditCardOutlinedIcon,
+  GroupOutlined as GroupOutlinedIcon,
+  Inventory2Outlined as Inventory2OutlinedIcon,
+  Person2Outlined as Person2OutlinedIcon,
+  SellOutlined as SellOutlinedIcon,
 } from "@mui/icons-material";
-import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../../public/styles/links.css";
 
@@ -41,19 +41,19 @@ export default function SideBarComponent({ isSidebarOpen, toggleSidebar }) {
   const currentPage = location.pathname;
 
   const sideBarComponent = [
-    { title: "Home", route: "home", component: <HomeOutlined /> },
-    { title: "Calendário", route: "calendar", component: <CalendarTodayOutlined /> },
-    { title: "Mapa", route: "maps", component: <MapOutlined /> },
-    { title: "Clientes", route: "customers", component: <Person2Outlined /> },
-    { title: "Fornecedores", route: "suppliers", component: <LocalShippingOutlined /> },
-    { title: "Categorias", route: "categories", component: <CategoryOutlined /> },
-    { title: "Produtos", route: "products", component: <InventoryOutlined /> },
-    { title: "QR Code", route: "qrcode-generator", component: <QrCodeOutlined /> },
-    { title: "Inventário", route: "inventory", component: <Inventory2Outlined /> },
-    { title: "Entradas", route: "receivements", component: <AddCircleOutline /> },
-    { title: "Saídas", route: "exits", component: <CreditCardOutlined /> },
-    { title: "Pedidos", route: "orders", component: <SellOutlined /> },
-    { title: "Usuários", route: "create-user", component: <GroupOutlined /> },
+    { title: "Home", route: "home", component: <HomeOutlinedIcon /> },
+    { title: "Calendário", route: "calendar", component: <CalendarTodayOutlinedIcon /> },
+    { title: "Mapa", route: "maps", component: <MapOutlinedIcon /> },
+    { title: "Clientes", route: "customers", component: <Person2OutlinedIcon /> },
+    { title: "Fornecedores", route: "suppliers", component: <LocalShippingOutlinedIcon /> },
+    { title: "Categorias", route: "categories", component: <CategoryOutlinedIcon Icon/> },
+    { title: "Produtos", route: "products", component: <InventoryOutlinedIcon /> },
+    { title: "QR Code", route: "qrcode-generator", component: <QrCodeOutlinedIcon /> },
+    { title: "Inventário", route: "inventory", component: <Inventory2OutlinedIcon /> },
+    { title: "Entradas", route: "receivements", component: <AddCircleOutlineIcon /> },
+    { title: "Saídas", route: "exits", component: <CreditCardOutlinedIcon /> },
+    { title: "Pedidos", route: "orders", component: <SellOutlinedIcon /> },
+    { title: "Usuários", route: "create-user", component: <GroupOutlinedIcon /> },
   ];
 
   const filteredSideBarComponent = user?.role === "USER"
@@ -128,7 +128,7 @@ export default function SideBarComponent({ isSidebarOpen, toggleSidebar }) {
       }}
       sx={{
         '& .MuiDrawer-paper': {
-          backgroundColor: '#f5f5f5',
+          backgroundColor: 'background.default',
           boxSizing: 'border-box',
           width: 300,
           p: 2,

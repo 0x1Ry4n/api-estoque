@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -31,14 +31,12 @@ import {
   Close as CloseIcon,
   Visibility as VisibilityIcon,
   Edit as EditIcon,
-  Refresh as RefreshIcon,
-  Delete as DeleteIcon
 } from '@mui/icons-material';
-import { formatDocument } from "../../../../utils/utils";
-import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGridToolbar } from "../../subComponents/DataGridToolbar";
 import { OrderService } from "../../../../services/orderService";
-import { fileExporters } from "../../../../utils/utils";
 import { CustomerService } from "../../../../services/customerService";
+import { formatDocument } from "../../../../utils/utils";
 
 const Orders = () => {
   const [open, setOpen] = useState(false);
@@ -94,7 +92,7 @@ const Orders = () => {
       setSnackbarMessage(`Erro ao atualizar o pedido: ${e.message}`);
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
-    } 
+    }
   }
 
   const paymentMethods = {
@@ -150,7 +148,7 @@ const Orders = () => {
       setSnackbarMessage("Erro ao carregar pedidos.");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
-    } 
+    }
   };
 
   const handleDetailOpen = async (orderNumber) => {
@@ -231,32 +229,28 @@ const Orders = () => {
   ];
 
   return (
-    <div style={{ padding: '20px', backgroundColor: '#f5f5f5', borderRadius: '8px', width: "95%" }}>
+    <Box
+      sx={{
+        p: "20px",
+        bgcolor: "background.paper",
+        borderRadius: "8px",
+        width: "95%"
+      }}
+    >
       <div
         style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "12px",
-          marginBottom: "16px",
+          height: 400,
+          width: "100%",
         }}
       >
-        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={handleRefresh}>
-          Atualizar Lista
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => fileExporters.exportToExcel("Fornecedores", "fornecedores.xlsx", rows)}
-        >
-          Exportar Excel
-        </Button>
-      </div>
-
-      <div style={{ height: 400, width: '100%', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
         <DataGrid
           rows={rows}
           columns={columns}
-          slots={{ toolbar: GridToolbar }}
+          sx={{
+            bgcolor: 'background.variant'
+          }}
+          slots={{ toolbar: DataGridToolbar }}
+          slotProps={{ toolbar: { onReload: handleRefresh } }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
           rowCount={totalElements}
           paginationMode="server"
@@ -272,7 +266,6 @@ const Orders = () => {
           pageSizeOptions={[20, 50, 100]}
         />
       </div>
-
 
       <Dialog
         maxWidth="md"
@@ -519,7 +512,7 @@ const Orders = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </div >
+    </Box>
   );
 };
 

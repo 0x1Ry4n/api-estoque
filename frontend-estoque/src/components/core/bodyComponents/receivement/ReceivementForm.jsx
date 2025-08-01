@@ -18,8 +18,8 @@ import {
   AddCircleOutline as AddCircleOutlineIcon,
 } from "@mui/icons-material";
 import { Autocomplete } from "@mui/material";
-import api from "./../../../../api";
 import { useForm, Controller } from "react-hook-form";
+import api from "./../../../../api";
 
 const ReceivementForm = ({ onReceivementAdded }) => {
   const {
@@ -102,7 +102,12 @@ const ReceivementForm = ({ onReceivementAdded }) => {
     <Box>
       <Paper  
         elevation={4}
-        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: '95%'}}
+        sx={{ 
+          padding: 6, 
+          borderRadius: 2, 
+          backgroundColor: "background.paper", 
+          width: '95%'
+        }}
       >
         <Typography
           variant="h5"

@@ -24,7 +24,6 @@ import InputMask from "react-input-mask";
 import api from "./../../../../api";
 
 const SupplierForm = ({ onSupplierAdded }) => {
-
   const {
     control,
     handleSubmit,
@@ -64,7 +63,7 @@ const SupplierForm = ({ onSupplierAdded }) => {
         sx={{
           padding: 6,
           borderRadius: 3,
-          backgroundColor: "#f5f5f5",
+          backgroundColor: "background.paper",
           width: "95%",
         }}
       >

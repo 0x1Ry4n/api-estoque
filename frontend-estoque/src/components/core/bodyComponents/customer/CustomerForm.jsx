@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Button,
@@ -22,8 +22,8 @@ import {
   LocationOnOutlined as LocationOnOutlinedIcon 
 } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
-import { CepService } from '../../../../services/cepService';
 import { CustomerService } from '../../../../services/customerService';
+import { CepService } from '../../../../services/cepService';
 import InputMask from 'react-input-mask';
 
 const CustomerForm = ({ onCustomerAdded }) => {
@@ -115,7 +115,7 @@ const CustomerForm = ({ onCustomerAdded }) => {
         sx={{
           padding: 6,
           borderRadius: 3,
-          backgr408840oundColor: '#f5f5f5',
+          backgroundColor: 'background.paper',
           width: "95%"
         }}
       >

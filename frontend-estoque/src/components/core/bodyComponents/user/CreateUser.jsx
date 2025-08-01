@@ -15,14 +15,14 @@ import {
   IconButton,
 } from "@mui/material";
 import {
-  AccountCircle,
-  Email,
-  Lock,
-  Save,
-  CameraAlt,
-  Refresh,
-  Visibility,
-  VisibilityOff,
+  AccountCircle as AccountCircleIcon,
+  Email as EmailIcon,
+  Lock as LockIcon,
+  Save as SaveIcon,
+  CameraAlt as CameraAltIcon,
+  Refresh as RefreshIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
 } from "@mui/icons-material";
 import { useForm, Controller } from "react-hook-form";
 import Webcam from "react-webcam";
@@ -212,7 +212,12 @@ const CreateUser = ({ onUserAdded }) => {
     <Box>
       <Paper
         elevation={4}
-        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: '95%' }}
+        sx={{ 
+          padding: 6, 
+          borderRadius: 2, 
+          backgroundColor: "background.paper", 
+          width: '95%' 
+        }}
       >
         <Typography
           variant="h5"
@@ -223,14 +228,14 @@ const CreateUser = ({ onUserAdded }) => {
             alignItems: "center",
           }}
         >
-          <AccountCircle sx={{ mr: 1 }} />
+          <AccountCircleIcon sx={{ mr: 1 }} />
           Cadastro de Usuário
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
-              <Card variant="outlined" sx={{ mb: 3, borderRadius: 2, backgroundColor: "#f5f5f5" }}>
+              <Card variant="outlined" sx={{ mb: 3, borderRadius: 2, backgroundColor: "background.variant" }}>
                 <CardContent sx={{ p: 6 }}>
                   <Typography variant="h6" sx={{ mb: 3, fontWeight: "bold" }}>
                     Informações Pessoais
@@ -259,7 +264,7 @@ const CreateUser = ({ onUserAdded }) => {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <AccountCircle />
+                              <AccountCircleIcon />
                             </InputAdornment>
                           ),
                         }}
@@ -290,7 +295,7 @@ const CreateUser = ({ onUserAdded }) => {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <Email />
+                              <EmailIcon />
                             </InputAdornment>
                           ),
                         }}
@@ -322,7 +327,7 @@ const CreateUser = ({ onUserAdded }) => {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <Lock />
+                              <LockIcon />
                             </InputAdornment>
                           ),
                           endAdornment: (
@@ -331,7 +336,7 @@ const CreateUser = ({ onUserAdded }) => {
                                 onClick={() => setShowPassword(!showPassword)}
                                 edge="end"
                               >
-                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                               </IconButton>
                             </InputAdornment>
                           ),
@@ -351,7 +356,7 @@ const CreateUser = ({ onUserAdded }) => {
                         py: 1.5,
                         fontSize: "1rem",
                       }}
-                      startIcon={isLoading ? <CircularProgress size={24} /> : <Save />}
+                      startIcon={isLoading ? <CircularProgress size={24} /> : <SaveIcon />}
                     >
                       Finalizar Cadastro
                     </Button>
@@ -362,7 +367,7 @@ const CreateUser = ({ onUserAdded }) => {
 
             {faceRecognitionEnabled && (
               <Grid item xs={12} md={6}>
-                <Card variant="outlined" sx={{ height: "100%", borderRadius: 2 }}>
+                <Card variant="outlined" sx={{ height: "100%", borderRadius: 2, bgcolor: "background.variant" }}>
                   <CardContent sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
                     <Typography variant="h6" sx={{ mb: 3, fontWeight: "bold" }}>
                       Cadastro Facial
@@ -376,7 +381,7 @@ const CreateUser = ({ onUserAdded }) => {
                         justifyContent: "center",
                         alignItems: "center",
                         minHeight: "300px",
-                        backgroundColor: "#f5f5f5",
+                        bgcolor: "background.paper",
                         borderRadius: "8px",
                         p: 2,
                         position: "relative",
@@ -387,7 +392,7 @@ const CreateUser = ({ onUserAdded }) => {
                           variant="contained"
                           color="primary"
                           onClick={startCamera}
-                          startIcon={<CameraAlt />}
+                          startIcon={<CameraAltIcon />}
                           sx={{ py: 2 }}
                           disabled={!modelsLoaded || isLoading}
                         >
@@ -413,7 +418,7 @@ const CreateUser = ({ onUserAdded }) => {
                           <Button
                             variant="outlined"
                             onClick={startCamera}
-                            startIcon={<Refresh />}
+                            startIcon={<RefreshIcon />}
                             sx={{ mt: 2 }}
                           >
                             Tirar Outra Foto

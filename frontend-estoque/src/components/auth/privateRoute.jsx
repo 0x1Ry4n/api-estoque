@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
-import { isTokenExpired } from '../../utils/utils';
-import { setAuthToken } from '../../api';
 import { useAuth } from '../../context/AuthContext';
+import { setAuthToken } from '../../api';
+import { isTokenExpired } from '../../utils/utils';
 
 const PrivateRoute = ({ children, onlyAdmin = false }) => {
   const { user } = useAuth();

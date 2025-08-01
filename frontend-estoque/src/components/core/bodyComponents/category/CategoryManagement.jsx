@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { useAuth } from '../../../../context/AuthContext';
 import CategoryForm from './CategoryForm';
 import Categories from './CategoryList';
-import { useAuth } from '../../../../context/AuthContext';
 
 const CategoryManagement = () => {
   const [rows, setRows] = useState([]);

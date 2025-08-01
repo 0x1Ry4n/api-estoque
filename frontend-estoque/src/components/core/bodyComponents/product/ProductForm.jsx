@@ -14,7 +14,8 @@ import {
   Divider,
   Avatar,
   IconButton,
-  Badge
+  Badge, 
+  Autocomplete
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -28,9 +29,8 @@ import {
   Category as CategoryIcon
 } from "@mui/icons-material";
 import { useForm, Controller } from "react-hook-form";
-import { Autocomplete } from "@mui/material";
 import { SupplierService } from "../../../../services/supplierService";
-import { CategoryService } from "../../../../services/CategoryService";
+import { CategoryService } from "../../../../services/categoryService";
 import { ProductService } from "../../../../services/productService";
 import QrScanner from 'react-qr-scanner';
 
@@ -150,7 +150,12 @@ const ProductForm = ({ onProductAdded }) => {
     <Box>
       <Paper
         elevation={4}
-        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: "95%" }}
+        sx={{ 
+          padding: 6, 
+          borderRadius: 2, 
+          backgroundColor: "background.paper", 
+          width: "95%" 
+        }}
       >
         <Typography
           variant="h5"

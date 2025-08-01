@@ -1,6 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { Avatar, Box, Button, Dialog, DialogContent, IconButton } from '@mui/material';
-import { Add as AddIcon, PhotoCamera as PhotoCameraIcon, Remove as RemoveIcon, Close as CloseIcon } from '@mui/icons-material';
+import { 
+  Add as AddIcon, 
+  PhotoCamera as PhotoCameraIcon, 
+  Remove as RemoveIcon, 
+  Close as CloseIcon 
+} from '@mui/icons-material';
 import { useAuth } from '../../../context/AuthContext';
 import { UserService } from '../../../services/UserService';
 

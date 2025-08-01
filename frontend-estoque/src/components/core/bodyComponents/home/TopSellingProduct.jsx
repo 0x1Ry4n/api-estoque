@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Divider,
@@ -15,7 +16,6 @@ import {
   FormControl,
   InputLabel
 } from "@mui/material";
-import { useState } from "react";
 
 export default function TopSellingProducts({ receivements, exits }) {
   const theme = useTheme();
@@ -76,7 +76,7 @@ export default function TopSellingProducts({ receivements, exits }) {
     <Box
       sx={{
         margin: { xs: 1, sm: 3 },
-        bgcolor: "white",
+        bgcolor: "background.paper",
         borderRadius: 2,
         padding: { xs: 1, sm: 3 },
         height: "95%",

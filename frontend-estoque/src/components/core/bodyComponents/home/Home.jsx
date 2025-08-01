@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
-import UilReceipt from "@iconscout/react-unicons/icons/uil-receipt";
-import UilBox from "@iconscout/react-unicons/icons/uil-box";
-import UilTruck from "@iconscout/react-unicons/icons/uil-truck";
-import UilCancel from "@iconscout/react-unicons/icons/uil-cancel";
-import InfoCard from "../../subComponents/InfoCard";
+import { Box, Grid, useMediaQuery, useTheme, Typography } from "@mui/material";
+import { 
+  UilCancel as UilCancelIcon,
+  UilTruck as UilTruckIcon,
+  UilBox as UilBoxIcon,
+  UilReceipt as UilReceiptIcon
+} from "@iconscout/react-unicons"
 import TotalSales from "./TotalSales";
 import TopSellingProducts from "./TopSellingProduct";
-import api from "../../../../api";
 import SalesByProduct from "./SalesByProduct";
-import { Box, Grid, useMediaQuery, useTheme, Typography } from "@mui/material";
+import InfoCard from "../../subComponents/InfoCard";
+import api from "../../../../api";
 
 const Home = () => {
   const [state, setState] = useState({
@@ -65,28 +67,28 @@ const Home = () => {
 
   const cardComponent = [
     {
-      icon: <UilCancel size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
+      icon: <UilCancelIcon size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
       title: "Cancelado",
       subTitle: pendingCount,
       mx: 1,
       my: 0,
     },
     {
-      icon: <UilBox size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
+      icon: <UilBoxIcon size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
       title: "Pendente",
       subTitle: pendingCount,
       mx: 1,
       my: 0,
     },
     {
-      icon: <UilTruck size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
+      icon: <UilTruckIcon size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
       title: "Retornado",
       subTitle: returnedCount,
       mx: 1,
       my: 0,
     },
     {
-      icon: <UilReceipt size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
+      icon: <UilReceiptIcon size={isMobile ? 40 : 60} color={"#F6F4EB"} />,
       title: "Completado",
       subTitle: invoiceCount,
       mx: 1,

@@ -272,19 +272,17 @@ const Login = () => {
         alignItems: 'center',
         justifyContent: 'center',
         width: isMobile ? '100vw' : '80vw',
-        minHeight: '425px',
         p: isMobile ? 4 : 2,
         boxSizing: 'border-box',
         mx: 'auto',
-        mt: isMobile ? '50%' : '10%'
+        mt: isMobile ? '50%' : '10%',
       }}
     >
       <Box
-        bgcolor="#fff"
-        p={isMobile ? 3 : 4}
+        bgcolor="background.variant"
+        p={isMobile ? 4 : 8}
         borderRadius={2}
         boxShadow={4}
-        padding={8}
         width={isMobile ? "95%" : "700px"}
       >
         {isVerifyingFace && (
@@ -313,7 +311,17 @@ const Login = () => {
         </Typography>
 
         {!isVerifyingFace ? (
-          <form onSubmit={handleLogin} style={{ margin: 'auto', width: '85%' }}>
+          <Box
+            component="form"
+            onSubmit={handleLogin}
+            sx={{
+              width: '85%',
+              mx: 'auto',
+              bgcolor: 'background.paper',
+              p: 4,
+              borderRadius: 2
+            }}
+          >
             <FormControl fullWidth margin="normal">
               <InputLabel id="user-type-label">Tipo de Login</InputLabel>
               <Select
@@ -406,7 +414,7 @@ const Login = () => {
               Entrar
               {isLoading && <CircularProgress size={24} sx={{ ml: 1 }} />}
             </Button>
-          </form>
+          </Box>
         ) : (
           <Box>
             {faceImage ? (
@@ -542,7 +550,7 @@ const Login = () => {
           </Alert>
         </Snackbar>
       </Box>
-    </Box>
+    </Box >
   );
 };
 

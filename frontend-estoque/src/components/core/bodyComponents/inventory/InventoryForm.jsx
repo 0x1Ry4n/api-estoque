@@ -12,14 +12,16 @@ import {
   Dialog,
   DialogTitle,
   Divider,
+  Autocomplete
 } from '@mui/material';
 import {
-  AddCircleOutline as AddCircleOutlineIcon, Inventory2 as Inventory2Icon, QrCode2Rounded as QRCodeIcon
+  AddCircleOutline as AddCircleOutlineIcon, 
+  Inventory2 as Inventory2Icon, 
+  QrCode2Rounded as QRCodeIcon
 } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { ProductService } from '../../../../services/productService';
 import QrScanner from 'react-qr-scanner';
-import Autocomplete from '@mui/material/Autocomplete';
 
 const InventoryForm = ({ onInventoryAdded }) => {
   const [products, setProducts] = useState([]);
@@ -106,7 +108,15 @@ const InventoryForm = ({ onInventoryAdded }) => {
 
   return (
     <Box>
-      <Paper elevation={4} sx={{ padding: 6, borderRadius: 2, backgroundColor: '#f5f5f5', width: '95%' }}>
+      <Paper 
+        elevation={4} 
+        sx={{ 
+          padding: 6, 
+          borderRadius: 2, 
+          backgroundColor: 'background.paper', 
+          width: '95%' 
+        }}
+      >
         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
           <Inventory2Icon sx={{ mr: 1 }} />
           Cadastrar Inventário

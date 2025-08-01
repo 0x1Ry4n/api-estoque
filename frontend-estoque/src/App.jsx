@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ThemeProvider, CssBaseline } from "@mui/material";
-import { lightTheme, darkTheme } from "./context/theme";
-import RootComponent from "./components/RootComponent";
 import {
   Route,
   createBrowserRouter,
@@ -9,6 +7,8 @@ import {
   RouterProvider,
   Navigate,
 } from "react-router-dom";
+import { lightTheme, darkTheme } from "./context/theme";
+import RootComponent from "./components/RootComponent";
 import Home from "./components/core/bodyComponents/home/Home";
 import Settings from "./components/core/bodyComponents/settings/Settings";
 import Login from "./components/auth/login/Login";
@@ -66,9 +66,11 @@ function App() {
           <Route path="/customers" element={<CustomerManagement />} />
           <Route path="/orders" element={<OrderManagement />} />
           <Route path="/qrcode-generator" element={<QRCodeGenerator />} />
-          <Route path="/settings" element={<PrivateRoute onlyAdmin={true}>
-            <Settings onToggleTheme={handleToggleTheme} />
-          </PrivateRoute>} />
+          <Route path="/settings" element={
+            <PrivateRoute onlyAdmin={true}>
+              <Settings onToggleTheme={handleToggleTheme} />
+            </PrivateRoute>
+          } />
         </Route>
       </Route>
     )

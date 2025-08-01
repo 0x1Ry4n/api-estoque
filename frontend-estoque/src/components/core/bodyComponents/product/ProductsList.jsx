@@ -12,20 +12,19 @@ import {
   IconButton,
   Avatar,
   Badge,
-  Box,
   Grid,
   Divider,
   Typography,
   useMediaQuery,
   useTheme,
-  Tooltip
+  Tooltip,
+  Box
 } from "@mui/material";
-import { GridToolbar } from '@mui/x-data-grid';
+import { DataGridToolbar } from "../../subComponents/DataGridToolbar";
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   Visibility as VisibilityIcon,
-  Refresh as RefreshIcon,
   PhotoCamera as PhotoCameraIcon,
   Category as CategoryIcon,
   Close as CloseIcon
@@ -33,7 +32,6 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { DataGrid, ptBR } from "@mui/x-data-grid";
 import { addDays, format } from "date-fns";
-import { fileExporters } from "../../../../utils/utils";
 import { useProductListStore } from "./stores/useProductListStore";
 import { ProductService } from "../../../../services/productService";
 import Swal from "sweetalert2";
@@ -268,39 +266,14 @@ const Products = () => {
   ];
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        backgroundColor: "#f5f5f5",
+    <Box
+      sx={{
+        p: "20px",
+        bgcolor: "background.paper",
         borderRadius: "8px",
-        width: "95%",
+        width: "95%"
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "12px",
-          marginBottom: "16px",
-        }}
-      >
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={handleRefresh}
-        >
-          Atualizar Lista
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() =>
-            fileExporters.exportToExcel("Produtos", "produtos.xlsx", rows)
-          }
-        >
-          Exportar Excel
-        </Button>
-      </div>
       <div
         style={{
           height: 400,
@@ -314,7 +287,11 @@ const Products = () => {
         <DataGrid
           rows={rows}
           columns={columns}
-          slots={{ toolbar: GridToolbar }}
+          sx={{
+            bgcolor: 'background.variant'
+          }}
+          slots={{ toolbar: DataGridToolbar }}
+          slotProps={{ toolbar: { onReload: handleRefresh } }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
           rowCount={pagination.totalElements}
           paginationMode="server"
@@ -613,7 +590,7 @@ const Products = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 

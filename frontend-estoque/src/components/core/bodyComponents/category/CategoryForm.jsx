@@ -9,7 +9,10 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
-import { AddCircleOutline as AddCircleOutlineIcon, CategoryOutlined as CategoryOutlinedIcon } from '@mui/icons-material';
+import {
+  AddCircleOutline as AddCircleOutlineIcon,
+  CategoryOutlined as CategoryOutlinedIcon
+} from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { CategoryService } from '../../../../services/categoryService';
 
@@ -51,7 +54,15 @@ const CategoryForm = ({ onCategoryAdded }) => {
 
   return (
     <Box>
-      <Paper elevation={4} sx={{ padding: 6, borderRadius: 2, backgroundColor: '#f5f5f5', width: "95%", }}>
+      <Paper
+        elevation={4}
+        sx={{
+          padding: 6,
+          borderRadius: 2,
+          backgroundColor: 'background.paper',
+          width: "95%"
+        }}
+      >
         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
           <CategoryOutlinedIcon sx={{ mr: 1 }} />
           Cadastrar Categoria

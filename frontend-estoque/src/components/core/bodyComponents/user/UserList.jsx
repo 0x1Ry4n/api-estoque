@@ -8,13 +8,14 @@ import {
   Snackbar,
   Alert,
   TextField,
-  Tooltip
+  Tooltip,
+  Box
 } from "@mui/material";
-import { Edit as EditIcon, Refresh as RefreshIcon } from "@mui/icons-material";
-import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
-import Swal from "sweetalert2";
-import { fileExporters } from "../../../../utils/utils";
+import { Edit as EditIcon } from "@mui/icons-material";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGridToolbar } from "../../subComponents/DataGridToolbar";
 import { useUserListStore } from "./stores/useUserListStore";
+import Swal from "sweetalert2";
 
 const UserList = () => {
   const {
@@ -156,34 +157,29 @@ const UserList = () => {
   ];
 
   return (
-    <div style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "8px", width: "95%" }}>
-      <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
-        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={handleRefresh}>
-          Atualizar Lista
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => fileExporters.exportToExcel("Usuários", "usuarios.xlsx", rows)}
-        >
-          Exportar Excel
-        </Button>
-      </div>
-
+    <Box
+      sx={{
+        p: "20px",
+        bgcolor: "background.paper",
+        borderRadius: "8px",
+        width: "95%"
+      }}
+    >
       <div
         style={{
           height: 400,
           width: "100%",
-          backgroundColor: "white",
-          borderRadius: "8px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
         }}
       >
         <DataGrid
           rows={rows}
           columns={columns}
+          sx={{
+            bgcolor: 'background.variant'
+          }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
-          slots={{ toolbar: GridToolbar }}
+          slots={{ toolbar: DataGridToolbar }}
+          slotProps={{ toolbar: { onReload: handleRefresh } }}
         />
       </div>
 
@@ -225,7 +221,7 @@ const UserList = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 

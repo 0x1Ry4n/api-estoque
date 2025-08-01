@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { useAuth } from '../../../../context/AuthContext';
 import ProductForm from './ProductForm';
 import Products from './ProductsList';
-import { useAuth } from '../../../../context/AuthContext';
 
 const ProductManagement = () => {
   const [rows, setRows] = useState([]);

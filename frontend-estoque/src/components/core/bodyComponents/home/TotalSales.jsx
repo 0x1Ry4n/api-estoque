@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import ApexCharts from "react-apexcharts";
 import {
   Box,
   useMediaQuery,
@@ -19,6 +18,7 @@ import {
   Input,
   Output
 } from "@mui/icons-material";
+import ApexCharts from "react-apexcharts";
 
 function getWeekYearKey(date) {
   const d = new Date(date);

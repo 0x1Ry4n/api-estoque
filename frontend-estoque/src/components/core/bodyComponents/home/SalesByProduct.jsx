@@ -1,5 +1,5 @@
-import ApexCharts from "react-apexcharts";
 import { Box, useMediaQuery, useTheme, Typography } from "@mui/material";
+import ApexCharts from "react-apexcharts";
 
 export default function SalesByProduct({ receivements }) {
   const theme = useTheme();

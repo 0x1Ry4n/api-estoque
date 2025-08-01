@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { ProductService } from "../../../../../services/productService";
-import { CategoryService } from "../../../../../services/CategoryService";
+import { CategoryService } from "../../../../../services/categoryService";
 import { SupplierService } from "../../../../../services/supplierService";
 
 export const useProductListStore = create((set, get) => ({

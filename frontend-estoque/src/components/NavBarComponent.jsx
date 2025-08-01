@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Grid,
@@ -6,7 +8,6 @@ import {
   Typography,
   Paper,
   IconButton,
-  Avatar,
   Menu,
   MenuItem,
   Divider,
@@ -14,15 +15,13 @@ import {
   Tooltip,
 } from "@mui/material";
 import {
-  Settings,
-  AccountCircleOutlined,
+  Settings as SettingsIcon,
+  AccountCircleOutlined as AccountCircleOutlinedIcon,
   Menu as MenuIcon,
 } from "@mui/icons-material";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import api from '../api';
-import SideBarComponent from "./SideBarComponent";
 import UserAvatar from "./core/subComponents/UserAvatar";
+import SideBarComponent from "./SideBarComponent";
+import api from '../api';
 
 export default function NavBarComponent() {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -120,7 +119,7 @@ export default function NavBarComponent() {
                   >
                     <MenuItem onClick={handleProfileClick}>
                       <ListItemIcon>
-                        <AccountCircleOutlined fontSize="small" />
+                        <AccountCircleOutlinedIcon fontSize="small" />
                       </ListItemIcon>
                       Perfil
                     </MenuItem>
@@ -128,7 +127,7 @@ export default function NavBarComponent() {
 
                     <MenuItem onClick={handleSettingsClick}>
                       <ListItemIcon>
-                        <Settings fontSize="small" />
+                        <SettingsIcon fontSize="small" />
                       </ListItemIcon>
                       Configurações
                     </MenuItem>

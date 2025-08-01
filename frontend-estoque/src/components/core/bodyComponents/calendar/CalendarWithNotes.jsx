@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -29,8 +29,8 @@ import {
   Description as DescriptionIcon,
   Download as DownloadIcon
 } from '@mui/icons-material';
-import { format } from 'date-fns';
 import { saveAs } from 'file-saver';
+import { format } from 'date-fns';
 
 const CalendarWithNotes = () => {
   const [selectedDate, setSelectedDate] = useState(null);

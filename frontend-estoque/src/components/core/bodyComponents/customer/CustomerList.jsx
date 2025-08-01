@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -15,18 +15,18 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Box
 } from "@mui/material";
 import {
   Edit as EditIcon,
-  Refresh as RefreshIcon,
   PersonOutline as PersonOutlineIcon,
   EmailOutlined as EmailOutlinedIcon,
   PhoneOutlined as PhoneOutlinedIcon,
   DescriptionOutlined as DescriptionOutlinedIcon,
   LocationOnOutlined as LocationOnOutlinedIcon,
 } from "@mui/icons-material";
-import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
-import { fileExporters } from "../../../../utils/utils";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGridToolbar } from "../../subComponents/DataGridToolbar";
 import { CustomerService } from "../../../../services/customerService";
 import InputMask from "react-input-mask";
 
@@ -185,34 +185,14 @@ const Customers = () => {
   ];
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        backgroundColor: "#f5f5f5",
+    <Box
+      sx={{
+        p: "20px",
+        bgcolor: "background.paper",
         borderRadius: "8px",
-        width: "95%",
+        width: "95%"
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "12px",
-          marginBottom: "16px",
-        }}
-      >
-        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={handleRefresh}>
-          Atualizar Lista
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => fileExporters.exportToExcel("Fornecedores", "fornecedores.xlsx", rows)}
-        >
-          Exportar Excel
-        </Button>
-      </div>
-
       <div
         style={{
           height: 400,
@@ -226,7 +206,11 @@ const Customers = () => {
         <DataGrid
           rows={rows}
           columns={columns}
-          slots={{ toolbar: GridToolbar }}
+          slots={{ toolbar: DataGridToolbar }}
+          sx={{
+            bgcolor: 'background.variant'
+          }}
+          slotProps={{ toolbar: { onReload: handleRefresh } }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
           rowCount={totalElements}
           paginationMode="server"
@@ -612,7 +596,7 @@ const Customers = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 

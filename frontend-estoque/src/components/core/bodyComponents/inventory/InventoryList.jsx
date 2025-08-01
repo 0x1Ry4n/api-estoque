@@ -1,16 +1,16 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
   Button,
   Snackbar,
   Alert,
-  Tooltip
+  Tooltip,
+  Box
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
-  Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { DataGrid, GridToolbar, ptBR } from "@mui/x-data-grid";
-import { fileExporters } from "../../../../utils/utils";
+import { DataGrid, ptBR } from "@mui/x-data-grid";
+import { DataGridToolbar } from "../../subComponents/DataGridToolbar";
 import { useInventoryListStore } from "./stores/useInventoryListStore";
 import Swal from "sweetalert2";
 
@@ -117,22 +117,24 @@ const Inventory = () => {
   ];
 
   return (
-    <div style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "8px", width: "95%" }}>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "16px" }}>
-        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={handleRefresh}>
-          Atualizar Lista
-        </Button>
-        <Button variant="contained" color="primary" onClick={() => fileExporters.exportToExcel("Inventários", "inventarios.xlsx", rows)}>
-          Exportar Excel
-        </Button>
-      </div>
-
+    <Box
+      sx={{
+        p: "20px",
+        bgcolor: "background.paper",
+        borderRadius: "8px",
+        width: "95%"
+      }}
+    >
       <div style={{ height: 400, width: "100%", backgroundColor: "white", borderRadius: "8px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", overflow: "hidden" }}>
         <DataGrid
           rows={rows}
           columns={columns}
+          sx={{
+            bgcolor: 'background.variant'
+          }}
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
-          slots={{ toolbar: GridToolbar }}
+          slots={{ toolbar: DataGridToolbar }}
+          slotProps={{ toolbar: { onReload: handleRefresh } }}
           rowCount={pagination.totalElements}
           paginationMode="server"
           paginationModel={{ page: pagination.page, pageSize: pagination.pageSize }}
@@ -149,7 +151,7 @@ const Inventory = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 

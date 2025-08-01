@@ -11,8 +11,10 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
-import PrintIcon from '@mui/icons-material/Print';
+import { 
+  Download as DownloadIcon, 
+  Print as PrintIcon 
+} from '@mui/icons-material'
 import { QRCodeCanvas } from 'qrcode.react';
 
 const QRCodeGenerator = () => {

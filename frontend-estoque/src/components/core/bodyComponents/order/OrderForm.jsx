@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -26,8 +26,17 @@ import {
   InputAdornment,
   Tooltip
 } from '@mui/material';
+import { 
+  AddCircleOutline, 
+  Delete, 
+  Add, 
+  ShoppingBag, 
+  Construction, 
+  CardGiftcard, 
+  Stars, 
+  ShoppingCartOutlined 
+} from '@mui/icons-material';
 import { formatDocument } from '../../../../utils/utils';
-import { AddCircleOutline, Delete, Add, ShoppingBag, Construction, CardGiftcard, Stars, ShoppingCartOutlined } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { CustomerService } from '../../../../services/customerService';
 import { ProductService } from '../../../../services/productService';
@@ -191,7 +200,12 @@ const OrderForm = ({ onOrderAdded }) => {
     <Box>
       <Paper
         elevation={4}
-        sx={{ padding: 6, borderRadius: 2, backgroundColor: "#f5f5f5", width: "95%" }}
+        sx={{ 
+          padding: 6, 
+          borderRadius: 2, 
+          backgroundColor: "background.paper", 
+          width: "95%" 
+        }}
       >
         <Typography
           variant="h5"
