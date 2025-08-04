@@ -11,33 +11,32 @@ import com.apiestoque.crud.repositories.InventoryRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.ReceivementRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class ReceivementService {
+    private final ReceivementRepository receivementRepository;
+    private final ProductRepository productRepository;
+    private final InventoryRepository inventoryRepository;
+    private final SupplierRepository supplierRepository;
 
-    @Autowired
-    private ReceivementRepository receivementRepository;
-
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private InventoryRepository inventoryRepository;
-
-    @Autowired
-    private SupplierRepository supplierRepository;
-
+    @CacheEvict(value = "receivements_all", allEntries = true)
     @Transactional
     public ReceivementResponseDTO create(ReceivementRequestDTO data) {
         Product product = productRepository.findById(data.productId())
@@ -51,6 +50,10 @@ public class ReceivementService {
 
         if (data.quantity() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade deve ser maior que zero.");
+        }
+
+        if (data.receivingDate().isAfter(LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A data de recebimento não pode ser no futuro.");
         }
 
         BigDecimal totalPrice = inventory.getProduct().getUnitPrice().multiply(BigDecimal.valueOf(data.quantity()));
@@ -76,6 +79,7 @@ public class ReceivementService {
         return new ReceivementResponseDTO(receivement);
     }
 
+    @Cacheable(value = "receivements", key = "#id")
     public ReceivementResponseDTO getById(String id) {
         Receivement receivement = receivementRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recebimento não encontrado."));
@@ -86,6 +90,7 @@ public class ReceivementService {
         return receivementRepository.findAll(pageable).map(ReceivementResponseDTO::new);
     }
 
+    @Cacheable(value = "receivements_all")
     public List<ReceivementResponseDTO> getAll() {
         return receivementRepository.findAll().
                 stream().
@@ -93,12 +98,18 @@ public class ReceivementService {
                 collect(Collectors.toList());
     } 
 
+    @CachePut(value = "receivements", key = "#id")
     @Transactional
     public ReceivementResponseDTO update(String id, ReceivementRequestDTO data) {
         Receivement receivement = receivementRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recebimento não encontrado."));
 
         int quantityDifference = 0;
+
+        if (receivement.getStatus().equals(ReceivementStatus.COMPLETED)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O recebimento não pode ser alterado pois está com status 'completado'.");
+        }
+
         if (data.quantity() > 0) {
             quantityDifference = data.quantity() - receivement.getQuantity();
             receivement.setQuantity(data.quantity());
@@ -129,6 +140,7 @@ public class ReceivementService {
         return new ReceivementResponseDTO(receivement);
     }
     
+    @CachePut(value = "receivements", key = "#id")
     @Transactional
     public ReceivementResponseDTO updateStatus(String id, ReceivementStatus status) {
         Receivement receivement = receivementRepository.findById(id)
@@ -143,6 +155,7 @@ public class ReceivementService {
         return new ReceivementResponseDTO(receivement);
     }
 
+    @CacheEvict(value = "receivements", key = "#id")
     @Transactional
     public void delete(String id) {
         Receivement receivement = receivementRepository.findById(id)

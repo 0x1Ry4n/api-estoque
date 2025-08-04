@@ -12,6 +12,7 @@ import com.apiestoque.crud.infra.response.ApiResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 
 import com.apiestoque.crud.domain.user.dto.UserRole;
 import com.apiestoque.crud.domain.user.dto.UserStatus;
@@ -40,24 +41,14 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@AllArgsConstructor
 public class UserService {
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private FileStorageService fileStorageService;
-
-    @Autowired
-    private RedisTemplate<String, String> redisTemplate;
-
-    @Autowired
-    private TokenService tokenService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final FileStorageService fileStorageService;
+    private final TokenService tokenService;
+    private final PasswordEncoder passwordEncoder;
+    private final RedisTemplate<String, String> redisTemplate;
 
     public ApiResult registerAdmin(RegisterUserDTO data) {
         if (userRepository.findByUsername("admin") == null) {

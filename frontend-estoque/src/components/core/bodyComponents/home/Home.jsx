@@ -102,6 +102,7 @@ const Home = () => {
       minHeight: '100vh',
       p: isMobile ? 4 : 2,
       boxSizing: 'border-box',
+      mt: 2,
       mx: 'auto',
     }}>
       <Grid

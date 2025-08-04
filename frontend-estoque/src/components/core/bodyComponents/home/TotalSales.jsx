@@ -10,7 +10,8 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   Typography,
-  Stack
+  Stack,
+  colors
 } from "@mui/material";
 import {
   BarChart,
@@ -258,6 +259,9 @@ export default function SalesAnalysis({ receivements, exits }) {
         width: 8,
         height: 8
       },
+      labels: {
+        colors: theme.palette.text.secondary
+      },
       itemMargin: {
         horizontal: 10,
         vertical: 5
@@ -314,8 +318,11 @@ export default function SalesAnalysis({ receivements, exits }) {
           labels: {
             formatter: function (val) {
               return val.toFixed(0);
+            },
+            style: {
+              colors: theme.palette.text.secondary
             }
-          }
+          },
         }
       }
     }],
@@ -419,7 +426,6 @@ export default function SalesAnalysis({ receivements, exits }) {
         </Stack>
       </Box>
 
-      {/* Chart container */}
       <Box sx={{
         flex: 1,
         minHeight: 400,
@@ -433,7 +439,6 @@ export default function SalesAnalysis({ receivements, exits }) {
         />
       </Box>
 
-      {/* Footer */}
       <Box sx={{
         mt: 2,
         display: 'flex',

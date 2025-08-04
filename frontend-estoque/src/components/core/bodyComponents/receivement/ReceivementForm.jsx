@@ -281,6 +281,7 @@ const ReceivementForm = ({ onReceivementAdded }) => {
                 name="receivingDate"
                 control={control}
                 defaultValue=""
+                rules={{ required: "A data de recebimento é obrigatória." }}
                 render={({ field }) => (
                   <TextField
                     label="Data de Recebimento"
@@ -292,6 +293,7 @@ const ReceivementForm = ({ onReceivementAdded }) => {
                       shrink: true,
                     }}
                     sx={{ mb: 2 }}
+                    error={!!errors.receivingDate}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -299,6 +301,9 @@ const ReceivementForm = ({ onReceivementAdded }) => {
                         </InputAdornment>
                       ),
                     }}
+                    helperText={
+                      errors.receivingDate ? errors.receivingDate.message : ""
+                    }
                   />
                 )}
               />

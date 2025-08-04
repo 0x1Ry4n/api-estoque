@@ -459,7 +459,8 @@ const Orders = () => {
                             label={item.productCategory}
                             sx={{
                               fontWeight: 'bold',
-                              color: '#303030',
+                              color: 'gainsboro',
+                              bgcolor: '#524c4cff',
                               height: 25,
                               maxWidth: 150,
                               p: 2,

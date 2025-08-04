@@ -16,6 +16,7 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
+import logo from "../../../assets/logo-png.png"
 import {
   Email as EmailIcon,
   Lock as LockIcon,
@@ -271,13 +272,30 @@ const Login = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: isMobile ? '100vw' : '80vw',
+        width: '100vw',
+        height: '100vh',
+        background: 'linear-gradient(225deg, #004d40 0%, #117a65 40%, #2b857cff 70%, #273e3c 100%)',
         p: isMobile ? 4 : 2,
-        boxSizing: 'border-box',
         mx: 'auto',
-        mt: isMobile ? '50%' : '10%',
+        boxSizing: 'border-box',
       }}
     >
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          padding: 1,
+          filter: 'drop-shadow(0 0 2px #08312aff)',
+        }}
+      >
+        <img
+          src={logo}
+          alt="Logo"
+          style={{ height: '180px', objectFit: 'contain', filter: 'drop-shadow(0 0 0.5px #fbf4e7ff)', }}
+        />
+      </Box>
+
       <Box
         bgcolor="background.variant"
         p={isMobile ? 4 : 8}
@@ -289,20 +307,22 @@ const Login = () => {
           <Button
             startIcon={<ArrowBackIcon />}
             onClick={() => setIsVerifyingFace(false)}
-            sx={{ mb: 2, color: 'black' }}
+            sx={{ mb: 2, color: '#00796b' }}
           >
             Voltar
           </Button>
         )}
 
         <Typography
-          variant="h5"
-          mb={3}
+          variant="h6"
+          mb={4}
           textAlign="center"
           fontWeight="bold"
         >
           {isVerifyingFace ? (
-            "Verificação Facial"
+            <>
+              <FaceIcon sx={{ mr: 1 }} /> Verificação Facial
+            </>
           ) : (
             <>
               <LoginIcon sx={{ mr: 1 }} /> Acesse sua conta
@@ -315,7 +335,7 @@ const Login = () => {
             component="form"
             onSubmit={handleLogin}
             sx={{
-              width: '85%',
+              width: '90%',
               mx: 'auto',
               bgcolor: 'background.paper',
               p: 4,

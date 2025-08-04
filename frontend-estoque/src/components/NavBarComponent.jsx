@@ -70,25 +70,22 @@ export default function NavBarComponent() {
       <Grid container>
         <Grid item md={12}>
           <Paper elevation={4}>
-            <AppBar sx={{ padding: 2, bgcolor: '#00796b', position: 'fixed', top: 0 }} >
+            <AppBar sx={{ padding: 2, height: '63.5px', bgcolor: '#00796b', position: 'fixed', top: 0 }} >
               <Container maxWidth="xxl">
                 <Box
                   sx={{
                     display: "flex",
                     justifyContent: "space-between",
-                    alignItems: "center",
+                    alignItems: "self-start",
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'self-start' }}>
                     <IconButton
                       onClick={toggleSidebar}
                       sx={{ mr: 2, color: 'white' }}
                     >
                       <MenuIcon />
                     </IconButton>
-                    <Typography fontFamily={"Inter"} variant="h6">
-                      Estoque
-                    </Typography>
                   </Box>
 
                   <Box

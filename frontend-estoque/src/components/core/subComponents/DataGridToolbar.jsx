@@ -1,3 +1,4 @@
+import { Box, Button, MenuItem } from "@mui/material";
 import {
     GridToolbarColumnsButton,
     GridToolbarFilterButton,
@@ -7,8 +8,9 @@ import {
     GridToolbarExportContainer,
     useGridApiContext,
 } from "@mui/x-data-grid";
-import { Box, Button, MenuItem, Stack } from "@mui/material";
-import { Refresh as RefreshIcon } from "@mui/icons-material";
+import {
+    Refresh as RefreshIcon
+} from "@mui/icons-material";
 import { fileExporters } from "../../../utils/utils";
 
 export const DataGridToolbar = ({ onReload }) => {
@@ -46,28 +48,28 @@ export const DataGridToolbar = ({ onReload }) => {
                 p: 1,
                 pb: 0,
                 display: "flex",
-                justifyContent: "space-between",
                 flexWrap: "wrap",
+                gap: 1,
+                alignItems: "center",
             }}
         >
-            <Stack direction="row" spacing={1}>
-                <Button
-                    size="small"
-                    startIcon={<RefreshIcon />}
-                    onClick={onReload}
-                >
-                    Recarregar
-                </Button>
-                <GridToolbarColumnsButton />
-                <GridToolbarFilterButton />
-                <GridToolbarDensitySelector />
-                <GridToolbarExportContainer>
-                    <GridCsvExportMenuItem options={{ fileName: "dados" }} />
-                    <MenuItem onClick={handleExportExcel}>Baixar como Excel</MenuItem>
-                    <MenuItem onClick={handleExportPdf}>Baixar como PDF</MenuItem>
-                    <GridPrintExportMenuItem options={{ fileName: "dados" }} />
-                </GridToolbarExportContainer>
-            </Stack>
+            <Button
+                size="small"
+                startIcon={<RefreshIcon />}
+                onClick={onReload}
+            >
+                Recarregar
+            </Button>
+
+            <GridToolbarColumnsButton />
+            <GridToolbarFilterButton />
+            <GridToolbarDensitySelector />
+            <GridToolbarExportContainer>
+                <GridCsvExportMenuItem options={{ fileName: "dados" }} />
+                <MenuItem onClick={handleExportExcel}>Baixar como Excel</MenuItem>
+                <MenuItem onClick={handleExportPdf}>Baixar como PDF</MenuItem>
+                <GridPrintExportMenuItem options={{ fileName: "dados" }} />
+            </GridToolbarExportContainer>
         </Box>
     );
 };

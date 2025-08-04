@@ -1,6 +1,9 @@
 package com.apiestoque.crud.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -14,17 +17,21 @@ import com.apiestoque.crud.domain.product.category.dto.CategoryUpdateDTO;
 import com.apiestoque.crud.domain.product.dto.ProductDetailedResponseDTO;
 import com.apiestoque.crud.repositories.CategoryRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
+
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class CategoryService {
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
-    @Autowired
-    private ProductRepository productRepository;
-
+    @CacheEvict(value = "categories_all", allEntries = true)
+    @Transactional
     public CategoryResponseDTO create(CategoryRequestDTO data) {
         if (categoryRepository.existsByName(data.name())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria com esse nome já existe.");
@@ -38,6 +45,8 @@ public class CategoryService {
         return new CategoryResponseDTO(savedCategory);
     }
 
+    @CachePut(value = "categories", key = "#id")
+    @Transactional
     public CategoryResponseDTO update(String id, CategoryUpdateDTO data) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
@@ -59,6 +68,7 @@ public class CategoryService {
                 .map(CategoryResponseDTO::new);
     }
 
+    @Cacheable(value = "categories_all")
     public List<CategoryResponseDTO> getAll() {
         return categoryRepository.findAll()
                 .stream()
@@ -66,6 +76,7 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "categories", key = "#id")
     public CategoryResponseDTO getById(String id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
@@ -81,6 +92,9 @@ public class CategoryService {
         return categoryList.isEmpty() ? List.of() : categoryList;
     }
 
+
+    @CacheEvict(value = "categories", key = "#id")
+    @Transactional
     public ProductDetailedResponseDTO delete(String id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(

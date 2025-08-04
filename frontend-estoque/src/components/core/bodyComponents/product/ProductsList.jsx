@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -12,13 +12,19 @@ import {
   IconButton,
   Avatar,
   Badge,
-  Grid,
   Divider,
   Typography,
   useMediaQuery,
   useTheme,
   Tooltip,
-  Box
+  Box,
+  TableContainer,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper,
+  Chip
 } from "@mui/material";
 import { DataGridToolbar } from "../../subComponents/DataGridToolbar";
 import {
@@ -340,9 +346,9 @@ const Products = () => {
                     <IconButton
                       component="span"
                       sx={{
-                        backgroundColor: 'white',
+                        backgroundColor: '#979797ff',
                         boxShadow: 2,
-                        '&:hover': { backgroundColor: '#eee' },
+                        '&:hover': { bgcolor: '#004d40' },
                       }}
                     >
                       <PhotoCameraIcon />
@@ -504,74 +510,100 @@ const Products = () => {
         <DialogContent dividers>
           {detailedProduct && (
             <Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Typography><strong>ID:</strong> {detailedProduct.id}</Typography>
-                  <Typography><strong>Nome:</strong> {detailedProduct.name}</Typography>
-                  <Typography><strong>Descrição:</strong> {detailedProduct.description}</Typography>
-                  <Typography><strong>Quantidade:</strong> {detailedProduct.stockQuantity}</Typography>
-                  <Typography>
-                    <strong>Preço Unitário:</strong> {detailedProduct.unitPrice.toFixed(2)} BRL
-                  </Typography>
-                  <Typography>
-                    <strong>Valor Total:</strong>{" "}
-                    {(detailedProduct.unitPrice * detailedProduct.stockQuantity).toFixed(2)} BRL
-                  </Typography>
-                  <Typography><strong>Data de Expiração:</strong> {detailedProduct.expirationDate}</Typography>
-                  <Typography><strong>Categoria:</strong> {detailedProduct.category?.name}</Typography>
-                </Grid>
-              </Grid>
-
-              <Divider sx={{ my: 3 }} />
+              <TableContainer component={Paper} sx={{ mb: 3 }}>
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell><strong>ID:</strong></TableCell>
+                      <TableCell>{detailedProduct.id.slice(0, 8)}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>Nome:</strong></TableCell>
+                      <TableCell>{detailedProduct.name}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>Descrição:</strong></TableCell>
+                      <TableCell>{detailedProduct.description}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>Quantidade:</strong></TableCell>
+                      <TableCell>{detailedProduct.stockQuantity}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>Preço Unitário:</strong></TableCell>
+                      <TableCell>{detailedProduct.unitPrice.toFixed(2)} BRL</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>Valor Total:</strong></TableCell>
+                      <TableCell>
+                        {(detailedProduct.unitPrice * detailedProduct.stockQuantity).toFixed(2)} BRL
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>Data de Expiração:</strong></TableCell>
+                      <TableCell>{detailedProduct.expirationDate ? detailedProduct.expirationDate : "N/A"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell><strong>Categoria:</strong></TableCell>
+                      <TableCell>
+                        <Chip
+                          label={detailedProduct.category?.name}
+                          sx={{
+                            fontWeight: 'bold',
+                            color: 'gainsboro',
+                            bgcolor: '#524c4cff',
+                            height: 25,
+                            maxWidth: 150,
+                            p: 2,
+                            '& .MuiChip-label': {
+                              paddingLeft: 1,
+                              paddingRight: 1,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            },
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
 
               <Typography variant="h6" gutterBottom>Inventário</Typography>
-              <Grid container spacing={2}>
-                {detailedProduct.inventory.map((item) => (
-                  <Grid item xs={12} sm={6} md={4} key={item.id}>
-                    <Box
-                      p={2}
-                      border="1px solid #ddd"
-                      borderRadius={2}
-                      boxShadow={1}
-                      sx={{ height: "100%" }}
-                    >
-                      <Typography><strong>ID:</strong> {item.id}</Typography>
-                      <Typography><strong>Localização:</strong> {item.location}</Typography>
-                      <Typography><strong>Quantidade:</strong> {item.quantity}</Typography>
-                      <Typography><strong>Recebimento:</strong> {item.receivementQuantity}</Typography>
-                      <Typography><strong>Saída:</strong> {item.exitQuantity}</Typography>
-                      <Typography><strong>Preço:</strong> {item.unitPrice.toFixed(2)} BRL</Typography>
-                      <Typography><strong>Desconto:</strong> {item.discount} BRL</Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
+              <TableContainer component={Paper} sx={{ mt: 3 }}>
+                <Table>
+                  <TableBody>
+                    {detailedProduct.inventory.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell><strong>ID:</strong> {item.id.slice(0, 8)}</TableCell>
+                        <TableCell><strong>Localização:</strong> {item.location ? item.location : "N/A"}</TableCell>
+                        <TableCell><strong>Quantidade:</strong> {item.quantity}</TableCell>
+                        <TableCell><strong>Recebimento:</strong> {item.receivementQuantity}</TableCell>
+                        <TableCell><strong>Saída:</strong> {item.exitQuantity}</TableCell>
+                        <TableCell><strong>Preço:</strong> {item.unitPrice.toFixed(2)} BRL</TableCell>
+                        <TableCell><strong>Desconto:</strong> {item.discount} BRL</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
 
-              <Divider sx={{ my: 3 }} />
-
-              <Typography variant="h6" gutterBottom>Fornecedores</Typography>
-              <Grid container spacing={2}>
-                {detailedProduct.suppliers.map((supplier) => (
-                  <Grid item xs={12} sm={6} md={4} key={supplier.id}>
-                    <Box
-                      p={2}
-                      border="1px solid #ddd"
-                      borderRadius={2}
-                      boxShadow={1}
-                      sx={{ height: "100%" }}
-                    >
-                      <Typography><strong>ID:</strong> {supplier.id}</Typography>
-                      <Typography><strong>Nome:</strong> {supplier.socialReason}</Typography>
-                      <Typography><strong>Email:</strong> {supplier.email}</Typography>
-                      <Typography><strong>Telefone:</strong> {supplier.phone}</Typography>
-                      <Typography>
-                        <strong>Data de Criação:</strong>{" "}
-                        {new Date(supplier.createdAt).toLocaleString()}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
+              <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>Fornecedores</Typography>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableBody>
+                    {detailedProduct.suppliers.map((supplier) => (
+                      <TableRow key={supplier.id}>
+                        <TableCell><strong>ID:</strong> {supplier.id.slice(0, 8)}</TableCell>
+                        <TableCell><strong>Nome:</strong> {supplier.socialReason}</TableCell>
+                        <TableCell><strong>Email:</strong> {supplier.email}</TableCell>
+                        <TableCell><strong>Telefone:</strong> {supplier.phone}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Box>
           )}
         </DialogContent>

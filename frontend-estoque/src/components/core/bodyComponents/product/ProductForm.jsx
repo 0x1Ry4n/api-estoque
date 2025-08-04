@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -14,7 +14,7 @@ import {
   Divider,
   Avatar,
   IconButton,
-  Badge, 
+  Badge,
   Autocomplete
 } from "@mui/material";
 import {
@@ -150,11 +150,11 @@ const ProductForm = ({ onProductAdded }) => {
     <Box>
       <Paper
         elevation={4}
-        sx={{ 
-          padding: 6, 
-          borderRadius: 2, 
-          backgroundColor: "background.paper", 
-          width: "95%" 
+        sx={{
+          padding: 6,
+          borderRadius: 2,
+          backgroundColor: "background.paper",
+          width: "95%"
         }}
       >
         <Typography
@@ -188,9 +188,9 @@ const ProductForm = ({ onProductAdded }) => {
                       <IconButton
                         component="span"
                         sx={{
-                          backgroundColor: 'white',
+                          backgroundColor: '#979797ff',
                           boxShadow: 2,
-                          '&:hover': { backgroundColor: '#eee' },
+                          '&:hover': { bgcolor: '#004d40' },
                         }}
                       >
                         <PhotoCameraIcon />

@@ -14,7 +14,7 @@ public record ExitResponseDTO(
         Integer quantity,
         String inventoryCode,
         ExitStatus status,
-        LocalDate exitDate) {   
+        String exitDate) {   
     public ExitResponseDTO(Exit exit) {
         this(
             exit.getId(),
@@ -25,7 +25,7 @@ public record ExitResponseDTO(
             exit.getQuantity(),
             exit.getInventoryCode(),
             exit.getStatus(), 
-            exit.getExitDate()
+            exit.getExitDate().toString()
         );
     }
 }

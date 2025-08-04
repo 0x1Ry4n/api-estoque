@@ -8,7 +8,13 @@ import com.apiestoque.crud.domain.supplier.dto.SupplierResponseDTO;
 import com.apiestoque.crud.domain.supplier.dto.SupplierUpdateRequestDTO;
 import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
+
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -19,13 +25,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class SupplierService {
-    @Autowired
-    private SupplierRepository supplierRepository;
+    private final SupplierRepository supplierRepository;
+    private final ProductRepository productRepository;
 
-    @Autowired
-    private ProductRepository productRepository;
-
+    @CacheEvict(value = "suppliers_all", allEntries = true)
+    @Transactional
     public SupplierResponseDTO create(SupplierRequestDTO data) {
         if (supplierRepository.existsByEmail(data.email())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fornecedor com este e-mail já existe.");
@@ -54,6 +60,8 @@ public class SupplierService {
         return new SupplierResponseDTO(savedSupplier);
     }
 
+    @Cacheable(value = "suppliers", key = "#id")
+    @Transactional
     public SupplierResponseDTO update(String id, SupplierUpdateRequestDTO data) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado."));
@@ -86,6 +94,7 @@ public class SupplierService {
                 .map(SupplierResponseDTO::new);
     }
 
+    @Cacheable(value = "suppliers_all")
     public List<SupplierResponseDTO> getAll() {
         return supplierRepository.findAll()
             .stream()
@@ -93,6 +102,7 @@ public class SupplierService {
             .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "suppliers", key = "#id")
     public SupplierResponseDTO getById(String id) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado."));
@@ -100,6 +110,7 @@ public class SupplierService {
         return new SupplierResponseDTO(supplier);
     }
 
+    @Cacheable(value = "supplier_products", key = "#supplierId")
     public List<ProductResponseDTO> getProductsBySupplierId(String supplierId) {
         Optional<Supplier> supplier = supplierRepository.findById(supplierId);
 
@@ -114,6 +125,8 @@ public class SupplierService {
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = "suppliers", key = "#id")
+    @Transactional
     public void delete(String id) {
         supplierRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado."));

@@ -10,29 +10,29 @@ import com.apiestoque.crud.repositories.ExitRepository;
 import com.apiestoque.crud.repositories.InventoryRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class ExitService {
+    private final ExitRepository exitRepository;
+    private final ProductRepository productRepository;
+    private final InventoryRepository inventoryRepository;
 
-    @Autowired
-    private ExitRepository exitRepository;
-
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private InventoryRepository inventoryRepository;
-
+    @CacheEvict(value = "exits_all", allEntries = true)
     @Transactional
     public ExitResponseDTO create(ExitRequestDTO data) {
         Product product = productRepository.findById(data.productId())
@@ -68,19 +68,30 @@ public class ExitService {
         return new ExitResponseDTO(newExit);
     }
 
+    @CachePut(value = "exits", key = "#id")
     @Transactional
     public ExitResponseDTO update(String id, ExitRequestDTO data) {
         Exit exit = exitRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Saída não encontrada!"));
 
-        int quantityDifference;
+        int quantityDifference = 0;
+
+        if (exit.getStatus().equals(ExitStatus.COMPLETED)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A saída não pode ser alterada pois está com status 'completado'.");
+        }
 
         if (data.quantity() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantidade de saída deve ser maior que zero!");
         }
 
         quantityDifference = data.quantity() - exit.getQuantity();
+
         exit.setQuantity(data.quantity());
+
+        if (data.exitDate().isAfter(LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A data de saída não pode ser no futuro.");
+        }
+
         exit.setExitDate(data.exitDate());
 
         if (quantityDifference != 0) {
@@ -90,7 +101,13 @@ public class ExitService {
 
             Product product = inventory.getProduct();
 
-            inventory.setQuantity(inventory.getQuantity() - quantityDifference);
+            int inventoryQuantity = inventory.getQuantity() - quantityDifference;
+
+            if (inventoryQuantity < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Estoque insuficiente no inventário!");
+            }
+
+            inventory.setQuantity(inventoryQuantity);
             inventory.setExitQuantity(inventory.getExitQuantity() + quantityDifference);
             inventoryRepository.save(inventory);
 
@@ -102,6 +119,7 @@ public class ExitService {
         return new ExitResponseDTO(exit);
     }
 
+    @CachePut(value = "exits", key = "#id")
     @Transactional
     public ExitResponseDTO updateStatus(String id, ExitStatus status) {
         Exit receivement = exitRepository.findById(id)
@@ -116,6 +134,7 @@ public class ExitService {
         return new ExitResponseDTO(receivement);
     }
 
+    @Cacheable(value = "exits", key = "#id")
     public ExitResponseDTO getById(String id) {
         Exit exit = exitRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Saída não encontrada!"));
@@ -126,6 +145,7 @@ public class ExitService {
         return exitRepository.findAll(pageable).map(ExitResponseDTO::new);
     }
 
+    @Cacheable(value = "exits_all")
     public List<ExitResponseDTO> getAll() {
         return exitRepository.findAll()
                 .stream()
@@ -133,6 +153,7 @@ public class ExitService {
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = "exits", key = "#id")
     @Transactional
     public void delete(String id) {
         Exit exit = exitRepository.findById(id)

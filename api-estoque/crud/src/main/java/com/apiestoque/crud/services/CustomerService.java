@@ -3,7 +3,9 @@ package com.apiestoque.crud.services;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -17,12 +19,15 @@ import com.apiestoque.crud.domain.customer.dto.CustomerStatus;
 import com.apiestoque.crud.repositories.CustomerRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class CustomerService {
-    @Autowired
-    private CustomerRepository customerRepository;
+    private final CustomerRepository customerRepository;
 
+    @CacheEvict(value = "customers_all", allEntries = true)
+    @Transactional
     public CustomerResponseDTO create(CustomerRequestDTO data) {
         if (customerRepository.existsByEmail(data.email())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este e-mail já existe.");
@@ -68,6 +73,8 @@ public class CustomerService {
         return new CustomerResponseDTO(savedCustomer);
     }
 
+    @Cacheable(value = "customers", key = "#id")
+    @Transactional
     public CustomerResponseDTO update(String id, CustomerRequestDTO data) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado."));
@@ -129,25 +136,7 @@ public class CustomerService {
         return new CustomerResponseDTO(updatedCustomer);
     }
 
-    public Page<CustomerResponseDTO> getAll(Pageable pageable) {
-        return customerRepository.findAll(pageable)
-                .map(CustomerResponseDTO::new);
-    }
-
-    public List<CustomerResponseDTO> getAll() {
-        return customerRepository.findAll()
-                .stream()
-                .map(CustomerResponseDTO::new)
-                .collect(Collectors.toList());
-    }
-
-    public CustomerResponseDTO getById(String id) {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado."));
-
-        return new CustomerResponseDTO(customer);
-    }
-
+    @CachePut(value = "customers", key = "#id")
     @Transactional
     public CustomerResponseDTO updateStatus(String id, CustomerStatus status) {
         Customer customer = customerRepository.findById(id)
@@ -158,6 +147,27 @@ public class CustomerService {
         }
 
         customerRepository.UpdateCustomerStatus(customer.getId(), status.name());
+
+        return new CustomerResponseDTO(customer);
+    }
+
+    public Page<CustomerResponseDTO> getAll(Pageable pageable) {
+        return customerRepository.findAll(pageable)
+                .map(CustomerResponseDTO::new);
+    }
+
+    @Cacheable(value = "customers_all")
+    public List<CustomerResponseDTO> getAll() {
+        return customerRepository.findAll()
+                .stream()
+                .map(CustomerResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Cacheable(value = "customers", key = "#id")
+    public CustomerResponseDTO getById(String id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado."));
 
         return new CustomerResponseDTO(customer);
     }

@@ -12,37 +12,29 @@ import com.apiestoque.crud.repositories.CustomerRepository;
 import com.apiestoque.crud.repositories.InventoryRepository;
 import com.apiestoque.crud.repositories.OrderRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
-
 import jakarta.transaction.Transactional;
-
-import lombok.RequiredArgsConstructor;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class OrderService {
-    @Autowired
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final InventoryRepository inventoryRepository;
+    private final CustomerRepository customerRepository;
 
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private InventoryRepository inventoryRepository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
-
+    @CacheEvict(value = "orders_all", allEntries = true)
     @Transactional
     public OrderResponseDTO create(OrderRequestDTO data) {
         if (data.items() == null || data.items().isEmpty()) {
@@ -105,6 +97,8 @@ public class OrderService {
         return toResponseDTO(orderRepository.save(order));
     }
 
+    @CachePut(value = "orders", key = "#orderNumber")
+    @Transactional
     public OrderResponseDTO update(Long orderNumber, OrderRequestDTO data) {
         Order order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
@@ -178,6 +172,7 @@ public class OrderService {
         return orderPage;
     }
 
+    @Cacheable(value = "orders_all")
     public List<OrderResponseDTO> getAll() {
         return orderRepository.findAll()
                 .stream()
@@ -185,6 +180,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "orders", key = "#orderNumber")
     public OrderResponseDTO getByOrderNumber(Long orderNumber) {
         Order order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
@@ -199,20 +195,25 @@ public class OrderService {
                 order.getInvoiceNumber(),
                 order.getPackingNumber(),
                 new CustomerResponseDTO(order.getCustomer()),
-                order.getItems().stream().map(item -> new OrderItemResponseDTO(item)).collect(Collectors.toList()),
+                order.getItems().stream()
+                        .map(OrderItemResponseDTO::new)
+                        .collect(Collectors.toList()),
                 order.getTotalAmount(),
-                order.getStatus().name(),
-                order.getPaymentMethod().name(),
-                order.getDeliveryDate(),
+                order.getStatus() != null ? order.getStatus().name() : null,
+                order.getPaymentMethod() != null ? order.getPaymentMethod().name() : null,
+                order.getDeliveryDate() != null ? order.getDeliveryDate().toString() : null,
                 order.getObservation(),
                 order.getCancelReason(),
                 order.getCreatedBy(),
                 order.getCreatedAt() != null
                         ? order.getCreatedAt().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()
+                                .toString()
                         : null,
                 order.getLastModifiedBy(),
                 order.getUpdatedAt() != null
                         ? order.getUpdatedAt().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()
+                                .toString()
                         : null);
+
     }
 }

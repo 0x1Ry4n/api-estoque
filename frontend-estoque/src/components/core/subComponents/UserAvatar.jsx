@@ -203,13 +203,13 @@ const UserAvatar = ({ userId, showable = true, editable = true, sx = {} }) => {
                   minWidth: 'auto',
                   padding: '6px',
                   borderRadius: '50%',
-                  bgcolor: '#00796b',
+                  bgcolor: '#979797ff',
                   color: 'white',
                   boxShadow: 2,
                   '&:hover': { bgcolor: '#004d40' },
                 }}
               >
-                <PhotoCameraIcon fontSize="medium" />
+                <PhotoCameraIcon />
               </Button>
             </label>
           </>

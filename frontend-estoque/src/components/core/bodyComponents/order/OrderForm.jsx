@@ -624,7 +624,7 @@ const OrderForm = ({ onOrderAdded }) => {
             </Grid>
           </DialogContent>
 
-          <DialogActions sx={{ p: 3, borderTop: '1px solid #eee' }}>
+          <DialogActions sx={{ p: 3, borderTop: '1px solid gray' }}>
             <Button
               onClick={resetItemDialog}
               variant="outlined"

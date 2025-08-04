@@ -78,7 +78,7 @@ const UserProfile = () => {
   return (
     <Box sx={{
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'self-start',
       ml: !isMobile ? '25%' : '',
       width: isMobile ? '100vw' : '40vw',
       height: '100vh',
@@ -118,7 +118,7 @@ const UserProfile = () => {
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                 },
-                bgcolor: 'rgba(0, 0, 0, 0.08)',
+                bgcolor: '#524c4cff',
               }}
             />
           </Grid>

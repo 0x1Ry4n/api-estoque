@@ -284,7 +284,7 @@ const CalendarWithNotes = () => {
       width: isMobile ? '100vw' : '60vw',
       minHeight: '100vh',
       p: isMobile ? 4 : 6,
-      mt: 5,
+      mt: 2,
       boxSizing: 'border-box',
       borderRadius: 1,
       mx: 'auto',

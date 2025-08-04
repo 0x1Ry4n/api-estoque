@@ -298,8 +298,9 @@ const MapComponent = () => {
   return (
     <Box sx={{
       width: isMobile ? '100vw' : '60vw',
+      height: '105vh',
       p: isMobile ? 4 : 6,
-      mt: 5,
+      mt: 2,
       boxSizing: 'border-box',
       borderRadius: 1,
       mx: 'auto',
@@ -325,7 +326,6 @@ const MapComponent = () => {
                 backgroundColor: 'rgba(0, 0, 0, 0.6)',
                 boxShadow: 'none',
                 backdropFilter: 'blur(3px)',
-                backgroundColor: "#f5f5f5"
               },
             }}
           >

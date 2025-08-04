@@ -1,6 +1,9 @@
 package com.apiestoque.crud.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +28,9 @@ import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.ReceivementRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
 
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
@@ -32,28 +38,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class ProductService {
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final InventoryRepository inventoryRepository;
+    private final SupplierRepository supplierRepository;
+    private final ReceivementRepository receivementRepository;
+    private final ExitRepository exitRepository;
+    private final FileStorageService fileStorageService;
 
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private InventoryRepository inventoryRepository;
-
-    @Autowired
-    private SupplierRepository supplierRepository;
-
-    @Autowired
-    private ReceivementRepository receivementRepository;
-
-    @Autowired
-    private ExitRepository exitRepository;
-
-    @Autowired
-    private FileStorageService fileStorageService;
-
+    @CacheEvict(value = "products_all", allEntries = true)
+    @Transactional
     public ProductResponseDTO create(ProductRequestDTO data) {
         Category category = categoryRepository.findById(data.categoryId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
@@ -78,11 +74,13 @@ public class ProductService {
                 suppliers,
                 data.expirationDate());
 
-        try {
-            String imagePath = fileStorageService.save(data.file(), "produtos");
-            newProduct.setImagePath(imagePath);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem.", e);
+        if (data.file() != null) {
+            try {
+                String imagePath = fileStorageService.save(data.file(), "produtos");
+                newProduct.setImagePath(imagePath);
+            } catch (IOException e) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem.", e);
+            }
         }
 
         Product savedProduct = this.productRepository.save(newProduct);
@@ -90,6 +88,8 @@ public class ProductService {
         return new ProductResponseDTO(savedProduct);
     }
 
+    @CachePut(value = "products", key = "#id")
+    @Transactional
     public ProductResponseDTO update(String id, ProductUpdateDTO data) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
@@ -131,7 +131,9 @@ public class ProductService {
         return new ProductResponseDTO(updatedProduct);
     }
 
-    public void updateImage(String id, MultipartFile file) {
+    @CachePut(value = "products", key = "#id")
+    @Transactional
+    public ProductResponseDTO updateImage(String id, MultipartFile file) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
 
@@ -143,6 +145,7 @@ public class ProductService {
             String imagePath = fileStorageService.save(file, "produtos");
             product.setImagePath(imagePath);
             productRepository.save(product);
+            return new ProductResponseDTO(product);
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem.", e);
         }
@@ -179,6 +182,7 @@ public class ProductService {
         return productPage;
     }
 
+    @Cacheable(value = "products_all")
     public List<ProductResponseDTO> getAll() {
         return productRepository.findAll()
                 .stream()
@@ -186,6 +190,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "products_detailed", key = "#id")
     public ProductDetailedResponseDTO getById(String id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
@@ -193,6 +198,7 @@ public class ProductService {
         return new ProductDetailedResponseDTO(product);
     }
 
+    @Cacheable(value = "products", key = "#name")
     public List<ProductResponseDTO> getProductByName(String name) {
         List<Product> products = productRepository.findByName(name);
         List<ProductResponseDTO> productList = products.stream()
@@ -202,7 +208,9 @@ public class ProductService {
         return productList.isEmpty() ? List.of() : productList;
     }
 
-    public ProductDetailedResponseDTO delete(String id) {
+    @CacheEvict(value = "products", key = "#id")
+    @Transactional
+    public void delete(String id) {
         productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
 
@@ -212,12 +220,10 @@ public class ProductService {
         }
 
         this.productRepository.deleteById(id);
-
-        return null;
     }
 
-    // ---- Inventory controller ----
-
+    @CacheEvict(value = "inventories_all", allEntries = true)
+    @Transactional
     public InventoryResponseDTO createInventory(String productId, InventoryRequestDTO data) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -245,6 +251,7 @@ public class ProductService {
         return productPage;
     }
 
+    @Cacheable(value = "inventories", key = "#id")
     public List<InventoryResponseDTO> getInventoryById(String id) {
         List<Inventory> inventories = inventoryRepository.findAllByProductId(id);
 
@@ -260,7 +267,9 @@ public class ProductService {
         return inventoryResponseDTO;
     }
 
-    public Void deleteInventory(String productId, String inventoryId) {
+    @CacheEvict(value = "inventories", key = "#inventoryId")
+    @Transactional
+    public void deleteInventory(String productId, String inventoryId) {
         productRepository.findById(productId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Não foi possível encontrar o produto selecionado!"));
@@ -282,7 +291,5 @@ public class ProductService {
         }
 
         inventoryRepository.deleteById(inventoryId);
-
-        return null;
     }
 }

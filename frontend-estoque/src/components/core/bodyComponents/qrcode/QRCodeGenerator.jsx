@@ -10,12 +10,23 @@ import {
   Grid,
   useMediaQuery,
   useTheme,
+  Backdrop,
+  CircularProgress
 } from '@mui/material';
-import { 
-  Download as DownloadIcon, 
-  Print as PrintIcon 
-} from '@mui/icons-material'
+import {
+  Download as DownloadIcon,
+  Print as PrintIcon,
+} from '@mui/icons-material';
 import { QRCodeCanvas } from 'qrcode.react';
+
+const QRItem = ({ value, size, canvasRef, onCopy }) => (
+  <Box sx={{ border: '1px dashed #aaa', p: 1, textAlign: 'center' }}>
+    <QRCodeCanvas ref={canvasRef} value={value} size={size} />
+    <Typography variant="caption" display="block" mt={0.5}>
+      {value}
+    </Typography>
+  </Box>
+);
 
 const QRCodeGenerator = () => {
   const [baseCode, setBaseCode] = useState('');
@@ -24,12 +35,16 @@ const QRCodeGenerator = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const [loading, setLoading] = useState(false);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const canvasRefs = useRef([]);
 
-  const handleDownloadAll = () => {
+  const isFormValid = baseCode.trim() && quantity > 0 && accumulator > 0;
+
+  const handleDownloadAll = async () => {
+    setLoading(true);
     for (let i = 0; i < quantity; i++) {
       const canvas = canvasRefs.current[i];
       if (canvas) {
@@ -42,24 +57,27 @@ const QRCodeGenerator = () => {
         document.body.removeChild(downloadLink);
       }
     }
+    setLoading(false);
     setSnackbarMessage(`${quantity} QR Codes baixados com sucesso!`);
     setSnackbarSeverity('success');
     setSnackbarOpen(true);
   };
 
   const handlePrint = () => window.print();
+
+  const handleCopy = (value) => {
+    navigator.clipboard.writeText(value);
+    setSnackbarMessage(`Código ${value} copiado!`);
+    setSnackbarSeverity('info');
+    setSnackbarOpen(true);
+  };
+
   const handleSnackbarClose = () => setSnackbarOpen(false);
 
   return (
-    <Box sx={{
-      width: isMobile ? '100vw' : '80vw',
-      minHeight: '100vh',
-      p: isMobile ? 4 : 6,
-      mt: 5,
-      boxSizing: 'border-box',
-    }}>
-      <Paper elevation={4} sx={{ p: 8, borderRadius: 2, maxWidth: 1200, mx: 'auto' }} className="no-print">
-        <Typography variant="h5" fontWeight="bold" textAlign="center" mb={4}>
+    <Box sx={{ width: isMobile ? '100vw' : '80vw', height: '100vh', p: isMobile ? 4 : 2, mt: 2, boxSizing: 'border-box' }}>
+      <Paper elevation={4} sx={{ p: 10, borderRadius: 2, maxWidth: 1000, mx: 'auto' }} className="no-print">
+        <Typography variant="h5" fontWeight="bold" textAlign="center" mb={6}>
           Gerador de QR Codes
         </Typography>
 
@@ -111,13 +129,12 @@ const QRCodeGenerator = () => {
               {`${baseCode}-${String(accumulator).padStart(3, '0')}`}
             </Typography>
           </Box>
-
         </Box>
 
         {quantity > 1 && (
           <Box textAlign="center">
             <Typography variant="body2" color="text.secondary" mt={2}>
-              +{quantity - 1} QR Codes não exibidos (mas serão impressos)
+              +{quantity - 1} QR Codes não exibidos (mas serão impressos/baixados)
             </Typography>
           </Box>
         )}
@@ -128,17 +145,17 @@ const QRCodeGenerator = () => {
             color="primary"
             startIcon={<DownloadIcon />}
             onClick={handleDownloadAll}
-            disabled={!baseCode}
+            disabled={!isFormValid || loading}
             sx={{ textTransform: 'none', px: 3 }}
           >
-            {`Baixar Todos (${quantity - 1})`}
+            {`Baixar Todos (${quantity})`}
           </Button>
           <Button
             variant="outlined"
             color="secondary"
             startIcon={<PrintIcon />}
             onClick={handlePrint}
-            disabled={!baseCode}
+            disabled={!isFormValid}
             sx={{ textTransform: 'none', px: 3 }}
           >
             Imprimir
@@ -146,35 +163,16 @@ const QRCodeGenerator = () => {
         </Box>
       </Paper>
 
-      <Box
-        className="print-grid print-only"
-        sx={{
-          display: 'none',
-          mt: 4,
-          px: 2,
-        }}
-      >
+      <Box className="print-grid print-only" sx={{ display: 'none', mt: 4, px: 2 }}>
         <Grid container spacing={2}>
-          {Array.from({ length: quantity }).map((_, index) => (
-            <Grid item xs={3} key={index} sx={{ p: '4mm' }}>
-              <Box
-                sx={{
-                  border: '1px dashed #aaa',
-                  p: 1,
-                  textAlign: 'center',
-                }}
-              >
-                <QRCodeCanvas
-                  ref={(el) => (canvasRefs.current[index] = el)}
-                  value={`${baseCode}-${String(accumulator + index).padStart(3, '0')}`}
-                  size={120}
-                />
-                <Typography variant="caption" display="block" mt={0.5}>
-                  {`${baseCode}-${String(accumulator + index).padStart(3, '0')}`}
-                </Typography>
-              </Box>
-            </Grid>
-          ))}
+          {Array.from({ length: quantity }).map((_, index) => {
+            const value = `${baseCode}-${String(accumulator + index).padStart(3, '0')}`;
+            return (
+              <Grid item xs={6} sm={4} md={3} key={index} sx={{ p: '4mm' }}>
+                <QRItem value={value} size={120} canvasRef={(el) => (canvasRefs.current[index] = el)} onCopy={handleCopy} />
+              </Grid>
+            );
+          })}
         </Grid>
       </Box>
 
@@ -184,36 +182,21 @@ const QRCodeGenerator = () => {
         </Alert>
       </Snackbar>
 
+      <Backdrop open={loading} sx={{ zIndex: theme.zIndex.drawer + 1, color: '#fff' }}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
       <style jsx="true" media="print">
         {`
-          @page {
-            margin: 10mm;
-          }
-
-          body {
-            background: white;
-          }
-
-          .no-print {
-            display: none !important;
-          }
-
-          .print-only {
-            display: block !important;
-            page-break-inside: avoid;
-          }
-
-          .print-grid .MuiGrid-item {
-            break-inside: avoid;
-          }
+          @page { margin: 10mm; }
+          body { background: white; }
+          .no-print { display: none !important; }
+          .print-only { display: block !important; page-break-inside: avoid; }
+          .print-grid .MuiGrid-item { break-inside: avoid; }
         `}
       </style>
 
-      <style jsx="true">{`
-        .print-only {
-          display: none;
-        }
-      `}</style>
+      <style jsx="true">{`.print-only { display: none; }`}</style>
     </Box>
   );
 };

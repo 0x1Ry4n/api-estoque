@@ -41,7 +41,7 @@ const Settings = ({ onToggleTheme }) => {
     <Box
       sx={{
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'self-start',
         ml: !isMobile ? '25%' : '',
         width: isMobile ? '100vw' : '40vw',
         height: '100vh',
