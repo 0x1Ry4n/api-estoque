@@ -55,7 +55,7 @@ export const lightTheme = createTheme({
     },
     text: {
       primary: "#212121",
-      secondary: "#555",
+      secondary: "#534d4dff",
     },
   },
 });

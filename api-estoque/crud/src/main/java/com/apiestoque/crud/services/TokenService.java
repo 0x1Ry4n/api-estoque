@@ -1,6 +1,7 @@
 package com.apiestoque.crud.services;
 
 import com.apiestoque.crud.domain.user.User;
+import com.apiestoque.crud.infra.exceptions.InternalErrorException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -24,8 +25,8 @@ public class TokenService {
                     .withSubject(user.getEmail())  
                     .withExpiresAt(genExpirationDate())
                     .sign(algorithm);
-        } catch (JWTCreationException exception) {
-            throw new RuntimeException("Erro ao gerar o token JWT: ", exception);
+        } catch (JWTCreationException ex) {
+            throw new InternalErrorException("Erro ao gerar o token JWT: " + ex.getMessage());
         }
     }
 

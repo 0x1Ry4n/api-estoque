@@ -473,7 +473,7 @@ const CreateUser = ({ onUserAdded }) => {
                                 <Button
                                   variant="contained"
                                   onClick={captureFace}
-                                  startIcon={<CameraAlt />}
+                                  startIcon={<CameraAltIcon />}
                                   sx={{ mt: 2, py: 1.5, width: "90%", maxWidth: 300 }}
                                   disabled={isLoading}
                                 >

@@ -1,16 +1,13 @@
 package com.apiestoque.crud.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 import com.apiestoque.crud.domain.inventory.Inventory;
 import com.apiestoque.crud.domain.inventory.dto.InventoryRequestDTO;
 import com.apiestoque.crud.domain.inventory.dto.InventoryResponseDTO;
@@ -21,16 +18,17 @@ import com.apiestoque.crud.domain.product.dto.ProductRequestDTO;
 import com.apiestoque.crud.domain.product.dto.ProductResponseDTO;
 import com.apiestoque.crud.domain.product.dto.ProductUpdateDTO;
 import com.apiestoque.crud.domain.supplier.Supplier;
+import com.apiestoque.crud.infra.exceptions.BadRequestException;
+import com.apiestoque.crud.infra.exceptions.InternalErrorException;
+import com.apiestoque.crud.infra.exceptions.NotFoundException;
 import com.apiestoque.crud.repositories.CategoryRepository;
 import com.apiestoque.crud.repositories.ExitRepository;
 import com.apiestoque.crud.repositories.InventoryRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
 import com.apiestoque.crud.repositories.ReceivementRepository;
 import com.apiestoque.crud.repositories.SupplierRepository;
-
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
@@ -52,17 +50,15 @@ public class ProductService {
     @Transactional
     public ProductResponseDTO create(ProductRequestDTO data) {
         Category category = categoryRepository.findById(data.categoryId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
+                .orElseThrow(() -> new NotFoundException("Categoria não encontrada!"));
 
         Set<Supplier> suppliers = data.suppliersId().stream()
                 .map(supplierId -> supplierRepository.findById(supplierId)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "Fornecedor não encontrado com ID: " + supplierId)))
+                        .orElseThrow(() -> new NotFoundException("Fornecedor não encontrado com ID: " + supplierId)))
                 .collect(Collectors.toSet());
 
         if (productRepository.existsByProductCode(data.productCode())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Produto com esse código já existe.");
+            throw new BadRequestException("Produto com esse código já existe!");
         }
 
         Product newProduct = new Product(
@@ -78,8 +74,8 @@ public class ProductService {
             try {
                 String imagePath = fileStorageService.save(data.file(), "produtos");
                 newProduct.setImagePath(imagePath);
-            } catch (IOException e) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem.", e);
+            } catch (IOException ex) {
+                throw new InternalErrorException("Erro ao salvar a imagem: " + ex.getMessage());
             }
         }
 
@@ -92,13 +88,12 @@ public class ProductService {
     @Transactional
     public ProductResponseDTO update(String id, ProductUpdateDTO data) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+                .orElseThrow(() -> new NotFoundException("Produto não encontrado!"));
 
         if (!data.supplierIds().isEmpty()) {
             Set<Supplier> suppliers = data.supplierIds().stream()
                     .map(supplierId -> supplierRepository.findById(supplierId)
-                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                    "Fornecedor não encontrado com ID: " + supplierId)))
+                            .orElseThrow(() -> new NotFoundException("Fornecedor não encontrado com ID: " + supplierId)))
                     .collect(Collectors.toSet());
 
             product.setSuppliers(suppliers);
@@ -110,7 +105,7 @@ public class ProductService {
 
         if (data.categoryId() != null) {
             Category category = categoryRepository.findById(data.categoryId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
+                    .orElseThrow(() -> new NotFoundException("Categoria não encontrada!"));
 
             product.setCategory(category);
         }
@@ -135,10 +130,10 @@ public class ProductService {
     @Transactional
     public ProductResponseDTO updateImage(String id, MultipartFile file) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+                .orElseThrow(() -> new NotFoundException("Produto não encontrado!"));
 
         if (file == null || file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Arquivo de imagem inválido.");
+            throw new BadRequestException("Insira uma imagem!");
         }
 
         try {
@@ -146,18 +141,18 @@ public class ProductService {
             product.setImagePath(imagePath);
             productRepository.save(product);
             return new ProductResponseDTO(product);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem.", e);
+        } catch (IOException ex) {
+            throw new InternalErrorException("Erro ao salvar a imagem: " + ex.getMessage());
         }
     }
 
     public Resource getImage(String id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+                .orElseThrow(() -> new NotFoundException("Produto não encontrado!"));
 
         String imagePath = product.getImagePath();
         if (imagePath == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "O produto não possui imagem.");
+            throw new NotFoundException("O produto não possui imagem registrada!");
         }
 
         try {
@@ -165,14 +160,12 @@ public class ProductService {
             Resource resource = fileStorageService.load(fileName, "produtos");
 
             if (resource == null || !resource.exists()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Imagem do produto não encontrada.");
+                throw new NotFoundException("Imagem do produto não encontrada!");
             }
 
             return resource;
-        } catch (ResponseStatusException ex) {
-            throw ex;
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao obter a imagem.", e);
+        } catch (Exception ex) {
+            throw new InternalErrorException("Erro ao obter a imagem: " + ex.getMessage());
         }
     }
 
@@ -193,7 +186,7 @@ public class ProductService {
     @Cacheable(value = "products_detailed", key = "#id")
     public ProductDetailedResponseDTO getById(String id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+                .orElseThrow(() -> new NotFoundException("Produto não encontrado!"));
 
         return new ProductDetailedResponseDTO(product);
     }
@@ -212,11 +205,10 @@ public class ProductService {
     @Transactional
     public void delete(String id) {
         productRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
+                .orElseThrow(() -> new NotFoundException("Produto não encontrado!"));
 
         if (inventoryRepository.findByProductId(id).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "O produto possui inventários associados e não pode ser excluído!");
+            throw new BadRequestException("O produto possui inventários associados e não pode ser excluído!");
         }
 
         this.productRepository.deleteById(id);
@@ -226,12 +218,10 @@ public class ProductService {
     @Transactional
     public InventoryResponseDTO createInventory(String productId, InventoryRequestDTO data) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Produto não encontrado"));
+                .orElseThrow(() -> new NotFoundException("Produto não encontrado!"));
 
         if (inventoryRepository.existsByInventoryCode(data.inventoryCode())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Inventário com esse código já existe.");
+            throw new BadRequestException("Inventário com esse código já existe!");
         }
 
         Inventory inventory = new Inventory(
@@ -256,8 +246,7 @@ public class ProductService {
         List<Inventory> inventories = inventoryRepository.findAllByProductId(id);
 
         if (inventories.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Não foi possível encontrar nenhum inventário para o produto!");
+            throw new NotFoundException("Não foi possível encontrar nenhum inventário para o produto!");
         }
 
         List<InventoryResponseDTO> inventoryResponseDTO = inventories.stream()
@@ -271,23 +260,17 @@ public class ProductService {
     @Transactional
     public void deleteInventory(String productId, String inventoryId) {
         productRepository.findById(productId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Não foi possível encontrar o produto selecionado!"));
+                .orElseThrow(() -> new NotFoundException("Não foi possível encontrar o produto selecionado!"));
 
         Inventory inventory = inventoryRepository.findById(inventoryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Não foi possível encontrar o inventário selecionado!"));
+                .orElseThrow(() -> new NotFoundException("Não foi possível encontrar o inventário selecionado!"));
 
-        boolean hasReceivements = receivementRepository.existsByInventoryCode(inventory.getInventoryCode());
-        if (hasReceivements) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "O inventário possui recebimentos associados e não pode ser excluído!");
+        if (receivementRepository.existsByInventoryCode(inventory.getInventoryCode())) {
+            throw new BadRequestException("O inventário possui recebimentos associados e não pode ser excluído!");
         }
 
-        boolean hasExits = exitRepository.existsByInventoryCode(inventory.getInventoryCode());
-        if (hasExits) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "O inventário possui saídas associadas e não pode ser excluído!");
+        if (exitRepository.existsByInventoryCode(inventory.getInventoryCode())) {
+            throw new BadRequestException("O inventário possui saídas associadas e não pode ser excluído!");
         }
 
         inventoryRepository.deleteById(inventoryId);

@@ -32,8 +32,6 @@ public class EmailService {
             message.setText(body);
 
             Transport.send(message);
-            System.out.println("Email enviado com sucesso!");
-
         } catch (MessagingException e) {
             e.printStackTrace();
         }

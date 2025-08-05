@@ -10,13 +10,10 @@ import com.apiestoque.crud.repositories.UserRepository;
 import com.apiestoque.crud.infra.response.ApiResponse;
 import com.apiestoque.crud.infra.response.ApiResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-
 import com.apiestoque.crud.domain.user.dto.UserRole;
 import com.apiestoque.crud.domain.user.dto.UserStatus;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -27,12 +24,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.HashMap;
@@ -52,21 +48,21 @@ public class UserService {
 
     public ApiResult registerAdmin(RegisterUserDTO data) {
         if (userRepository.findByUsername("admin") == null) {
-            return new ApiResult(new ApiResponse("message", "O Usuário master não existe."), HttpStatus.BAD_REQUEST);
+            return new ApiResult(new ApiResponse("message", "O usuário master não existe!"), HttpStatus.BAD_REQUEST);
         }
 
         if (data.role() == null || !data.role().equals(UserRole.ADMIN)) {
             return new ApiResult(
-                    new ApiResponse("message", "A regra de administrador é necessária para acessar esse endpoint."),
+                    new ApiResponse("message", "A regra de administrador é necessária para acessar este recurso!"),
                     HttpStatus.BAD_REQUEST);
         }
 
         if (this.userRepository.findByUsername(data.username()) != null) {
-            return new ApiResult(new ApiResponse("message", "O Username inserido já existe."), HttpStatus.BAD_REQUEST);
+            return new ApiResult(new ApiResponse("message", "O username inserido já existe!"), HttpStatus.BAD_REQUEST);
         }
 
         if (this.userRepository.findByEmail(data.email()) != null) {
-            return new ApiResult(new ApiResponse("message", "O Email inserido já existe."), HttpStatus.BAD_REQUEST);
+            return new ApiResult(new ApiResponse("message", "O email inserido já existe!"), HttpStatus.BAD_REQUEST);
         }
 
         String encryptedPassword = passwordEncoder.encode(data.password());
@@ -74,26 +70,26 @@ public class UserService {
 
         this.userRepository.save(newUser);
 
-        return new ApiResult(new ApiResponse("message", "Usuário admin registrado com sucesso."), HttpStatus.CREATED);
+        return new ApiResult(new ApiResponse("message", "Usuário admin registrado com sucesso!"), HttpStatus.CREATED);
     }
 
     public ApiResult registerUser(RegisterUserDTO data) {
         if (userRepository.findByUsername("admin") == null) {
-            return new ApiResult(new ApiResponse("message", "O Usuário master não existe."), HttpStatus.BAD_REQUEST);
+            return new ApiResult(new ApiResponse("message", "O usuário master não existe!"), HttpStatus.BAD_REQUEST);
         }
 
         if (data.role() == null || !data.role().equals(UserRole.USER)) {
             return new ApiResult(
-                    new ApiResponse("message", "A regra de administrador é necessária para acessar esse endpoint."),
+                    new ApiResponse("message", "A regra de administrador é necessária para acessar este recurso!"),
                     HttpStatus.BAD_REQUEST);
         }
 
         if (this.userRepository.findByUsername(data.username()) != null) {
-            return new ApiResult(new ApiResponse("message", "O Username inserido já existe."), HttpStatus.BAD_REQUEST);
+            return new ApiResult(new ApiResponse("message", "O Username inserido já existe!"), HttpStatus.BAD_REQUEST);
         }
 
         if (this.userRepository.findByEmail(data.email()) != null) {
-            return new ApiResult(new ApiResponse("message", "O Email inserido já existe."), HttpStatus.BAD_REQUEST);
+            return new ApiResult(new ApiResponse("message", "O Email inserido já existe!"), HttpStatus.BAD_REQUEST);
         }
 
         String encryptedPassword = passwordEncoder.encode(data.password());
@@ -110,16 +106,16 @@ public class UserService {
 
         this.userRepository.save(newUser);
 
-        return new ApiResult(new ApiResponse("message", "Usuário registrado com sucesso."), HttpStatus.CREATED);
+        return new ApiResult(new ApiResponse("message", "Usuário registrado com sucesso!"), HttpStatus.CREATED);
     }
 
     @Transactional
     public UserResponseDTO updateStatus(String id, UserStatus status) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado!"));
 
         if (status == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O status não pode ser nulo.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O status não pode ser nulo!");
         }
 
         userRepository.updateUserStatus(user.getId(), status.name());
@@ -130,10 +126,10 @@ public class UserService {
     @Transactional
     public UserResponseDTO updatePassword(String id, String password) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado!"));
 
         if (password == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A senha não pode ser nula.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A senha não pode ser nula!");
         }
 
         String encryptedPassword = passwordEncoder.encode(password);
@@ -147,18 +143,18 @@ public class UserService {
     @Transactional
     public UserResponseDTO updateUser(String id, UpdateUserRequestDTO data) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado!"));
 
         if (data.username() != null && !data.username().equals(user.getUsername()) &&
                 userRepository.existsByUsername(data.username())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário com esse username já existe.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário com esse username já existe!");
         } else {
             user.setUsername(data.username());
         }
 
         if (data.email() != null && !data.email().equals(user.getEmail()) &&
                 userRepository.existsByEmail(data.email())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário com esse e-mail já existe.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário com esse e-mail já existe!");
         } else {
             user.setEmail(data.email());
         }
@@ -176,7 +172,7 @@ public class UserService {
         User user = (User) auth.getPrincipal();
 
         if (user.getStatus() == UserStatus.INACTIVE) {
-            throw new RuntimeException("Esta conta de usuário foi desativada.");
+            throw new RuntimeException("Esta conta de usuário foi desativada!");
         }
 
         if (user.getFaceImage() != null && user.getRole() == UserRole.USER) {
@@ -184,7 +180,7 @@ public class UserService {
             String validation = redisTemplate.opsForValue().get(key);
 
             if (validation == null || !validation.equals("valid")) {
-                throw new RuntimeException("Verificação facial necessária.");
+                throw new RuntimeException("Verificação facial necessária!");
             }
 
             redisTemplate.delete(key);
@@ -199,17 +195,17 @@ public class UserService {
         ObjectMapper objectMapper = new ObjectMapper();
 
         if (capturedImage == null || capturedImage.isBlank()) {
-            throw new IllegalArgumentException("A imagem capturada não pode ser nula ou vazia");
+            throw new IllegalArgumentException("A imagem capturada não pode ser nula ou vazia!");
         }
 
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("O e-mail não pode ser nulo ou vazio");
+            throw new IllegalArgumentException("O email não pode ser nulo ou vazio!");
         }
 
         User user = userRepository.findUserByEmail(email);
 
         if (user == null) {
-            throw new RuntimeException("Usuário não cadastrado");
+            throw new RuntimeException("Usuário não cadastrado!");
         }
 
         if (user.getFaceImage() == null || user.getFaceImage().length == 0) {
@@ -222,8 +218,8 @@ public class UserService {
         String base64SavedImage;
         try {
             base64SavedImage = Base64.getEncoder().encodeToString(user.getFaceImage());
-        } catch (Exception e) {
-            throw new RuntimeException("Falha ao codificar imagem do usuário", e);
+        } catch (Exception ex) {
+            throw new RuntimeException("Falha ao codificar imagem do usuário: " + ex.getMessage());
         }
 
         String jsonBody;
@@ -231,8 +227,8 @@ public class UserService {
             jsonBody = objectMapper.writeValueAsString(Map.of(
                     "image", capturedImage,
                     "saved_image", base64SavedImage));
-        } catch (Exception e) {
-            throw new RuntimeException("Falha ao criar JSON para requisição", e);
+        } catch (Exception ex) {
+            throw new RuntimeException("Falha ao criar JSON para requisição: " + ex.getMessage());
         }
 
         HttpRequest request;
@@ -245,23 +241,19 @@ public class UserService {
                     .build();
 
             response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            throw new RuntimeException("Falha na comunicação com o serviço de reconhecimento facial", e);
-        }
-
-        if (response.statusCode() != 200) {
-            throw new RuntimeException("Serviço de reconhecimento retornou status: " + response.statusCode());
+        } catch (Exception ex) {
+            throw new RuntimeException("Falha na comunicação com o serviço de reconhecimento facial: " +  ex.getMessage());
         }
 
         Map<String, Object> result;
         try {
             result = objectMapper.readValue(response.body(), Map.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Resposta inválida do serviço de reconhecimento", e);
+        } catch (Exception ex) {
+            throw new RuntimeException("Resposta inválida do serviço de reconhecimento facial: " + ex.getMessage());
         }
 
         if (!result.containsKey("verified")) {
-            throw new RuntimeException("Resposta do serviço não contém campo 'verified'");
+            throw new RuntimeException("Resposta do serviço de reconhecimento facial não contém o campo 'verified'!");
         }
 
         if (Boolean.TRUE.equals(result.get("verified"))) {
@@ -269,7 +261,7 @@ public class UserService {
                 String key = "face_validation:" + email;
                 redisTemplate.opsForValue().set(key, "valid", 5, TimeUnit.MINUTES);
             } catch (Exception e) {
-                System.err.println("Erro ao acessar Redis: " + e.getMessage());
+                System.err.println("Erro ao acessar o serviço do redis: " + e.getMessage());
             }
         }
 
@@ -278,13 +270,13 @@ public class UserService {
 
     public String refreshToken(String refreshToken) {
         if (tokenService.validateToken(refreshToken).equals("")) {
-            throw new RuntimeException("Invalid refresh token.");
+            throw new RuntimeException("Refresh token de autorização inválido!");
         }
 
         String username = tokenService.getUsernameFromToken(refreshToken);
         User user = userRepository.findByUsername(username);
         if (user == null) {
-            throw new RuntimeException("Usuário não encontrado.");
+            throw new RuntimeException("Usuário não encontrado!");
         }
 
         return tokenService.generateToken(user);
@@ -292,31 +284,31 @@ public class UserService {
 
     public void updateImage(String id, MultipartFile file) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado!"));
 
         if (file == null || file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Arquivo de imagem inválido.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Arquivo de imagem inválido!");
         }
 
         try {
             String imagePath = fileStorageService.save(file, "usuarios");
             user.setImagePath(imagePath);
             userRepository.save(user);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem.", e);
+        } catch (IOException ex) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar a imagem: " + ex.getMessage());
         }
     }
 
     public Resource getImage(String id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado!"));
 
         try {
             String fileName = Paths.get(user.getImagePath()).getFileName().toString();
 
             return fileStorageService.load(fileName, "usuarios");
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao obter a imagem.", e);
+        } catch (Exception ex) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao obter a imagem: " + ex.getMessage());
         }
     }
 

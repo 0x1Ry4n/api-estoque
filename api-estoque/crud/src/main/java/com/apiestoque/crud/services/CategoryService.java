@@ -15,6 +15,8 @@ import com.apiestoque.crud.domain.product.category.dto.CategoryRequestDTO;
 import com.apiestoque.crud.domain.product.category.dto.CategoryResponseDTO;
 import com.apiestoque.crud.domain.product.category.dto.CategoryUpdateDTO;
 import com.apiestoque.crud.domain.product.dto.ProductDetailedResponseDTO;
+import com.apiestoque.crud.infra.exceptions.BadRequestException;
+import com.apiestoque.crud.infra.exceptions.NotFoundException;
 import com.apiestoque.crud.repositories.CategoryRepository;
 import com.apiestoque.crud.repositories.ProductRepository;
 
@@ -34,7 +36,7 @@ public class CategoryService {
     @Transactional
     public CategoryResponseDTO create(CategoryRequestDTO data) {
         if (categoryRepository.existsByName(data.name())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria com esse nome já existe.");
+            throw new BadRequestException("Categoria com esse nome já existe!");
         }
 
         Category newCategory = new Category();
@@ -49,11 +51,11 @@ public class CategoryService {
     @Transactional
     public CategoryResponseDTO update(String id, CategoryUpdateDTO data) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
+                .orElseThrow(() -> new NotFoundException("Categoria não encontrada!"));
 
         if (data.name() != null && !data.name().equals(category.getName()) &&
                 categoryRepository.existsByName(data.name())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria com esse nome já existe.");
+            throw new BadRequestException("Categoria com esse nome já existe!");
         } else {
             category.setName(data.name());
         }
@@ -79,7 +81,7 @@ public class CategoryService {
     @Cacheable(value = "categories", key = "#id")
     public CategoryResponseDTO getById(String id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada."));
+                .orElseThrow(() -> new NotFoundException("Categoria não encontrada!"));
 
         return new CategoryResponseDTO(category);
     }
@@ -92,20 +94,16 @@ public class CategoryService {
         return categoryList.isEmpty() ? List.of() : categoryList;
     }
 
-
     @CacheEvict(value = "categories", key = "#id")
     @Transactional
-    public ProductDetailedResponseDTO delete(String id) {
+    public void delete(String id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Categoria não encontrada"));
+                .orElseThrow(() -> new NotFoundException("Categoria não encontrada!"));
 
         if (!productRepository.findByCategoryId(category.getId()).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "A categoria possuí produtos associados e não pode ser excluída!");
+            throw new BadRequestException("A categoria possuí produtos associados e não pode ser excluída!");
         }
 
         this.categoryRepository.deleteById(category.getId());
-        return null;
     }
 }

@@ -46,7 +46,7 @@ export default function SideBarComponent({ isSidebarOpen, toggleSidebar }) {
     { title: "Mapa", route: "maps", component: <MapOutlinedIcon /> },
     { title: "Clientes", route: "customers", component: <Person2OutlinedIcon /> },
     { title: "Fornecedores", route: "suppliers", component: <LocalShippingOutlinedIcon /> },
-    { title: "Categorias", route: "categories", component: <CategoryOutlinedIcon Icon/> },
+    { title: "Categorias", route: "categories", component: <CategoryOutlinedIcon /> },
     { title: "Produtos", route: "products", component: <InventoryOutlinedIcon /> },
     { title: "QR Code", route: "qrcode-generator", component: <QrCodeOutlinedIcon /> },
     { title: "Inventário", route: "inventory", component: <Inventory2OutlinedIcon /> },
@@ -80,20 +80,20 @@ export default function SideBarComponent({ isSidebarOpen, toggleSidebar }) {
               selected={index === selected && currentPage === "/" + comp.route.toLowerCase()}
               sx={{
                 mb: 1,
-                bgcolor: selected === index ? "#e0f2f1" : "transparent",
+                bgcolor: selected === index ? theme.palette.primary.secondary : "transparent",
                 borderRadius: 2,
                 transition: "background-color 0.2s",
                 justifyContent: open || isMobile ? "initial" : "center",
                 px: 2.5,
                 minHeight: 48,
                 '&:hover': {
-                  bgcolor: "#b2dfdb",
+                  bgcolor: theme.palette.secondary.main,
                 },
               }}
             >
               <ListItemIcon
                 sx={{
-                  color: selected === index ? "#00796b" : "inherit",
+                  color: selected === index ? theme.palette.primary.main : "inherit",
                   minWidth: 0,
                   mr: open || isMobile ? 3 : "auto",
                   justifyContent: "center",
@@ -107,7 +107,7 @@ export default function SideBarComponent({ isSidebarOpen, toggleSidebar }) {
                   primaryTypographyProps={{
                     fontSize: "medium",
                     fontWeight: selected === index ? "bold" : "normal",
-                    color: selected === index ? "#00796b" : "inherit",
+                    color: selected === index ? theme.palette.primary.main : "inherit",
                   }}
                 />
               )}

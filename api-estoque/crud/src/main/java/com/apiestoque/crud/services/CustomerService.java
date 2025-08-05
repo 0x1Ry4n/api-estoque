@@ -8,14 +8,13 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
 import com.apiestoque.crud.domain.customer.Customer;
 import com.apiestoque.crud.domain.customer.dto.CustomerRequestDTO;
 import com.apiestoque.crud.domain.customer.dto.CustomerResponseDTO;
 import com.apiestoque.crud.domain.customer.dto.CustomerStatus;
+import com.apiestoque.crud.infra.exceptions.BadRequestException;
+import com.apiestoque.crud.infra.exceptions.NotFoundException;
 import com.apiestoque.crud.repositories.CustomerRepository;
 
 import jakarta.transaction.Transactional;
@@ -30,23 +29,23 @@ public class CustomerService {
     @Transactional
     public CustomerResponseDTO create(CustomerRequestDTO data) {
         if (customerRepository.existsByEmail(data.email())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este e-mail já existe.");
+            throw new BadRequestException("Cliente com este e-mail já existe.");
         }
 
         if (customerRepository.existsByCpf(data.cpf())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este cpf já existe.");
+            throw new BadRequestException("Cliente com este cpf já existe.");
         }
 
         if (customerRepository.existsByCnpj(data.cnpj())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este cnpj já existe.");
+            throw new BadRequestException("Cliente com este cnpj já existe.");
         }
 
         if (customerRepository.existsByPhone(data.phone())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este telefone já existe.");
+            throw new BadRequestException("Cliente com este telefone já existe.");
         }
 
         if (customerRepository.existsByMobile(data.mobile())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este telefone celular já existe.");
+            throw new BadRequestException("Cliente com este telefone celular já existe.");
         }
 
         Customer newCustomer = new Customer(
@@ -77,31 +76,31 @@ public class CustomerService {
     @Transactional
     public CustomerResponseDTO update(String id, CustomerRequestDTO data) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado."));
+                .orElseThrow(() -> new NotFoundException("Cliente não encontrado."));
 
         if (data.cpf() != null && !customer.getCpf().equals(data.cpf())
                 && customerRepository.existsByCpf(data.cpf())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este cpf já existe.");
+            throw new BadRequestException("Cliente com este cpf já existe.");
         }
 
         if (data.cnpj() != null && !customer.getCnpj().equals(data.cnpj())
                 && customerRepository.existsByCnpj(data.cnpj())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este cnpj já existe.");
+            throw new BadRequestException("Cliente com este cnpj já existe.");
         }
 
         if (data.email() != null && !customer.getEmail().equals(data.email())
                 && customerRepository.existsByEmail(data.email())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este e-mail já existe.");
+            throw new BadRequestException("Cliente com este e-mail já existe.");
         }
 
         if (data.mobile() != null && !customer.getMobile().equals(data.mobile())
                 && customerRepository.existsByMobile(data.mobile())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este telefone celular já existe.");
+            throw new BadRequestException("Cliente com este telefone celular já existe.");
         }
 
         if (data.phone() != null && !customer.getPhone().equals(data.phone())
                 && customerRepository.existsByPhone(data.phone())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente com este telefone já existe.");
+            throw new BadRequestException("Cliente com este telefone já existe.");
         }
 
         if (data.name() != null)
@@ -140,14 +139,13 @@ public class CustomerService {
     @Transactional
     public CustomerResponseDTO updateStatus(String id, CustomerStatus status) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado."));
+                .orElseThrow(() -> new NotFoundException("Cliente não encontrado."));
 
         if (status == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O status não pode ser nulo.");
+            throw new BadRequestException("O status não pode ser nulo.");
         }
 
         customerRepository.UpdateCustomerStatus(customer.getId(), status.name());
-
         return new CustomerResponseDTO(customer);
     }
 
@@ -167,7 +165,7 @@ public class CustomerService {
     @Cacheable(value = "customers", key = "#id")
     public CustomerResponseDTO getById(String id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado."));
+                .orElseThrow(() -> new NotFoundException("Cliente não encontrado."));
 
         return new CustomerResponseDTO(customer);
     }
